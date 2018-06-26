@@ -19,7 +19,7 @@ limitations under the License. */
 namespace paddle {
 namespace platform {
 
-DeviceContextPool* DeviceContextPool::pool = nullptr;
+DeviceContextPool* DeviceContextPool::pool_ = nullptr;
 
 platform::DeviceContext* DeviceContextPool::Get(const platform::Place& place) {
   auto it = device_contexts_.find(place);
@@ -213,7 +213,7 @@ Eigen::DefaultDevice* CUDAPinnedDeviceContext::eigen_device() const {
 }
 
 Place CUDAPinnedDeviceContext::GetPlace() const { return place_; }
-#endif
+#endif  // PADDLE_WITH_CUDA
 
 #ifdef PADDLE_WITH_MKLDNN
 MKLDNNDeviceContext::MKLDNNDeviceContext(CPUPlace place)
@@ -251,7 +251,27 @@ std::shared_ptr<void> MKLDNNDeviceContext::GetBlob(
   return nullptr;
 }
 
-#endif
+#endif  // PADDLE_WITH_MKLDNN
+
+DeviceContextPool* DeviceContextPool::Init() {
+  std::vector<platform::Place> places;
+
+#ifdef PADDLE_WITH_CUDA
+  int num_cuda_devices = 0;
+  try {
+    num_cuda_devices = platform::GetCUDADeviceCount();
+  } catch (const std::exception &exp) {
+    LOG(WARNING) << "Compiled with WITH_GPU, but no GPU found in runtime.";
+  }
+
+  for (int i = 0; i < num_cuda_devices; ++i) {
+    places.emplace_back(platform::CUDAPlace(i));
+  }
+#endif  // PADDLE_WITH_CUDA
+
+  places.emplace_back(platform::CPUPlace());
+  return new DeviceContextPool(places);
+}
 
 }  // namespace platform
 }  // namespace paddle

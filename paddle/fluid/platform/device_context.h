@@ -8,13 +8,11 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
+
 #pragma once
 
 #include <memory>
-#include <mutex>  // NOLINT
-#include <string>
 #include <unordered_map>
-#include <vector>
 
 #ifdef PADDLE_WITH_CUDA
 #include "paddle/fluid/platform/dynload/cublas.h"
@@ -99,18 +97,13 @@ class CUDADeviceContext : public DeviceContext {
   /*! \brief  Return cuda stream in the device context. */
   cudaStream_t stream() const;
 
-  template <typename Callback>
-  void RecordEvent(cudaEvent_t ev, Callback callback) {
-    std::lock_guard<std::mutex> guard(mtx_);
-    callback();
-    PADDLE_ENFORCE(cudaEventRecord(ev, stream_));
-  }
-
  private:
   CUDAPlace place_;
 
   std::unique_ptr<Eigen::GpuDevice> eigen_device_;
   std::unique_ptr<EigenCudaStreamDevice> eigen_stream_;
+
+  mutable std::mutex mutex_;
   cudaStream_t stream_;
   cudnnHandle_t cudnn_handle_;
   cublasHandle_t cublas_handle_;
@@ -118,8 +111,6 @@ class CUDADeviceContext : public DeviceContext {
   int compute_capability;
   int multi_process;
   int max_threads_per_mp;
-
-  std::mutex mtx_;
 };
 
 template <>
@@ -175,17 +166,12 @@ class DeviceContextPool {
   explicit DeviceContextPool(const std::vector<platform::Place>& places);
 
   static DeviceContextPool& Instance() {
-    PADDLE_ENFORCE_NOT_NULL(pool, "Need to Create DeviceContextPool first!");
-    return *pool;
+    if (pool_ == nullptr)
+      pool_ = Init();
+    return *pool_;
   }
 
   /*! \brief  Create should only called by Init function */
-  static DeviceContextPool& Init(const std::vector<platform::Place>& places) {
-    if (pool == nullptr) {
-      pool = new DeviceContextPool(places);
-    }
-    return *pool;
-  }
 
   /*! \brief  Return handle of single device context. */
   platform::DeviceContext* Get(const platform::Place& place);
@@ -200,7 +186,9 @@ class DeviceContextPool {
   size_t size() const { return device_contexts_.size(); }
 
  private:
-  static DeviceContextPool* pool;
+  static DeviceContextPool* Init();
+
+  static DeviceContextPool* pool_;
   std::unordered_map<const platform::Place,
                      std::unique_ptr<platform::DeviceContext>, PlaceHash>
       device_contexts_;
