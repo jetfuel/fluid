@@ -1,8 +1,8 @@
+proto_library(framework_proto SRCS framework.proto)
+
 cc_library(ddim SRCS ddim.cc DEPS enforce eigen3 boost)
 cc_test(ddim_test SRCS ddim_test.cc DEPS ddim)
 nv_test(dim_test SRCS dim_test.cu DEPS ddim)
-
-proto_library(framework_proto SRCS framework.proto)
 
 cc_library(data_type SRCS data_type.cc DEPS framework_proto ddim device_context)
 
@@ -21,3 +21,5 @@ else()
 endif()
 
 cc_test(eigen_test SRCS eigen_test.cc DEPS tensor)
+
+nv_test(mixed_vector_test SRCS mixed_vector_test.cu DEPS place memory device_context)
