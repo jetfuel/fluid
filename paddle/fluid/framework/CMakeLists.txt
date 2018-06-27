@@ -6,10 +6,12 @@ proto_library(framework_proto SRCS framework.proto)
 
 cc_library(data_type SRCS data_type.cc DEPS framework_proto ddim device_context)
 
+cc_library(tensor_data_layout SRCS tensor_data_layout.cc DEPS enforce)
+
 if(WITH_GPU)
-  nv_library(tensor SRCS tensor.cc tensor_util.cu DEPS place memory data_type)
+  nv_library(tensor SRCS tensor.cc tensor_util.cu DEPS tensor_data_layout place memory data_type)
 else()
-  cc_library(tensor SRCS tensor.cc tensor_util.cc DEPS place memory data_type)
+  cc_library(tensor SRCS tensor.cc tensor_util.cc DEPS tensor_data_layout place memory data_type)
 endif()
 
 cc_test(tensor_test SRCS tensor_test.cc DEPS tensor)

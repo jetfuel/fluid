@@ -11,12 +11,12 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
-#include "paddle/fluid/framework/accelerator.h"
+#include "paddle/fluid/framework/tensor_data_layout.h"
 
-#include <algorithm>  // for transform
-#include <cctype>  // for toupper
+#include <algorithm>
+#include <cctype>
+#include <ostream>
 #include <string>
-#include <vector>
 
 #include "paddle/fluid/platform/enforce.h"
 
@@ -24,29 +24,27 @@ namespace paddle {
 namespace framework {
 
 namespace {
+std::vector<std::string> layouts = {"NHWC", "NCHW", "ANYLAYOUT", "MKLDNNLAYOUT"};
+} // namespace
 
-std::vector<std::string> accelerators = {"PLAIN", "MKLDNN", "CUDNN"};
-
-}  // namespace
-
-Accelerator::Accelerator(const char* type) {
+TensorDataLayout::TensorDataLayout(const std::string& type) {
   std::string key(type);
   std::transform(key.begin(), key.end(), key.begin(), ::toupper);
 
-  for (int i = 0; i < accelerators.size(); ++i) {
-    if (key == accelerators[i]) {
-      type_ = static_cast<Accelerator::Type>(i);
+  for (int i = 0; i < layouts.size(); ++i) {
+    if (key == layouts[i]) {
+      type_ = static_cast<TensorDataLayout::Type>(i);
       return;
     }
   }
-  PADDLE_THROW("Unknown Accelerator %s", type);
+  PADDLE_THROW("Unknown TensorDataLayout %s", type);
 }
 
-std::string Accelerator::ToString() const {
-  return accelerators[type_];
+std::string TensorDataLayout::ToString() const {
+  return layouts[type_];
 }
 
-std::ostream& operator<<(std::ostream& out, Accelerator l) {
+std::ostream& operator<<(std::ostream& out, const TensorDataLayout& l) {
   out << l.ToString();
   return out;
 }

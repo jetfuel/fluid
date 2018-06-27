@@ -380,7 +380,7 @@ void LoDTensor::MergeLoDTensor(
 
   framework::DDim new_dim = lod_tensors[0]->dims();
   std::type_index new_type = lod_tensors[0]->type();
-  framework::DataLayout new_layout = lod_tensors[0]->layout();
+  framework::TensorDataLayout new_layout = lod_tensors[0]->layout();
   LoD new_lod = lod_tensors[0]->lod();
   for (size_t i = 1; i < lod_tensors.size(); ++i) {
     auto *t = lod_tensors[i];

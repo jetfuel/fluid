@@ -20,7 +20,7 @@ limitations under the License. */
 #include <typeindex>
 #include <vector>
 
-#include "paddle/fluid/framework/data_layout.h"
+#include "paddle/fluid/framework/tensor_data_layout.h"
 #include "paddle/fluid/framework/ddim.h"
 #include "paddle/fluid/memory/memory.h"
 #include "paddle/fluid/platform/device_context.h"
@@ -30,8 +30,6 @@ limitations under the License. */
 namespace paddle {
 
 namespace framework {
-
-class LoDTensor;
 
 class Tensor {
 #ifdef PADDLE_WITH_MKLDNN
@@ -49,7 +47,7 @@ class Tensor {
    *
    * @note MKLDNN lib support various memory format like nchw, nhwc, nChw8C,
    *       nChw16c, etc. For a MKLDNN memory block, layout will be set as
-   *       DataLayout::kMKLDNN meanwhile detail memory format will be kept in
+   *       TensorDataLayout::kMKLDNN meanwhile detail memory format will be kept in
    *       this field.
    */
 
@@ -67,10 +65,10 @@ class Tensor {
   friend struct EigenVector;
 
  public:
-  Tensor() : offset_(0) {}
+  Tensor() : layout_(TensorDataLayout::kNCHW), offset_(0) {}
 
   /*! Constructor with place should only be used in pybind. */
-  explicit Tensor(const platform::Place& place) : offset_(0) {
+  explicit Tensor(const platform::Place& place) : layout_(TensorDataLayout::kNCHW), offset_(0) {
     holder_->set_place(place);
   }
 
@@ -145,9 +143,9 @@ class Tensor {
 
   void check_memory_size() const;
 
-  DataLayout layout() const { return layout_; }
+  TensorDataLayout layout() const { return layout_; }
 
-  void set_layout(const DataLayout layout) { layout_ = layout; }
+  void set_layout(const TensorDataLayout layout) { layout_ = layout; }
 
  private:
   /**
@@ -220,7 +218,7 @@ class Tensor {
   // Fix me: here just change the default layout to kNCHW
   // it doesn't fix the real issue, i.e. feeder should set up tensor layout
   // according to actual input data
-  DataLayout layout_ = DataLayout::kNCHW;
+  TensorDataLayout layout_;
 
   /**
    * @brief   A PlaceHolder may be shared by more than one tensor.

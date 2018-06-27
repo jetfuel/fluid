@@ -30,7 +30,7 @@ TEST(TensorCopy, Tensor) {
 
   int arr[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
   memcpy(src_ptr, arr, 9 * sizeof(int));
-  src_tensor.set_layout(DataLayout::kAnyLayout);
+  src_tensor.set_layout(TensorDataLayout::kAnyLayout);
 
   auto cpu_place = new platform::CPUPlace();
   TensorCopy(src_tensor, *cpu_place, &dst_tensor);
