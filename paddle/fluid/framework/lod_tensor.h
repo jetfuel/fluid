@@ -25,7 +25,7 @@ limitations under the License. */
 
 #include <glog/logging.h>
 #include "paddle/fluid/framework/ddim.h"
-#include "paddle/fluid/framework/mixed_vector.h"
+#include "paddle/fluid/framework/vector.h"
 #include "paddle/fluid/framework/tensor.h"
 #include "paddle/fluid/framework/tensor_util.h"
 #include "paddle/fluid/platform/enforce.h"

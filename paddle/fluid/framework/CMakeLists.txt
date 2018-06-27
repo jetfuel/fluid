@@ -22,7 +22,7 @@ endif()
 
 cc_test(eigen_test SRCS eigen_test.cc DEPS tensor)
 
-nv_test(mixed_vector_test SRCS mixed_vector_test.cu DEPS place memory device_context init)
+nv_test(vector_test SRCS vector_test.cu DEPS place memory device_context init)
 
 cc_library(lod_tensor SRCS lod_tensor.cc DEPS ddim place tensor framework_proto recordio)
 cc_test(lod_tensor_test SRCS lod_tensor_test.cc DEPS lod_tensor memory)
