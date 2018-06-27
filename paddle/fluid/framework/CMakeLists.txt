@@ -28,6 +28,9 @@ cc_library(lod_tensor SRCS lod_tensor.cc DEPS ddim place tensor framework_proto 
 cc_test(lod_tensor_test SRCS lod_tensor_test.cc DEPS lod_tensor memory)
 nv_test(lod_tensor_gpu_test SRCS lod_tensor_test.cu DEPS lod_tensor)
 
+cc_library(selected_rows SRCS selected_rows.cc DEPS tensor)
+cc_test(selected_rows_test SRCS selected_rows_test.cc DEPS selected_rows)
+
 cc_test(variable_test SRCS variable_test.cc)
 
 cc_library(scope SRCS scope.cc DEPS glog)
