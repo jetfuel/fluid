@@ -1,5 +1,7 @@
 # PaddlePaddle Fluid and Its Operator Base
 
+[![Build Status](https://travis-ci.org/wangkuiyi/fluid.svg?branch=develop)](https://travis-ci.org/wangkuiyi/fluid)
+
 This repo contains the ongoing progress of extracting 6PaddlePaddle Fluid, a subsystem of [Paddle](https://github.com/PaddlePaddle/Paddle), out from Paddle.
 
 After the work, it will be migrated to github.com/PaddlePaddle/fluid.
