@@ -1,6 +1,8 @@
 # PaddlePaddle Fluid and Its Operator Base
 
-This repo contains PaddlePaddle Fluid, a subsystem of [Paddle](https://github.com/PaddlePaddle/Paddle).
+This repo contains the ongoing progress of extracting 6PaddlePaddle Fluid, a subsystem of [Paddle](https://github.com/PaddlePaddle/Paddle), out from Paddle.
+
+After the work, it will be migrated to github.com/PaddlePaddle/fluid.
 
 ## Motivations
 
@@ -10,5 +12,19 @@ PaddlePaddle Fluid and other PaddlePaddle subsystems live in the Github repo [Pa
 1. Another benefit of extracting Fluid out from Paddle repo is faster continuous integration (CI). For some reasons, it takes a few minutes for the CI of this repo to run, but half or close to an hour for the CI of Paddle.
 1. We'd remove some unnecessary third-party dependencies from Fluid source code to make it cross-platform.
 1. However, Fluid's source code contains many cyclic dependencies that we'd have to untangle.
+1. The CMake-based build system of Paddle contains out-of-control legacy code and we'd like to switch to [bazel.cmake](https://github.com/gangliao/bazel.cmake/).
 
 For above and some more reasons, we decided to clean up Fluid in a separate repo, which is here.
+
+## How to Build
+
+```bash
+cd ~/work
+git clone --recursive https://github.com/wangkuiyi/fluid
+cd fluid
+mkdir build
+cd build
+cmake -DWITH_GPU=OFF .. # or cmake .. if you have a GPU
+make -j10 -k
+ctest
+```
