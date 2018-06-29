@@ -35,7 +35,7 @@ class Variable {
     return *static_cast<const T*>(holder_->Ptr());
   }
 
-  bool IsInitialized() const { return holder_ != nullptr; }
+  bool IsInitialized() const;
 
   template <typename T>
   T* GetMutable() {
@@ -51,12 +51,8 @@ class Variable {
            std::type_index(typeid(T)) == std::type_index(holder_->Type());
   }
 
-  void Clear() { holder_.reset(); }
-
-  std::type_index Type() const {
-    PADDLE_ENFORCE(holder_ != nullptr, "Must hold memory");
-    return holder_->Type();
-  }
+  void Clear();
+  std::type_index Type() const;
 
  private:
   struct Placeholder {
