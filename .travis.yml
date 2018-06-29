@@ -1,8 +1,8 @@
 language: cpp
 cache:
   directories:
-    - $HOME/.ccache
     - $TRAVIS_BUILD_DIR/build/third_party
+    - $TRAVIS_BUILD_DIR/bazel.cmake/third-party
 matrix:
     include:
         - os: linux
@@ -10,6 +10,7 @@ matrix:
         - os: osx
           osx_image: xcode9 
 script:
+    - cmake --version
     - if [ ! -d "build" ]; then mkdir build; fi
     - cd build
     - cmake -DWITH_GPU=OFF ..
