@@ -13,7 +13,7 @@ matrix:
             - pushd /tmp && wget -q https://cmake.org/files/v3.11/cmake-3.11.4-Linux-x86_64.sh
             - chmod +x ./cmake-3.11.4-Linux-x86_64.sh
             - ./cmake-3.11.4-Linux-x86_64.sh --skip-license
-            - mv /tmp/bin/cmake /bin/cmake
+            - sudo mv /tmp/bin/cmake /bin/cmake
         - os: osx
           osx_image: xcode9 
 script:
