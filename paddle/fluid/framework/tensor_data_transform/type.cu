@@ -18,6 +18,7 @@ limitations under the License. */
 #include "paddle/fluid/platform/transform.h"
 
 namespace paddle {
+namespace fluid {
 namespace framework {
 
 template <typename InType, typename OutType>
@@ -103,4 +104,5 @@ void TransDataType(const OpKernelType& kernel_type_for_var,
 }
 
 }  // namespace framework
+}  // namespace fluid
 }  // namespace paddle

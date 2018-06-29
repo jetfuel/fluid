@@ -21,6 +21,7 @@
 #include "paddle/fluid/framework/variable.h"
 
 namespace paddle {
+namespace fluid {
 namespace framework {
 
 #ifdef PADDLE_WITH_MKLDNN
@@ -81,4 +82,5 @@ void TransDataLayout(const OpKernelType& kernel_type_for_var,
                      Tensor* out);
 
 }  // namespace framework
+}  // namespace fluid
 }  // namespace paddle

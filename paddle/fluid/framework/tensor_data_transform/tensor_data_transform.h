@@ -28,6 +28,7 @@ limitations under the License. */
 #include "paddle/fluid/platform/transform.h"
 
 namespace paddle {
+namespace fluid {
 namespace framework {
 
 void DataTransform(const OpKernelType& expected_kernel_type,
@@ -38,4 +39,5 @@ void CopyVariableWithTensor(const Variable& in_var, const Tensor& tensor,
                             Variable* out_var);
 
 }  // namespace framework
+}  // namespace fluid
 }  // namespace paddle

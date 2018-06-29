@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "paddle/fluid/framework/data_layout_transform.h"
+#include "paddle/fluid/framework/tensor_data_transform/layout.h"
 #include <vector>
 
 #include "paddle/fluid/operators/math/math_function.h"
@@ -21,6 +21,7 @@
 #endif
 
 namespace paddle {
+namespace fluid {
 namespace framework {
 
 std::vector<int> GetAxis(const DataLayout& from, const DataLayout& to) {
@@ -171,4 +172,5 @@ void TransDataLayoutFromMKLDNN(const OpKernelType& kernel_type_for_var,
 }
 
 }  // namespace framework
+}  // namespace fluid
 }  // namespace paddle

@@ -19,10 +19,12 @@ limitations under the License. */
 #include "paddle/fluid/platform/device_context.h"
 
 namespace paddle {
+namespace fluid {
 namespace framework {
 
 void TransDataDevice(const Tensor& in, const platform::Place& dst_place,
                      Tensor* out);
 
 }  // namespace framework
+}  // namespace fluid
 }  // namespace paddle

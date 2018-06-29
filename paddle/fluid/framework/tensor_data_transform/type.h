@@ -21,6 +21,7 @@ limitations under the License. */
 #include "paddle/fluid/platform/device_context.h"
 
 namespace paddle {
+namespace fluid {
 namespace framework {
 
 using KernelTypePair = std::pair<OpKernelType, OpKernelType>;
@@ -30,4 +31,5 @@ void TransDataType(const OpKernelType& kernel_type_for_var,
                    Tensor* out);
 
 }  // namespace framework
+}  // namespace fluid
 }  // namespace paddle

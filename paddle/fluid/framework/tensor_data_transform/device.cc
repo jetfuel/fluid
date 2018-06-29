@@ -14,6 +14,7 @@ limitations under the License. */
 #include "paddle/fluid/framework/tensor_data_transform/device.h"
 
 namespace paddle {
+namespace fluid {
 namespace framework {
 
 void TransDataDevice(const Tensor &in, const platform::Place &dst_place,
@@ -38,4 +39,5 @@ void TransDataDevice(const Tensor &in, const platform::Place &dst_place,
 }
 
 }  // namespace framework
+}  // namespace fluid
 }  // namespace paddle

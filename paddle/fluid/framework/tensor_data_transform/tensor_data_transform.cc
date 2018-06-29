@@ -19,6 +19,7 @@ limitations under the License. */
 #include "paddle/fluid/framework/data_type_transform.h"
 
 namespace paddle {
+namespace fluid {
 namespace framework {
 
 static void PassTensorData(Tensor* from, Tensor* to) {
@@ -109,4 +110,5 @@ void CopyVariableWithTensor(const Variable& in_var, const Tensor& tensor,
 }
 
 }  // namespace framework
+}  // namespace fluid
 }  // namespace paddle

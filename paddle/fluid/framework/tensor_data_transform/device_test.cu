@@ -23,6 +23,7 @@ limitations under the License. */
 #include "paddle/fluid/platform/device_context.h"
 
 namespace paddle {
+namespace fluid {
 namespace framework {
 
 template <typename T>
@@ -80,6 +81,7 @@ class TestKernel : public OpKernel<float> {
 };
 
 }  // namespace framework
+}  // namespace fluid
 }  // namespace paddle
 
 REGISTER_OP_WITHOUT_GRADIENT(
