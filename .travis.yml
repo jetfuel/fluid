@@ -7,6 +7,13 @@ matrix:
     include:
         - os: linux
           dist: trusty
+          before_install:
+            - sudo apt-get update
+            - sudo apt-get install -y build-essential make git wget tar gzip
+            - pushd /tmp && wget -q https://cmake.org/files/v3.11/cmake-3.11.4-Linux-x86_64.sh
+            - chmod +x ./cmake-3.11.4-Linux-x86_64.sh
+            - ./cmake-3.11.4-Linux-x86_64.sh --skip-license
+            - mv /tmp/bin/cmake /bin/cmake
         - os: osx
           osx_image: xcode9 
 script:
