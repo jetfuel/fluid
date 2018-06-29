@@ -40,3 +40,5 @@ cc_test(scope_test SRCS scope_test.cc DEPS scope)
 
 cc_library(accelerator SRCS accelerator.cc DEPS enforce)
 cc_test(accelerator_test SRCS accelerator_test.cc DEPS accelerator)
+
+add_subdirectory(tensor_data_transform)
