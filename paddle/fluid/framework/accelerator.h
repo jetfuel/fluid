@@ -30,10 +30,14 @@ class Accelerator {
     kCUDNN = 2
   };
 
+  Accelerator(Accelerator::Type type) : type_(type) {}  // NOLINT: allow explicity construction.
   explicit Accelerator(const char* type);
   std::string ToString() const;
 
   Type type_;
+
+  bool operator==(const Accelerator& l) const { return type_ == l.type_; }
+  bool operator!=(const Accelerator& l) const { return type_ != l.type_; }
 };
 
 std::ostream& operator<<(std::ostream& out, Accelerator l);
