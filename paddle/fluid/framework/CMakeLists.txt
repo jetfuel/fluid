@@ -44,3 +44,5 @@ cc_test(accelerator_test SRCS accelerator_test.cc DEPS accelerator)
 
 cc_library(op_kernel_type SRCS op_kernel_type.cc DEPS place device_context data_type tensor_data_layout accelerator framework_proto)
 cc_test(op_kernel_type_test SRCS op_kernel_type_test.cc DEPS op_kernel_type)
+
+cc_library(attribute SRCS attribute.cc DEPS framework_proto boost)
