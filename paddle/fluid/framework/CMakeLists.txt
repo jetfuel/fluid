@@ -46,3 +46,5 @@ cc_library(op_kernel_type SRCS op_kernel_type.cc DEPS place device_context data_
 cc_test(op_kernel_type_test SRCS op_kernel_type_test.cc DEPS op_kernel_type)
 
 cc_library(attribute SRCS attribute.cc DEPS framework_proto boost)
+
+cc_library(var_desc SRCS var_desc.cc DEPS enforce framework_proto)
