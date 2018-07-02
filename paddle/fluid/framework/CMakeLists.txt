@@ -46,3 +46,6 @@ cc_library(op_kernel_type SRCS op_kernel_type.cc DEPS place device_context data_
 cc_test(op_kernel_type_test SRCS op_kernel_type_test.cc DEPS op_kernel_type)
 
 cc_library(attribute SRCS attribute.cc DEPS framework_proto boost)
+
+cc_library(op_proto_maker SRCS op_proto_maker.cc DEPS framework_proto attribute glog)
+cc_test(op_proto_maker_test SRCS op_proto_maker_test.cc DEPS op_proto_maker)
