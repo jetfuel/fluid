@@ -61,3 +61,7 @@ else()
   cc_library(data_type_transform SRCS data_type_transform.cc DEPS tensor op_kernel_type)
   cc_test(data_type_transform_test SRCS data_type_transform_test.cc DEPS data_type_transform framework_proto tensor_data_layout accelerator)
 endif()
+
+cc_library(data_device_transform SRCS data_device_transform.cc DEPS tensor enforce)
+# TODO(yi): The current unit test is too much heavier than needed and
+# is out of the scope of a "unit test". We need to write a new one.
