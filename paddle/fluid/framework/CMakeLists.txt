@@ -54,4 +54,6 @@ cc_library(op_desc SRCS op_desc.cc DEPS op_proto_maker)
 
 cc_library(grad_op_desc_maker SRCS grad_op_desc_maker.cc DEPS op_desc)
 
+cc_library(reader SRCS reader.cc DEPS lod_tensor ddim)
+
 # cc_library(op_info SRCS op_info.cc DEPS attribute framework_proto)
