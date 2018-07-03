@@ -27,16 +27,7 @@ namespace framework {
 
 struct OpKernelType {
   struct Hash {
-    size_t operator()(const OpKernelType& key) const {
-      int place = key.place_.which();
-      int data_type = static_cast<int>(key.data_type_) << LEFT_SHIFT;
-      int data_layout = static_cast<int>(key.data_layout_.type_) << (LEFT_SHIFT * 2);
-      int accelerator = static_cast<int>(key.accelerator_.type_)
-                         << (LEFT_SHIFT * 3);
-
-      std::hash<int> hasher;
-      return hasher(place + data_type + data_layout + accelerator);
-    }
+    size_t operator()(const OpKernelType& key) const;
   };
 
   // place, data_type, accelerator kinds less than 2^8
@@ -49,20 +40,12 @@ struct OpKernelType {
 
   OpKernelType(proto::VarType::Type data_type, platform::Place place,
                TensorDataLayout data_layout = TensorDataLayout::kAnyLayout,
-               Accelerator accelerator = Accelerator::kPlain)
-      : data_type_(data_type),
-        data_layout_(data_layout),
-        place_(place),
-        accelerator_(accelerator) {}
+               Accelerator accelerator = Accelerator::kPlain);
 
   OpKernelType(proto::VarType::Type data_type,
                const platform::DeviceContext& dev_ctx,
                TensorDataLayout data_layout = TensorDataLayout::kAnyLayout,
-               Accelerator accelerator = Accelerator::kPlain)
-      : data_type_(data_type),
-        data_layout_(data_layout),
-        place_(dev_ctx.GetPlace()),
-        accelerator_(accelerator) {}
+               Accelerator accelerator = Accelerator::kPlain);
 
   bool operator==(const OpKernelType& o) const {
     return platform::places_are_same_class(place_, o.place_) &&
