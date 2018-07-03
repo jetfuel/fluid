@@ -69,4 +69,6 @@ cc_library(data_device_transform SRCS data_device_transform.cc DEPS tensor enfor
 cc_library(data_layout_transform SRCS data_layout_transform.cc DEPS tensor enforce op_kernel_type device_context tensor_data_layout)
 cc_test(data_layout_transform_test SRCS data_layout_transform_test.cc DEPS data_layout_transform)
 
+cc_library(data_transform SRCS data_transform.cc DEPS enforce op_kernel_type tensor variable selected_rows data_device_transform data_type_transform data_layout_transform)
+
 cc_library(reader SRCS reader.cc DEPS lod_tensor ddim)
