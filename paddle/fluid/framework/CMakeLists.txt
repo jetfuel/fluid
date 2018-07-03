@@ -65,3 +65,5 @@ endif()
 cc_library(data_device_transform SRCS data_device_transform.cc DEPS tensor enforce)
 # TODO(yi): The current unit test is too much heavier than needed and
 # is out of the scope of a "unit test". We need to write a new one.
+
+cc_library(reader SRCS reader.cc DEPS lod_tensor ddim)
