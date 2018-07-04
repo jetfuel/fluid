@@ -23,12 +23,21 @@ namespace paddle {
 namespace fluid {
 namespace platform {
 
-struct CPUPlace {
-  // WORKAROUND: for some reason, omitting this constructor
-  // causes errors with boost 1.59 and OSX
-  CPUPlace() {}
+struct Place {
+  // We want to be able to check the real place type using the
+  // predicate dynamic_cast<CPUPlace*>(p)!=nullptr.  To enable this
+  // check, the base class must be a virtual class, and a virtual
+  // class must (and at least need to) have a virtual destructor.
+  //
+  // Also, we don't want to allow users to define a variable of type
+  // Place, so we make the destructuor pure virtual.  However, we have
+  // a type PlaceList=vector<Place>, which prevents us from doing so.
+  virtual ~Place() {}
+};
 
-  // needed for variant equality comparison
+struct CPUPlace : public Place {
+  virtual ~CPUPlace() {}
+
   inline bool operator==(const CPUPlace &) const { return true; }
   inline bool operator!=(const CPUPlace &) const { return false; }
 };
@@ -36,44 +45,23 @@ struct CPUPlace {
 struct CUDAPlace {
   CUDAPlace() : CUDAPlace(0) {}
   explicit CUDAPlace(int d) : device(d) {}
+  virtual ~CUDAPlace() {}
 
-  inline int GetDeviceId() const { return device; }
-  // needed for variant equality comparison
   inline bool operator==(const CUDAPlace &o) const {
     return device == o.device;
   }
-  inline bool operator!=(const CUDAPlace &o) const { return !(*this == o); }
+  inline bool operator!=(const CUDAPlace &o) const { return device != o.device; }
 
   int device;
 };
 
 struct CUDAPinnedPlace {
   CUDAPinnedPlace() {}
+  virtual ~CUDAPinnedPlace() {}
 
-  // needed for variant equality comparison
   inline bool operator==(const CUDAPinnedPlace &) const { return true; }
   inline bool operator!=(const CUDAPinnedPlace &) const { return false; }
 };
-
-struct IsCUDAPlace : public boost::static_visitor<bool> {
-  bool operator()(const CPUPlace &) const { return false; }
-  bool operator()(const CUDAPlace &gpu) const { return true; }
-  bool operator()(const CUDAPinnedPlace &) const { return false; }
-};
-
-struct IsCPUPlace : public boost::static_visitor<bool> {
-  bool operator()(const CPUPlace &cpu) const { return true; }
-  bool operator()(const CUDAPlace &) const { return false; }
-  bool operator()(const CUDAPinnedPlace &) const { return false; }
-};
-
-struct IsCUDAPinnedPlace : public boost::static_visitor<bool> {
-  bool operator()(const CPUPlace &) const { return false; }
-  bool operator()(const CUDAPlace &) const { return false; }
-  bool operator()(const CUDAPinnedPlace &cuda_pinned) const { return true; }
-};
-
-typedef boost::variant<CUDAPlace, CPUPlace, CUDAPinnedPlace> Place;
 
 using PlaceList = std::vector<Place>;
 

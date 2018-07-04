@@ -19,11 +19,51 @@ namespace fluid {
 namespace platform {
 
 namespace detail {
+const Place& the_default_place;
+}  // namespace detail
 
-class PlacePrinter : public boost::static_visitor<> {
+void set_place(const Place &place) { the_default_place = place; }
+const const Place &get_place() { return the_default_place; }
+
+const CUDAPlace default_gpu() { return CUDAPlace(0); }
+const CPUPlace default_cpu() { return CPUPlace(); }
+const CUDAPinnedPlace default_cuda_pinned() { return CUDAPinnedPlace(); }
+
+bool is_gpu_place(const Place &p) {
+  // Note: don't try to cast to CPUPlace&. Such a trial would throw an
+  // exception when p is not a CPUPlace.
+  return dynamic_cast<const CUDAPlace*>(&p) != nullptr;
+}
+
+bool is_cpu_place(const Place &p) {
+  return dynamic_cast<const CPUPlace*>(&p) != nullptr;
+}
+
+bool is_cuda_pinned_place(const Place &p) {
+  return dynamic_cast<const CUDAPinnedPlace*>(&p) != nullptr;
+}
+
+bool places_are_same_class(const Place &p1, const Place &p2) {
+  return (is_gpu_place(p1) && is_gpu_place(p2))
+      || (is_cpu_place(p1) && is_cpu_place(p2))
+      || (is_cuda_pinned_place(p1) && is_cuda_pinned_place(p2));
+}
+
+bool is_same_place(const Place &p1, const Place &p2) {
+  return places_are_same_class(p1, p2) &&
+      (is_gpu_place(p1) ?
+       dynamic_cast<const CUDAPlace*>(&p1)->device ==
+       dynamic_cast<const CUDAPlace*>(&p2)->device :
+       true);
+}
+
+std::ostream &operator<<(std::ostream &os, const Place &p) {
+  if (is_cpu_place(p)) {
+    os_ << "CPUPlace"; }
+  class PlacePrinter : public boost::static_visitor<> {
  public:
   explicit PlacePrinter(std::ostream &os) : os_(os) {}
-  void operator()(const CPUPlace &) { os_ << "CPUPlace"; }
+  void operator()(const CPUPlace &) {
   void operator()(const CUDAPlace &p) {
     os_ << "CUDAPlace(" << p.device << ")";
   }
@@ -33,46 +73,7 @@ class PlacePrinter : public boost::static_visitor<> {
   std::ostream &os_;
 };
 
-}  // namespace detail
 
-static Place the_default_place;
-
-void set_place(const Place &place) { the_default_place = place; }
-const Place &get_place() { return the_default_place; }
-
-const CUDAPlace default_gpu() { return CUDAPlace(0); }
-const CPUPlace default_cpu() { return CPUPlace(); }
-const CUDAPinnedPlace default_cuda_pinned() { return CUDAPinnedPlace(); }
-
-bool is_gpu_place(const Place &p) {
-  return boost::apply_visitor(IsCUDAPlace(), p);
-}
-
-bool is_cpu_place(const Place &p) {
-  return boost::apply_visitor(IsCPUPlace(), p);
-}
-
-bool is_cuda_pinned_place(const Place &p) {
-  return boost::apply_visitor(IsCUDAPinnedPlace(), p);
-}
-
-bool places_are_same_class(const Place &p1, const Place &p2) {
-  return p1.which() == p2.which();
-}
-
-bool is_same_place(const Place &p1, const Place &p2) {
-  if (places_are_same_class(p1, p2)) {
-    if (is_cpu_place(p1) || is_cuda_pinned_place(p1)) {
-      return true;
-    } else {
-      return boost::get<CUDAPlace>(p1) == boost::get<CUDAPlace>(p2);
-    }
-  } else {
-    return false;
-  }
-}
-
-std::ostream &operator<<(std::ostream &os, const Place &p) {
   detail::PlacePrinter printer(os);
   boost::apply_visitor(printer, p);
   return os;

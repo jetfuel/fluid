@@ -212,6 +212,13 @@ bool TensorContainsNAN(const framework::Tensor& tensor) {
   return Any(tensor, predicate);
 }
 
+bool TensorContainsNaN(const framework::Tensor& tensor) {
+    auto t = EigenVector<T>::Flatten(tensor_);
+    auto o = EigenScalar<bool>::From(*out_);
+    // return any of predicate_(t) is true.
+    o.device(*ctx_.eigen_device()) = predicate_(t).any();
+}
+
 struct ContainsInfPredicate {
   template <typename T>
   auto operator()(const T& eigen_vec) const
