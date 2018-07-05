@@ -18,8 +18,6 @@ limitations under the License. */
 #include <unordered_map>
 #include <vector>
 #include "paddle/fluid/framework/attribute.h"
-// #include "paddle/fluid/framework/type_defs.h"
-// #include "paddle/fluid/framework/var_desc.h"
 
 namespace paddle {
 namespace fluid {
