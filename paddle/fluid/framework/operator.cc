@@ -11,14 +11,16 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
+#include "paddle/fluid/framework/operator.h"
+
 #include <gflags/gflags.h>
 #include <glog/logging.h>
-
 #include <algorithm>
 
+#include "paddle/fluid/framework/var_type.h"
+#include "paddle/fluid/framework/op_kernel_type.h"
 #include "paddle/fluid/framework/data_transform.h"
-#include "paddle/fluid/framework/operator.h"
-#include "paddle/fluid/platform/profiler.h"
+
 
 DECLARE_bool(benchmark);
 DEFINE_bool(check_nan_inf, false,
@@ -217,7 +219,8 @@ OperatorBase::OperatorBase(const std::string& type,
                            const AttributeMap& attrs)
     : type_(type), inputs_(inputs), outputs_(outputs), attrs_(attrs) {
   GenerateTemporaryNames();
-  CheckAllInputOutputSet();
+  // FIXME(tonyyang-svail): check this
+//  CheckAllInputOutputSet();
 }
 
 std::vector<std::string> OperatorBase::InputVars() const {
@@ -231,49 +234,35 @@ std::vector<std::string> OperatorBase::InputVars() const {
 
 std::vector<std::string> OperatorBase::OutputVars(bool has_intermediate) const {
   std::vector<std::string> ret_val;
-  if (has_intermediate) {
-    // push all outputs into ret_val
-    for (auto& o : outputs_) {
-      ret_val.reserve(ret_val.size() + o.second.size());
-      ret_val.insert(ret_val.end(), o.second.begin(), o.second.end());
-    }
-    return ret_val;
-  }
-  auto& info = OpInfoMap::Instance().Get(Type());
-
-  // get all OpProto::Var for outputs
-  for (auto& o : info.Proto().outputs()) {
-    // ignore all intermediate output
-    if (o.intermediate()) continue;
-    auto out = outputs_.find(o.name());
-    if (out != outputs_.end()) {
-      ret_val.reserve(ret_val.size() + out->second.size());
-      ret_val.insert(ret_val.end(), out->second.begin(), out->second.end());
+  for (auto& out : outputs_) {
+    for (auto& o : out.second) {
+      ret_val.emplace_back(o);
     }
   }
   return ret_val;
 }
 
-void OperatorBase::CheckAllInputOutputSet() const {
-  auto& info_map = OpInfoMap::Instance();
-  auto* op_info = info_map.GetNullable(Type());
-  if (op_info == nullptr || op_info->proto_ == nullptr) return;
-
-  for (auto& in : op_info->Proto().inputs()) {
-    if (!in.dispensable()) {
-      PADDLE_ENFORCE(inputs_.find(in.name()) != inputs_.end(),
-                     "Operator %s's input, %s, is not set", Type(), in.name());
-    }
-  }
-
-  for (auto& out : op_info->Proto().outputs()) {
-    if (!out.dispensable()) {
-      PADDLE_ENFORCE(outputs_.find(out.name()) != outputs_.end(),
-                     "Operator %s's output, %s, is not set", Type(),
-                     out.name());
-    }
-  }
-}
+// FIXME(tonyyang-svail): Operator should not depends on op_info
+//void OperatorBase::CheckAllInputOutputSet() const {
+//  auto& info_map = OpInfoMap::Instance();
+//  auto* op_info = info_map.GetNullable(Type());
+//  if (op_info == nullptr || op_info->proto_ == nullptr) return;
+//
+//  for (auto& in : op_info->Proto().inputs()) {
+//    if (!in.dispensable()) {
+//      PADDLE_ENFORCE(inputs_.find(in.name()) != inputs_.end(),
+//                     "Operator %s's input, %s, is not set", Type(), in.name());
+//    }
+//  }
+//
+//  for (auto& out : op_info->Proto().outputs()) {
+//    if (!out.dispensable()) {
+//      PADDLE_ENFORCE(outputs_.find(out.name()) != outputs_.end(),
+//                     "Operator %s's output, %s, is not set", Type(),
+//                     out.name());
+//    }
+//  }
+//}
 
 void OperatorBase::GenerateTemporaryNames() {
   static std::atomic<size_t> gUniqId(0UL);
@@ -434,9 +423,6 @@ void OperatorWithKernel::RunImpl(const Scope& scope,
   platform::DeviceContextPool& pool = platform::DeviceContextPool::Instance();
   auto* dev_ctx = pool.Get(place);
 
-  // For profiling, don't move out of this function because that will result
-  // in the failure of multi-GPU profiling.
-  platform::RecordEvent record_event(Type(), dev_ctx);
   // check if op[type] has kernel registered.
   auto& all_op_kernels = AllOpKernels();
   auto kernels_iter = all_op_kernels.find(type_);
@@ -477,7 +463,7 @@ void OperatorWithKernel::RunImpl(const Scope& scope,
         if (tensor_in->IsInitialized()) {
           auto kernel_type_for_var = this->GetKernelTypeForVar(
               var_name_item.first, *tensor_in, expected_kernel_key);
-          if (TransFromNeeded(kernel_type_for_var, expected_kernel_key)) {
+          if (NeedTransform(kernel_type_for_var, expected_kernel_key)) {
             auto out_var_names = OutputVars(true);
             if (std::find(out_var_names.begin(), out_var_names.end(),
                           var_name) != out_var_names.end()) {

@@ -30,6 +30,7 @@ limitations under the License. */
 #include "paddle/fluid/framework/scope.h"
 #include "paddle/fluid/framework/selected_rows.h"
 #include "paddle/fluid/framework/tensor.h"
+#include "paddle/fluid/framework/shape_inference.h"
 #include "paddle/fluid/platform/device_context.h"
 #include "paddle/fluid/platform/variant.h"
 #include "paddle/fluid/framework/library_type.h"
@@ -352,7 +353,9 @@ class OperatorWithKernel : public OperatorBase {
   }
 
   virtual void InferShape(InferShapeContext* ctx) const {
-    OpInfoMap::Instance().Get(Type()).infer_shape_(ctx);
+    // TODO(tonyyang-svail): Bring back infershape
+    // OpInfoMap::Instance().Get(Type()).infer_shape_(ctx);
+    PADDLE_THROW("Not Implemented!");
   }
 
  protected:
@@ -368,7 +371,6 @@ class OperatorWithKernel : public OperatorBase {
   void RunImpl(const Scope& scope, const platform::Place& place) const final;
 };
 
-// TODO(tonyyang-svail): Bring back infershape
 class RuntimeInferShapeContext : public InferShapeContext {
  public:
   RuntimeInferShapeContext(const OperatorBase& op, const Scope& scope)

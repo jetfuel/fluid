@@ -75,4 +75,4 @@ cc_library(reader SRCS reader.cc DEPS lod_tensor ddim)
 
 cc_library(shape_inference SRCS shape_inference.cc DEPS ddim attribute op_desc grad_op_desc_maker variable)
 
-cc_library(operator SRCS operator.cc DEPS device_context shape_inference tensor scope glog data_transform lod_tensor)
+cc_library(operator SRCS operator.cc DEPS device_context shape_inference tensor scope glog data_transform lod_tensor enforce)
