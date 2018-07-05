@@ -132,8 +132,8 @@ class OperatorBase {
 // If you are writing an kernel operator, `Clone` will be defined when you
 // register it. i.e. `Clone` method is not needed to define by yourself.
 #define DEFINE_OP_CLONE_METHOD(cls)                                            \
-  std::unique_ptr<::paddle::framework::OperatorBase> Clone() const final {     \
-    return std::unique_ptr<::paddle::framework::OperatorBase>(new cls(*this)); \
+  std::unique_ptr<::paddle::fluid::framework::OperatorBase> Clone() const final {     \
+    return std::unique_ptr<::paddle::fluid::framework::OperatorBase>(new cls(*this)); \
   }
 
 // Macro for define a default constructor for Operator.
@@ -142,9 +142,9 @@ class OperatorBase {
 // to use parent's constructor.
 #define DEFINE_OP_CONSTRUCTOR(cls, parent_cls)             \
   cls(const std::string& type,                             \
-      const ::paddle::framework::VariableNameMap& inputs,  \
-      const ::paddle::framework::VariableNameMap& outputs, \
-      const paddle::framework::AttributeMap& attrs)        \
+      const ::paddle::fluid::framework::VariableNameMap& inputs,  \
+      const ::paddle::fluid::framework::VariableNameMap& outputs, \
+      const paddle::fluid::framework::AttributeMap& attrs)        \
       : parent_cls(type, inputs, outputs, attrs) {}
 
 class NOP : public OperatorBase {

@@ -21,7 +21,7 @@ namespace paddle {
 namespace fluid {
 namespace framework {
 
-// EigenDim converts paddle::platform::DDim into Eigen::DSizes.
+// EigenDim converts paddle::fluid::platform::DDim into Eigen::DSizes.
 template <int D>
 struct EigenDim {
   using Type = Eigen::DSizes<Eigen::DenseIndex, D>;
@@ -36,7 +36,7 @@ struct EigenDim {
   }
 };
 
-// Interpret paddle::platform::Tensor as EigenTensor and EigenConstTensor.
+// Interpret paddle::fluid::platform::Tensor as EigenTensor and EigenConstTensor.
 template <typename T, size_t D, int MajorType = Eigen::RowMajor,
           typename IndexType = Eigen::DenseIndex>
 struct EigenTensor {
