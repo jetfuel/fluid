@@ -1,0 +1,10 @@
+if (WITH_GPU)
+    nv_library(math_function SRCS math_function.cc math_function.cu DEPS cblas)
+else()
+    cc_library(math_function SRCS math_function.cc DEPS cblas)
+endif()
+
+cc_test(math_function_test SRCS math_function_test.cc)
+if (WITH_GPU)
+    nv_test(math_function_gpu_test SRCS math_function_test.cu)
+endif()
