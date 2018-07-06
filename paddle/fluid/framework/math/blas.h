@@ -17,13 +17,6 @@
 #include "paddle/fluid/framework/operator.h"
 #include "paddle/fluid/framework/tensor.h"
 
-#ifdef PADDLE_WITH_MKLML
-#include <mkl_cblas.h>
-#include <mkl_lapacke.h>
-#include <mkl_service.h>
-#include <mkl_vml_functions.h>
-#endif
-
 #ifdef PADDLE_USE_OPENBLAS
 #include <cblas.h>
 #ifdef LAPACK_FOUND
