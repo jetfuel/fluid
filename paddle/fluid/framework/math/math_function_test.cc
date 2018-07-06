@@ -11,26 +11,26 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#include "paddle/fluid/operators/math/math_function.h"
+#include "paddle/fluid/framework/math/math_function.h"
 #include "gtest/gtest.h"
-#include "paddle/fluid//math/blas.h"
+#include "paddle/fluid/framework/math/blas.h"
 
 template <typename T>
-inline paddle::operators::math::BlasT<paddle::platform::CPUDeviceContext, T>
-GetBlas(const paddle::platform::CPUDeviceContext& context) {
-  return paddle::operators::math::GetBlas<paddle::platform::CPUDeviceContext,
+inline paddle::fluid::framework::math::BlasT<paddle::fluid::platform::CPUDeviceContext, T>
+GetBlas(const paddle::fluid::platform::CPUDeviceContext& context) {
+  return paddle::fluid::framework::math::GetBlas<paddle::fluid::platform::CPUDeviceContext,
                                           T>(context);
 }
 
 TEST(math_function, gemm_notrans_cblas) {
-  paddle::framework::Tensor input1;
-  paddle::framework::Tensor input2;
-  paddle::framework::Tensor input3;
+  paddle::fluid::framework::Tensor input1;
+  paddle::fluid::framework::Tensor input2;
+  paddle::fluid::framework::Tensor input3;
 
   int m = 2;
   int n = 3;
   int k = 3;
-  auto* cpu_place = new paddle::platform::CPUPlace();
+  auto* cpu_place = new paddle::fluid::platform::CPUPlace();
   float* input1_ptr = input1.mutable_data<float>({2, 3}, *cpu_place);
   float arr1[6] = {0, 1, 2, 3, 4, 5};
   memcpy(input1_ptr, arr1, 6 * sizeof(float));
@@ -41,7 +41,7 @@ TEST(math_function, gemm_notrans_cblas) {
   float arr3[8] = {0, 1, 2, 3, 4, 5, 6, 7};
   memcpy(input3_ptr, arr3, 8 * sizeof(float));
 
-  paddle::platform::CPUDeviceContext context(*cpu_place);
+  paddle::fluid::platform::CPUDeviceContext context(*cpu_place);
   GetBlas<float>(context).GEMM(false, false, m, n, k, 1, input1_ptr, 3,
                                input2_ptr + 1, 4, 1, input3_ptr + 1, 4);
 
@@ -56,14 +56,14 @@ TEST(math_function, gemm_notrans_cblas) {
 }
 
 TEST(math_function, gemm_trans_clbas) {
-  paddle::framework::Tensor input1;
-  paddle::framework::Tensor input2;
-  paddle::framework::Tensor input3;
+  paddle::fluid::framework::Tensor input1;
+  paddle::fluid::framework::Tensor input2;
+  paddle::fluid::framework::Tensor input3;
 
   int m = 2;
   int n = 3;
   int k = 3;
-  auto* cpu_place = new paddle::platform::CPUPlace();
+  auto* cpu_place = new paddle::fluid::platform::CPUPlace();
   float* input1_ptr = input1.mutable_data<float>({2, 3}, *cpu_place);
   float arr1[6] = {0, 1, 2, 3, 4, 5};
   memcpy(input1_ptr, arr1, 6 * sizeof(float));
@@ -74,7 +74,7 @@ TEST(math_function, gemm_trans_clbas) {
   float arr3[8] = {0, 1, 2, 3, 4, 5, 6, 7};
   memcpy(input3_ptr, arr3, 8 * sizeof(float));
 
-  paddle::platform::CPUDeviceContext context(*cpu_place);
+  paddle::fluid::platform::CPUDeviceContext context(*cpu_place);
   GetBlas<float>(context).GEMM(false, true, m, n, k, 1, input1_ptr, 3,
                                input2_ptr + 3, 3, 1, input3_ptr + 1, 4);
   delete cpu_place;
@@ -91,11 +91,11 @@ TEST(math_function, gemm_trans_clbas) {
 }
 
 TEST(math_function, zero) {
-  paddle::framework::Tensor tensor;
-  auto* cpu_place = new paddle::platform::CPUPlace();
+  paddle::fluid::framework::Tensor tensor;
+  auto* cpu_place = new paddle::fluid::platform::CPUPlace();
   float* t = tensor.mutable_data<float>({2, 2}, *cpu_place);
-  paddle::platform::CPUDeviceContext context(*cpu_place);
-  paddle::operators::math::SetConstant<paddle::platform::CPUDeviceContext,
+  paddle::fluid::platform::CPUDeviceContext context(*cpu_place);
+  paddle::fluid::framework::math::SetConstant<paddle::fluid::platform::CPUDeviceContext,
                                        float>
       functor;
   functor(context, &tensor, 0);
@@ -114,10 +114,10 @@ TEST(math_function, zero) {
 
 template <typename T>
 void GemvTest(int m, int n, bool trans) {
-  paddle::framework::Tensor mat_a;
-  paddle::framework::Tensor vec_b;
-  paddle::framework::Tensor vec_c;
-  auto* cpu_place = new paddle::platform::CPUPlace();
+  paddle::fluid::framework::Tensor mat_a;
+  paddle::fluid::framework::Tensor vec_b;
+  paddle::fluid::framework::Tensor vec_c;
+  auto* cpu_place = new paddle::fluid::platform::CPUPlace();
   int b_num = trans ? m : n;
   int c_num = trans ? n : m;
 
@@ -131,7 +131,7 @@ void GemvTest(int m, int n, bool trans) {
     data_b[i] = static_cast<T>(i);
   }
 
-  paddle::platform::CPUDeviceContext context(*cpu_place);
+  paddle::fluid::platform::CPUDeviceContext context(*cpu_place);
   GetBlas<T>(context).GEMV(trans, static_cast<int>(m), static_cast<int>(n), 1.,
                            data_a, data_b, 0., data_c);
 
@@ -162,11 +162,11 @@ TEST(math_function, gemv) {
 }
 
 TEST(math_funciton, set_constant) {
-  paddle::framework::Tensor t;
+  paddle::fluid::framework::Tensor t;
   t.Resize({10, 10});
-  t.mutable_data<int>(paddle::platform::CPUPlace());
-  auto* ctx = new paddle::platform::CPUDeviceContext();
-  paddle::operators::math::set_constant(*ctx, &t, 10);
+  t.mutable_data<int>(paddle::fluid::platform::CPUPlace());
+  auto* ctx = new paddle::fluid::platform::CPUDeviceContext();
+  paddle::fluid::framework::math::set_constant(*ctx, &t, 10);
   for (int64_t i = 0; i < t.numel(); ++i) {
     PADDLE_ENFORCE_EQ(10, t.data<int>()[i]);
   }

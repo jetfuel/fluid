@@ -5,7 +5,7 @@ else()
     cc_library(math_function SRCS math_function.cc DEPS blas)
 endif()
 
-cc_test(math_function_test SRCS math_function_test.cc)
+cc_test(math_function_test SRCS math_function_test.cc DEPS math_function device_context tensor)
 if (WITH_GPU)
     nv_test(math_function_gpu_test SRCS math_function_test.cu)
 endif()

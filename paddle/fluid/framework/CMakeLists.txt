@@ -1,4 +1,3 @@
-add_subdirectory(math)
 
 cc_library(ddim SRCS ddim.cc DEPS enforce eigen3 boost)
 cc_test(ddim_test SRCS ddim_test.cc DEPS ddim)
@@ -55,6 +54,9 @@ cc_test(op_proto_maker_test SRCS op_proto_maker_test.cc DEPS op_proto_maker enfo
 cc_library(op_desc SRCS op_desc.cc DEPS op_proto_maker)
 
 cc_library(grad_op_desc_maker SRCS grad_op_desc_maker.cc DEPS op_desc)
+
+# math is used in data_transform
+add_subdirectory(math)
 
 if(WITH_GPU)
   nv_library(data_type_transform SRCS data_type_transform.cu DEPS lod_tensor op_kernel_type)
