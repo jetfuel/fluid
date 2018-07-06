@@ -1,7 +1,7 @@
 if (WITH_GPU)
-    nv_library(math_function SRCS math_function.cc math_function.cu DEPS cblas framework_proto)
+    nv_library(math_function SRCS math_function.cc math_function.cu DEPS enforce eigen tensor device_context cblas framework_proto)
 else()
-    cc_library(math_function SRCS math_function.cc DEPS cblas framework_proto)
+    cc_library(math_function SRCS math_function.cc DEPS enforce eigen tensor device_context cblas framework_proto)
 endif()
 
 cc_library(blas SRCS blas.cc DEPS cblas framework_proto device_context)
