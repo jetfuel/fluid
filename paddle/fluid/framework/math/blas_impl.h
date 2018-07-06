@@ -35,13 +35,6 @@ struct CBlas<float> {
     cblas_saxpy(args...);
   }
 
-#ifdef PADDLE_WITH_MKLML
-  template <typename... ARGS>
-  static void VADD(ARGS... args) {
-    vsAdd(args...);
-  }
-#endif
-
   template <typename... ARGS>
   static void VCOPY(ARGS... args) {
     cblas_scopy(args...);
@@ -51,14 +44,6 @@ struct CBlas<float> {
   static void GEMV(ARGS... args) {
     cblas_sgemv(args...);
   }
-
-#ifdef PADDLE_WITH_MKLML
-  template <typename... ARGS>
-  static void GEMM_BATCH(ARGS... args) {
-    cblas_sgemm_batch(args...);
-  }
-#endif
-};
 
 template <>
 struct CBlas<double> {
@@ -72,13 +57,6 @@ struct CBlas<double> {
     cblas_daxpy(args...);
   }
 
-#ifdef PADDLE_WITH_MKLML
-  template <typename... ARGS>
-  static void VADD(ARGS... args) {
-    vdAdd(args...);
-  }
-#endif
-
   template <typename... ARGS>
   static void VCOPY(ARGS... args) {
     cblas_dcopy(args...);
@@ -88,23 +66,11 @@ struct CBlas<double> {
   static void GEMV(ARGS... args) {
     cblas_dgemv(args...);
   }
-
-#ifdef PADDLE_WITH_MKLML
-  template <typename... ARGS>
-  static void GEMM_BATCH(ARGS... args) {
-    cblas_dgemm_batch(args...);
-  }
-#endif
 };
 
 template <>
 struct CBlas<platform::float16> {
   static void GEMM(...) { PADDLE_THROW("float16 GEMM not supported on CPU"); }
-#ifdef PADDLE_WITH_MKLML
-  static void GEMM_BATCH(...) {
-    PADDLE_THROW("float16 GEMM_BATCH not supported on CPU");
-  }
-#endif
 };
 
 template <>
@@ -174,12 +140,8 @@ template <>
 template <typename T>
 void Blas<platform::CPUDeviceContext>::VADD(int n, const T *x, const T *y,
                                             T *z) const {
-#ifdef PADDLE_WITH_MKLML
-  CBlas<T>::VADD(n, x, y, z);
-#else
   this->template VCOPY<T>(n, y, z);
   this->template AXPY<T>(n, 1., x, z);
-#endif
 }
 
 template <>
@@ -197,30 +159,12 @@ void Blas<platform::CPUDeviceContext>::BatchedGEMM(
     CBLAS_TRANSPOSE transA, CBLAS_TRANSPOSE transB, int M, int N, int K,
     T alpha, const T *A, const T *B, T beta, T *C, int batchCount,
     int64_t strideA, int64_t strideB) const {
-#ifdef PADDLE_WITH_MKLML
-  int lda = (transA == CblasNoTrans) ? K : M;
-  int ldb = (transB == CblasNoTrans) ? N : K;
-  int ldc = N;
-  auto a_array = std::vector<const T *>(batchCount);
-  auto b_array = std::vector<const T *>(batchCount);
-  auto c_array = std::vector<T *>(batchCount);
-  for (int k = 0; k < batchCount; ++k) {
-    a_array[k] = &A[k * strideA];
-    b_array[k] = &B[k * strideB];
-    c_array[k] = &C[k * M * N];
-  }
-
-  CBlas<T>::GEMM_BATCH(CblasRowMajor, &transA, &transB, &M, &N, &K, &alpha,
-                       a_array.data(), &lda, b_array.data(), &ldb, &beta,
-                       c_array.data(), &ldc, 1 /* group_count */, &batchCount);
-#else
   for (int k = 0; k < batchCount; ++k) {
     auto *Ak = &A[k * strideA];
     auto *Bk = &B[k * strideB];
     auto *Ck = &C[k * M * N];
     this->template GEMM<T>(transA, transB, M, N, K, alpha, Ak, Bk, beta, Ck);
   }
-#endif
 }
 
 template <typename DeviceContext>
