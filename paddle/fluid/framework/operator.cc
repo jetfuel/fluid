@@ -31,11 +31,11 @@ namespace paddle {
 namespace fluid {
 namespace framework {
 
-std::vector<std::tuple<platform::Place, LibraryType>> kKernelPriority = {
-    std::make_tuple(platform::CUDAPlace(0), LibraryType::kCUDNN),
-    std::make_tuple(platform::CUDAPlace(0), LibraryType::kPlain),
-    std::make_tuple(platform::CPUPlace(), LibraryType::kMKLDNN),
-    std::make_tuple(platform::CPUPlace(), LibraryType::kPlain),
+std::vector<std::tuple<platform::Place, Accelerator::Type>> kKernelPriority = {
+    std::make_tuple(platform::CUDAPlace(0), Accelerator::Type::kCUDNN),
+    std::make_tuple(platform::CUDAPlace(0), Accelerator::Type::kPlain),
+    std::make_tuple(platform::CPUPlace(), Accelerator::Type::kMKLDNN),
+    std::make_tuple(platform::CPUPlace(), Accelerator::Type::kPlain),
 };
 
 proto::VarType::Type GetDataTypeOfVar(const Variable* var) {

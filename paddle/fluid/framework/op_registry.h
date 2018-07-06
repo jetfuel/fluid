@@ -91,7 +91,7 @@ struct OpKernelRegistrarFunctor<PlaceType, false, I, KernelTypes...> {
     }
     OpKernelType key(ToDataType(std::type_index(typeid(T))), PlaceType(),
                      TensorDataLayout(data_layout),
-                     StringToLibraryType(library_type));
+                     Accelerator(library_type).ToString());
     OperatorWithKernel::AllOpKernels()[op_type][key].reset(new KERNEL_TYPE);
 
     constexpr auto size = std::tuple_size<std::tuple<KernelTypes...>>::value;

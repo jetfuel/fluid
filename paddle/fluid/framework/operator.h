@@ -33,7 +33,7 @@ limitations under the License. */
 #include "paddle/fluid/framework/shape_inference.h"
 #include "paddle/fluid/platform/device_context.h"
 #include "paddle/fluid/platform/variant.h"
-#include "paddle/fluid/framework/library_type.h"
+#include "paddle/fluid/framework/accelerator.h"
 
 namespace paddle {
 namespace fluid {
@@ -41,7 +41,7 @@ namespace framework {
 
 // define some kernel priority
 /* Define multiple kernel type fallback order*/
-extern std::vector<std::tuple<platform::Place, LibraryType>> kKernelPriority;
+extern std::vector<std::tuple<platform::Place, Accelerator::Type>> kKernelPriority;
 
 proto::VarType::Type GetDataTypeOfVar(const Variable* var);
 
