@@ -55,8 +55,6 @@ cc_library(op_desc SRCS op_desc.cc DEPS op_proto_maker)
 
 cc_library(grad_op_desc_maker SRCS grad_op_desc_maker.cc DEPS op_desc)
 
-# math is used in data_transform
-add_subdirectory(math)
 
 if(WITH_GPU)
   nv_library(data_type_transform SRCS data_type_transform.cu DEPS lod_tensor op_kernel_type)
@@ -70,7 +68,9 @@ cc_library(data_device_transform SRCS data_device_transform.cc DEPS lod_tensor e
 # TODO(yi): The current unit test is too much heavier than needed and
 # is out of the scope of a "unit test". We need to write a new one.
 
-cc_library(data_layout_transform SRCS data_layout_transform.cc DEPS lod_tensor enforce op_kernel_type device_context tensor_data_layout)
+# math is used in data_layout_transform
+add_subdirectory(math)
+cc_library(data_layout_transform SRCS data_layout_transform.cc DEPS lod_tensor enforce op_kernel_type device_context tensor_data_layout math_function)
 cc_test(data_layout_transform_test SRCS data_layout_transform_test.cc DEPS data_layout_transform)
 
 cc_library(data_transform SRCS data_transform.cc DEPS enforce op_kernel_type lod_tensor variable selected_rows data_device_transform data_type_transform data_layout_transform)
