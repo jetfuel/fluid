@@ -21,7 +21,7 @@ namespace framework {
 namespace math {
 
 template <typename T>
-struct CBlas;
+struct CBlas {};
 
 template <>
 struct CBlas<float> {
@@ -44,6 +44,7 @@ struct CBlas<float> {
   static void GEMV(ARGS... args) {
     cblas_sgemv(args...);
   }
+};
 
 template <>
 struct CBlas<double> {
