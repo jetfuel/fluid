@@ -18,7 +18,6 @@ limitations under the License. */
 #include <iterator>
 
 #include "paddle/fluid/framework/data_type.h"
-#include "paddle/fluid/framework/framework.pb.h"
 #include "paddle/fluid/framework/lod_tensor.h"
 
 #include "paddle/fluid/memory/memcpy.h"

@@ -18,7 +18,6 @@ limitations under the License. */
 #include "paddle/fluid/framework/tensor_data_layout.h"
 #include "paddle/fluid/framework/data_type.h"
 #include "paddle/fluid/framework/accelerator.h"
-#include "paddle/fluid/platform/device_context.h"
 #include "paddle/fluid/platform/place.h"
 
 namespace paddle {
