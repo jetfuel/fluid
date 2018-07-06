@@ -1,0 +1,11 @@
+cc_library(blas SRCS blas.cc DEPS cblas framework_proto device_context)
+if (WITH_GPU)
+    nv_library(math_function SRCS math_function.cc math_function.cu DEPS blas)
+else()
+    cc_library(math_function SRCS math_function.cc DEPS blas)
+endif()
+
+cc_test(math_function_test SRCS math_function_test.cc DEPS math_function device_context tensor)
+if (WITH_GPU)
+    nv_test(math_function_gpu_test SRCS math_function_test.cu)
+endif()

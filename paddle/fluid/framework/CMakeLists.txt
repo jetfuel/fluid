@@ -1,3 +1,4 @@
+
 cc_library(ddim SRCS ddim.cc DEPS enforce eigen3 boost)
 cc_test(ddim_test SRCS ddim_test.cc DEPS ddim)
 nv_test(dim_test SRCS dim_test.cu DEPS ddim)
@@ -54,6 +55,7 @@ cc_library(op_desc SRCS op_desc.cc DEPS op_proto_maker)
 
 cc_library(grad_op_desc_maker SRCS grad_op_desc_maker.cc DEPS op_desc)
 
+
 if(WITH_GPU)
   nv_library(data_type_transform SRCS data_type_transform.cu DEPS lod_tensor op_kernel_type)
   nv_test(data_type_transform_test SRCS data_type_transform_test.cc data_type_transform_test.cu DEPS data_type_transform framework_proto tensor_data_layout accelerator)
@@ -66,7 +68,9 @@ cc_library(data_device_transform SRCS data_device_transform.cc DEPS lod_tensor e
 # TODO(yi): The current unit test is too much heavier than needed and
 # is out of the scope of a "unit test". We need to write a new one.
 
-cc_library(data_layout_transform SRCS data_layout_transform.cc DEPS lod_tensor enforce op_kernel_type device_context tensor_data_layout)
+# math is used in data_layout_transform
+add_subdirectory(math)
+cc_library(data_layout_transform SRCS data_layout_transform.cc DEPS lod_tensor enforce op_kernel_type device_context tensor_data_layout math_function)
 cc_test(data_layout_transform_test SRCS data_layout_transform_test.cc DEPS data_layout_transform)
 
 cc_library(data_transform SRCS data_transform.cc DEPS enforce op_kernel_type lod_tensor variable selected_rows data_device_transform data_type_transform data_layout_transform)
@@ -75,7 +79,7 @@ cc_library(reader SRCS reader.cc DEPS lod_tensor ddim)
 
 cc_library(shape_inference SRCS shape_inference.cc DEPS ddim attribute op_desc grad_op_desc_maker variable)
 
-cc_library(operator SRCS operator.cc DEPS device_context variable shape_inference lod_tensor scope glog data_transform enforce)
+cc_library(operator SRCS operator.cc DEPS device_context variable shape_inference lod_tensor scope glog data_transform enforce accelerator)
 # TODO(tonyyang-svail): make operator test lighter, current one depends on op_registry
 
 cc_library(op_info SRCS op_info.cc DEPS attribute)
