@@ -16,9 +16,6 @@ limitations under the License. */
 
 #ifdef PADDLE_USE_OPENBLAS
 #include <cblas.h>
-#ifdef LAPACK_FOUND
-#include <lapacke.h>
-#endif
 #endif
 
 #include <cmath>
