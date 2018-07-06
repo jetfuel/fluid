@@ -11,27 +11,54 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
-
 #include "paddle/fluid/platform/place.h"
+
+#include "paddle/fluid/platform/enforce.h"
 
 namespace paddle {
 namespace fluid {
 namespace platform {
 
-namespace detail {
-const Place& the_default_place;
-}  // namespace detail
+namespace {
+const Place* the_default_place = &default_cpu();
+}  // namespace
 
-void set_place(const Place &place) { the_default_place = place; }
-const const Place &get_place() { return the_default_place; }
+const Place* clone_place(const Place& p) {
+  Place* r = nullptr;
+  if (is_cpu_place(p)) {
+    r = new CPUPlace();
+  } else if (is_gpu_place(p)) {
+    r = new CUDAPlace(dynamic_cast<const CUDAPlace&>(p).device);
+  } else if (is_cuda_pinned_place(p)) {
+    r = new CUDAPinnedPlace();
+  } else {
+    PADDLE_THROW("clone_place: unknown place type");
+  }
+  return r;
+}
 
-const CUDAPlace default_gpu() { return CUDAPlace(0); }
-const CPUPlace default_cpu() { return CPUPlace(); }
-const CUDAPinnedPlace default_cuda_pinned() { return CUDAPinnedPlace(); }
+void set_place(const Place& place) {
+  if (the_default_place != nullptr) {
+    delete the_default_place;
+  }
+  the_default_place = clone_place(place);
+}
+
+const Place& get_place() { return *the_default_place; }
+
+const Place& default_cpu() {
+  return *clone_place(CPUPlace());
+}
+
+const Place& default_gpu() {
+  return *clone_place(CUDAPlace(0));
+}
+
+const Place& default_cuda_pinned() {
+  return *clone_place(CUDAPinnedPlace());
+}
 
 bool is_gpu_place(const Place &p) {
-  // Note: don't try to cast to CPUPlace&. Such a trial would throw an
-  // exception when p is not a CPUPlace.
   return dynamic_cast<const CUDAPlace*>(&p) != nullptr;
 }
 
@@ -59,24 +86,36 @@ bool is_same_place(const Place &p1, const Place &p2) {
 
 std::ostream &operator<<(std::ostream &os, const Place &p) {
   if (is_cpu_place(p)) {
-    os_ << "CPUPlace"; }
-  class PlacePrinter : public boost::static_visitor<> {
- public:
-  explicit PlacePrinter(std::ostream &os) : os_(os) {}
-  void operator()(const CPUPlace &) {
-  void operator()(const CUDAPlace &p) {
-    os_ << "CUDAPlace(" << p.device << ")";
+    os << "CPUPlace";
+  } else if (is_gpu_place(p)) {
+    os << "CUDAPlace(" << dynamic_cast<const CUDAPlace&>(p).device << ")";
+  } else if (is_cuda_pinned_place(p)) {
+    os << "CUDAPinnedPlace";
   }
-  void operator()(const CUDAPinnedPlace &p) { os_ << "CUDAPinnedPlace"; }
-
- private:
-  std::ostream &os_;
+  return os;
 };
 
+int PlaceHash::which_place(const Place& p) {
+  int r = -1;
+  if (is_cpu_place(p))
+    r = 0;
+  else if (is_gpu_place(p))
+    r = 1;
+  else if (is_cuda_pinned_place(p))
+    r = 2;
+  else
+    PADDLE_THROW("PlaceHash::which : unknown place type");
+  return r;
+}
 
-  detail::PlacePrinter printer(os);
-  boost::apply_visitor(printer, p);
-  return os;
+std::size_t PlaceHash::operator()(const Place &p) const {
+  constexpr size_t num_dev_bits = 4;
+  std::hash<int> ihash;
+  size_t dev_id = 0;
+  if (is_gpu_place(p)) {
+    dev_id = dynamic_cast<const CUDAPlace&>(p).device;
+  }
+  return ihash(dev_id << num_dev_bits | which_place(p));
 }
 
 }  // namespace platform

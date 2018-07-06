@@ -17,7 +17,6 @@ limitations under the License. */
 #include <vector>
 
 #include "paddle/fluid/platform/enforce.h"
-#include "paddle/fluid/platform/variant.h"
 
 namespace paddle {
 namespace fluid {
@@ -37,16 +36,14 @@ struct Place {
 
 struct CPUPlace : public Place {
   virtual ~CPUPlace() {}
-
   inline bool operator==(const CPUPlace &) const { return true; }
   inline bool operator!=(const CPUPlace &) const { return false; }
 };
 
-struct CUDAPlace {
+struct CUDAPlace : public Place {
   CUDAPlace() : CUDAPlace(0) {}
   explicit CUDAPlace(int d) : device(d) {}
   virtual ~CUDAPlace() {}
-
   inline bool operator==(const CUDAPlace &o) const {
     return device == o.device;
   }
@@ -55,10 +52,9 @@ struct CUDAPlace {
   int device;
 };
 
-struct CUDAPinnedPlace {
+struct CUDAPinnedPlace : public Place {
   CUDAPinnedPlace() {}
   virtual ~CUDAPinnedPlace() {}
-
   inline bool operator==(const CUDAPinnedPlace &) const { return true; }
   inline bool operator!=(const CUDAPinnedPlace &) const { return false; }
 };
@@ -68,9 +64,9 @@ using PlaceList = std::vector<Place>;
 void set_place(const Place &);
 const Place &get_place();
 
-const CUDAPlace default_gpu();
-const CPUPlace default_cpu();
-const CUDAPinnedPlace default_cuda_pinned();
+const Place& default_gpu();
+const Place& default_cpu();
+const Place& default_cuda_pinned();
 
 bool is_gpu_place(const Place &);
 bool is_cpu_place(const Place &);
@@ -79,54 +75,11 @@ bool places_are_same_class(const Place &, const Place &);
 bool is_same_place(const Place &, const Place &);
 
 struct PlaceHash {
-  std::size_t operator()(const Place &p) const {
-    constexpr size_t num_dev_bits = 4;
-    std::hash<int> ihash;
-    size_t dev_id = 0;
-    if (is_gpu_place(p)) {
-      dev_id = boost::get<CUDAPlace>(p).device;
-    }
-    return ihash(dev_id << num_dev_bits | p.which());
-  }
+  static int which_place(const Place& p);
+  std::size_t operator()(const Place &p) const;
 };
 
 std::ostream &operator<<(std::ostream &, const Place &);
-
-template <typename Visitor>
-struct PlaceVisitorWrapper
-    : public boost::static_visitor<typename Visitor::result_type> {
-  const Visitor &visitor_;
-  explicit PlaceVisitorWrapper(const Visitor &visitor) : visitor_(visitor) {}
-
-  typename Visitor::result_type operator()(const CPUPlace &cpu) const {
-    return visitor_(cpu);
-  }
-
-  typename Visitor::result_type operator()(const CUDAPlace &cuda) const {
-#ifdef PADDLE_WITH_CUDA
-    return visitor_(cuda);
-#else
-    PADDLE_THROW("Paddle is not compiled with CUDA. Cannot visit cuda device");
-    return typename Visitor::result_type();
-#endif
-  }
-
-  typename Visitor::result_type operator()(
-      const CUDAPinnedPlace &cuda_pinned) const {
-#ifdef PADDLE_WITH_CUDA
-    return visitor_(cuda_pinned);
-#else
-    PADDLE_THROW("Paddle is not compiled with CUDA. Cannot visit cuda_pinned");
-    return typename Visitor::result_type();
-#endif
-  }
-};
-
-template <typename Visitor>
-typename Visitor::result_type VisitPlace(const Place &place,
-                                         const Visitor &visitor) {
-  return boost::apply_visitor(PlaceVisitorWrapper<Visitor>(visitor), place);
-}
 
 }  // namespace platform
 }  // namespace fluid

@@ -31,13 +31,34 @@ TEST(Place, Equality) {
 }
 
 TEST(Place, Default) {
-  EXPECT_TRUE(paddle::fluid::platform::is_gpu_place(paddle::fluid::platform::get_place()));
-  EXPECT_TRUE(paddle::fluid::platform::is_gpu_place(paddle::fluid::platform::default_gpu()));
-  EXPECT_TRUE(paddle::fluid::platform::is_cpu_place(paddle::fluid::platform::default_cpu()));
+  using paddle::fluid::platform::CPUPlace;
+  using paddle::fluid::platform::CUDAPlace;
+  using paddle::fluid::platform::CUDAPinnedPlace;
 
-  EXPECT_FALSE(paddle::fluid::platform::is_cpu_place(paddle::fluid::platform::get_place()));
-  paddle::fluid::platform::set_place(paddle::fluid::platform::CPUPlace());
-  EXPECT_TRUE(paddle::fluid::platform::is_cpu_place(paddle::fluid::platform::get_place()));
+  using paddle::fluid::platform::is_cpu_place;
+  using paddle::fluid::platform::is_gpu_place;
+  using paddle::fluid::platform::is_cuda_pinned_place;
+
+  using paddle::fluid::platform::get_place;
+  using paddle::fluid::platform::set_place;
+
+  using paddle::fluid::platform::default_cpu;
+  using paddle::fluid::platform::default_gpu;
+  using paddle::fluid::platform::default_cuda_pinned;
+
+  using paddle::fluid::platform::PlaceHash;
+  EXPECT_EQ(0, PlaceHash::which_place(get_place()));
+
+  EXPECT_TRUE(is_gpu_place(default_gpu()));
+  EXPECT_TRUE(is_cpu_place(default_cpu()));
+  EXPECT_TRUE(is_cuda_pinned_place(default_cuda_pinned()));
+
+  EXPECT_TRUE(is_cpu_place(get_place()));
+  set_place(CUDAPlace(1));
+  EXPECT_TRUE(is_gpu_place(get_place()));
+
+  set_place(CUDAPinnedPlace());
+  EXPECT_TRUE(is_cuda_pinned_place(get_place()));
 }
 
 TEST(Place, Print) {
