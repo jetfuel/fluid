@@ -50,18 +50,6 @@ namespace fluid {
 namespace framework {
 namespace math {
 
-static void SetNumThreads(int num_threads) {
-#ifdef PADDLE_USE_OPENBLAS
-  int real_num_threads = num_threads > 1 ? num_threads : 1;
-  openblas_set_num_threads(real_num_threads);
-#elif defined(PADDLE_WITH_MKLML)
-  int real_num_threads = num_threads > 1 ? num_threads : 1;
-  mkl_set_num_threads(real_num_threads);
-#else
-  PADDLE_ENFORCE(false, "To be implemented.");
-#endif
-}
-
 /**
  * Matrix Descriptor of a memory buffer.
  *
