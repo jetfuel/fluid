@@ -224,8 +224,8 @@ template <typename DeviceContext, typename T>
 class AdamOpKernel : public framework::OpKernel<T> {
  public:
   void Compute(const framework::ExecutionContext& ctx) const override {
-    using paddle::framework::LoDTensor;
-    using paddle::operators::detail::Ref;
+    using paddle::fluid::framework::LoDTensor;
+    using paddle::fluid::operators::detail::Ref;
 
     T beta1 = static_cast<T>(ctx.Attr<float>("beta1"));
     T beta2 = static_cast<T>(ctx.Attr<float>("beta2"));
