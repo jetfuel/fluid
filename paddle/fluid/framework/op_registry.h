@@ -82,28 +82,28 @@ struct OpKernelRegistrarFunctor<PlaceType, false, I, KernelTypes...> {
   using KERNEL_TYPE =
       typename std::tuple_element<I, std::tuple<KernelTypes...>>::type;
 
-  void operator()(const char* op_type, const char* library_type) const {
+  void operator()(const char* op_type, const char* accelerator) const {
     using T = typename KERNEL_TYPE::ELEMENT_TYPE;
-    std::string library(library_type);
+    std::string library(accelerator);
     std::string data_layout = "ANYLAYOUT";
     if (library == "MKLDNN") {
       data_layout = "MKLDNNLAYOUT";
     }
     OpKernelType key(ToDataType(std::type_index(typeid(T))), PlaceType(),
                      TensorDataLayout(data_layout),
-                     Accelerator(library_type).ToString());
+                     Accelerator(accelerator).ToString());
     OperatorWithKernel::AllOpKernels()[op_type][key].reset(new KERNEL_TYPE);
 
     constexpr auto size = std::tuple_size<std::tuple<KernelTypes...>>::value;
     OpKernelRegistrarFunctor<PlaceType, I + 1 == size, I + 1, KernelTypes...>
         func;
-    func(op_type, library_type);
+    func(op_type, accelerator);
   }
 };
 
 template <typename PlaceType, size_t I, typename... KernelType>
 struct OpKernelRegistrarFunctor<PlaceType, true, I, KernelType...> {
-  void operator()(const char* op_type, const char* library_type) const {}
+  void operator()(const char* op_type, const char* accelerator) const {}
 };
 
 // User can register many kernel in one place. The data type could be
@@ -111,9 +111,9 @@ struct OpKernelRegistrarFunctor<PlaceType, true, I, KernelType...> {
 template <typename PlaceType, typename... KernelType>
 class OpKernelRegistrar : public Registrar {
  public:
-  explicit OpKernelRegistrar(const char* op_type, const char* library_type) {
+  explicit OpKernelRegistrar(const char* op_type, const char* accelerator) {
     OpKernelRegistrarFunctor<PlaceType, false, 0, KernelType...> func;
-    func(op_type, library_type);
+    func(op_type, accelerator);
   }
 };
 
@@ -157,15 +157,15 @@ class OpKernelRegistrar : public Registrar {
 /**
  * Macro to register OperatorKernel.
  */
-#define REGISTER_OP_KERNEL(op_type, library_type, place_class, ...)               \
+#define REGISTER_OP_KERNEL(op_type, accelerator, place_class, ...)                \
   STATIC_ASSERT_GLOBAL_NAMESPACE(                                                 \
-      __reg_op_kernel_##op_type##_##library_type##__,                             \
+      __reg_op_kernel_##op_type##_##accelerator##__,                              \
       "REGISTER_OP_KERNEL must be called in global namespace");                   \
   static ::paddle::fluid::framework::OpKernelRegistrar<place_class, __VA_ARGS__>  \
-      __op_kernel_registrar_##op_type##_##library_type##__(#op_type,              \
-                                                           #library_type);        \
-  int TouchOpKernelRegistrar_##op_type##_##library_type() {                       \
-    __op_kernel_registrar_##op_type##_##library_type##__.Touch();                 \
+      __op_kernel_registrar_##op_type##_##accelerator##__(#op_type,               \
+                                                           #accelerator);         \
+  int TouchOpKernelRegistrar_##op_type##_##accelerator() {                        \
+    __op_kernel_registrar_##op_type##_##accelerator##__.Touch();                  \
     return 0;                                                                     \
   }
 

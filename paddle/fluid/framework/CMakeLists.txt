@@ -75,7 +75,7 @@ cc_library(reader SRCS reader.cc DEPS lod_tensor ddim)
 
 cc_library(shape_inference SRCS shape_inference.cc DEPS ddim attribute op_desc grad_op_desc_maker variable)
 
-cc_library(operator SRCS operator.cc DEPS device_context variable shape_inference lod_tensor scope glog data_transform enforce)
+cc_library(operator SRCS operator.cc DEPS device_context variable shape_inference lod_tensor scope glog data_transform enforce accelerator)
 # TODO(tonyyang-svail): make operator test lighter, current one depends on op_registry
 
 cc_library(op_info SRCS op_info.cc DEPS attribute)
