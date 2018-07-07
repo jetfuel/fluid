@@ -43,13 +43,8 @@ DeviceContextPool::DeviceContextPool(
 
   for (auto& p : set) {
     if (platform::is_cpu_place(p)) {
-#ifdef PADDLE_WITH_MKLDNN
-      device_contexts_.emplace(
-          p, PtrType(new MKLDNNDeviceContext(boost::get<CPUPlace>(p))));
-#else
       device_contexts_.emplace(
           p, PtrType(new CPUDeviceContext(boost::get<CPUPlace>(p))));
-#endif
     } else if (platform::is_gpu_place(p)) {
 #ifdef PADDLE_WITH_CUDA
       device_contexts_.emplace(
@@ -215,44 +210,6 @@ Eigen::DefaultDevice* CUDAPinnedDeviceContext::eigen_device() const {
 
 Place CUDAPinnedDeviceContext::GetPlace() const { return place_; }
 #endif  // PADDLE_WITH_CUDA
-
-#ifdef PADDLE_WITH_MKLDNN
-MKLDNNDeviceContext::MKLDNNDeviceContext(CPUPlace place)
-    : CPUDeviceContext(place), engine_(mkldnn::engine::cpu, 0), p_blobs_() {
-  p_blobs_.reset(new std::unordered_map<std::string, std::shared_ptr<void>>());
-}
-
-void MKLDNNDeviceContext::SetBlob(const std::string& name,
-                                  std::shared_ptr<void> data) const {
-  std::unordered_map<std::string, std::shared_ptr<void>>* p;
-  p = p_blobs_.get();
-
-  auto it = p->find(name);
-
-  if (it == p->end()) {
-    (*p)[name] = data;  // create new blob
-  } else {
-    it->second = data;  // set data to existing blob
-  }
-
-  return;
-}
-
-std::shared_ptr<void> MKLDNNDeviceContext::GetBlob(
-    const std::string& name) const {
-  std::unordered_map<std::string, std::shared_ptr<void>>* p;
-  p = p_blobs_.get();
-
-  auto it = p->find(name);
-
-  if (it != p->end()) {
-    return it->second;
-  }
-
-  return nullptr;
-}
-
-#endif  // PADDLE_WITH_MKLDNN
 
 DeviceContextPool* DeviceContextPool::Init() {
   std::vector<platform::Place> places;

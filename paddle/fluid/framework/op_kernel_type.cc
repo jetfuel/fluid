@@ -61,11 +61,6 @@ std::string KernelTypeToString(const OpKernelType& kernel_key) {
 bool NeedTransformLayout(const TensorDataLayout& l, const TensorDataLayout& r) {
   bool ret =
       (l != TensorDataLayout::kAnyLayout && r != TensorDataLayout::kAnyLayout && l != r);
-#ifdef PADDLE_WITH_MKLDNN
-  // Layout transform needed for either non-MKLDNN to MKLDNN or vice versa
-  ret |= (l != TensorDataLayout::kMKLDNN && r == TensorDataLayout::kMKLDNN);
-  ret |= (l == TensorDataLayout::kMKLDNN && r != TensorDataLayout::kMKLDNN);
-#endif
   return ret;
 }
 

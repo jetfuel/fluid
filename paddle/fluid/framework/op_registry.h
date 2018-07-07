@@ -86,9 +86,6 @@ struct OpKernelRegistrarFunctor<PlaceType, false, I, KernelTypes...> {
     using T = typename KERNEL_TYPE::ELEMENT_TYPE;
     std::string library(accelerator);
     std::string data_layout = "ANYLAYOUT";
-    if (library == "MKLDNN") {
-      data_layout = "MKLDNNLAYOUT";
-    }
     OpKernelType key(ToDataType(std::type_index(typeid(T))), PlaceType(),
                      TensorDataLayout(data_layout),
                      Accelerator(accelerator));

@@ -21,9 +21,6 @@ limitations under the License. */
 #define EIGEN_USE_GPU
 #endif
 
-#ifdef PADDLE_WITH_MKLDNN
-#include <mkldnn.hpp>
-#endif
 
 #include "paddle/fluid/platform/enforce.h"
 #include "paddle/fluid/platform/place.h"
@@ -137,27 +134,6 @@ class CUDAPinnedDeviceContext : public DeviceContext {
 template <>
 struct DefaultDeviceContextType<platform::CUDAPinnedPlace> {
   using TYPE = CUDAPinnedDeviceContext;
-};
-#endif
-
-#ifdef PADDLE_WITH_MKLDNN
-class MKLDNNDeviceContext : public CPUDeviceContext {
- public:
-  explicit MKLDNNDeviceContext(CPUPlace place);
-
-  /* \brief  Get the active engine */
-  const mkldnn::engine& GetEngine() const { return engine_; }
-
-  // Set data to blob (i.e. name/data pair). Create blob if not existing
-  void SetBlob(const std::string& name, std::shared_ptr<void> data) const;
-
-  // Find a saved blob. Return nullptr if not found
-  std::shared_ptr<void> GetBlob(const std::string& name) const;
-
- private:
-  mkldnn::engine engine_;
-  std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<void>>>
-      p_blobs_;
 };
 #endif
 
