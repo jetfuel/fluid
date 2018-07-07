@@ -14,9 +14,8 @@ limitations under the License. */
 #include "paddle/fluid/platform/device_context.h"
 
 #include <vector>
-
-#include "glog/logging.h"
-#include "gtest/gtest.h"
+#include <glog/logging.h>
+#include <gtest/gtest.h>
 
 TEST(Device, Init) {
   using paddle::fluid::platform::DeviceContext;
@@ -71,16 +70,16 @@ TEST(Device, DeviceContextPool) {
 }
 
 int main(int argc, char** argv) {
-  std::vector<paddle::fluid::platform::Place> places;
-
-  places.emplace_back(paddle::fluid::platform::CPUPlace());
-  int count = paddle::fluid::platform::GetCUDADeviceCount();
-  for (int i = 0; i < count; ++i) {
-    places.emplace_back(paddle::fluid::platform::CUDAPlace(i));
-  }
-
-  VLOG(0) << " DeviceCount " << count;
-  paddle::fluid::platform::DeviceContextPool::Init(places);
+//  std::vector<paddle::fluid::platform::Place> places;
+//
+//  places.emplace_back(paddle::fluid::platform::CPUPlace());
+//  int count = paddle::fluid::platform::GetCUDADeviceCount();
+//  for (int i = 0; i < count; ++i) {
+//    places.emplace_back(paddle::fluid::platform::CUDAPlace(i));
+//  }
+//
+//  VLOG(0) << " DeviceCount " << count;
+//  paddle::fluid::platform::DeviceContextPool::Init(places);
 
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

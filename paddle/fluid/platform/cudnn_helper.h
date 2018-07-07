@@ -16,10 +16,8 @@ limitations under the License. */
 
 #include <vector>
 
-#include "paddle/fluid/framework/operator.h"
 #include "paddle/fluid/platform/dynload/cudnn.h"
 #include "paddle/fluid/platform/enforce.h"
-#include "paddle/fluid/platform/float16.h"
 #include "paddle/fluid/platform/macros.h"
 
 DECLARE_bool(cudnn_deterministic);
@@ -119,23 +117,6 @@ inline cudnnPoolingMode_t GetPoolingMode(const PoolingMode& mode) {
 
 template <typename T>
 class CudnnDataType;
-
-template <>
-class CudnnDataType<float16> {
- public:
-  static const cudnnDataType_t type = CUDNN_DATA_HALF;
-  // The scaling param type is float for HALF and FLOAT tensors
-  using ScalingParamType = const float;
-  using BatchNormParamType = float;
-  static ScalingParamType* kOne() {
-    static ScalingParamType v = 1.0;
-    return &v;
-  }
-  static ScalingParamType* kZero() {
-    static ScalingParamType v = 0.0;
-    return &v;
-  }
-};
 
 template <>
 class CudnnDataType<float> {
@@ -343,6 +324,7 @@ class ScopedPoolingDescriptor {
   DISABLE_COPY_AND_ASSIGN(ScopedPoolingDescriptor);
 };
 
+/* FIXME(tonyyang-svail): platform should not depend on framework
 inline bool CanCUDNNBeUsed(const framework::ExecutionContext& ctx) {
   bool use_cudnn = ctx.Attr<bool>("use_cudnn");
   use_cudnn &= paddle::fluid::platform::is_gpu_place(ctx.GetPlace());
@@ -354,6 +336,7 @@ inline bool CanCUDNNBeUsed(const framework::ExecutionContext& ctx) {
 #endif
   return use_cudnn;
 }
+ */
 
 }  // namespace platform
 }  // namespace fluid

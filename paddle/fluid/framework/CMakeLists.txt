@@ -25,7 +25,7 @@ endif()
 
 cc_test(eigen_test SRCS eigen_test.cc DEPS tensor)
 
-nv_test(vector_test SRCS vector_test.cu DEPS place memory device_context)
+nv_test(vector_test SRCS vector_test.cu DEPS place memory device_context tensor)
 
 cc_library(lod_tensor SRCS lod_tensor.cc DEPS enforce ddim place tensor framework_proto recordio)
 cc_test(lod_tensor_test SRCS lod_tensor_test.cc DEPS lod_tensor memory)
@@ -85,5 +85,5 @@ cc_library(operator SRCS operator.cc DEPS device_context variable shape_inferenc
 cc_library(op_info SRCS op_info.cc DEPS attribute)
 
 cc_library(op_registry SRCS op_registry.cc DEPS op_proto_maker op_info operator glog op_desc)
-cc_test(op_registry_test SRCS op_registry_test.cc DEPS op_registry)
+nv_test(op_registry_test SRCS op_registry_test.cc DEPS op_registry)
 

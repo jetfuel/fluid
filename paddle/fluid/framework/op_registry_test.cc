@@ -17,8 +17,6 @@
 
 #include "paddle/fluid/framework/op_registry.h"
 
-//namespace pd = paddle::fluid::framework;
-
 namespace paddle {
 namespace fluid {
 namespace framework {
@@ -66,7 +64,6 @@ class MyTestOpProtoAndCheckerMaker : public OpProtoAndCheckerMaker {
     AddComment("This is my_test op");
   }
 };
-
 }  // namespace framework
 }  // namespace fluid
 }  // namespace paddle
@@ -79,7 +76,6 @@ static void BuildVar(const std::string& param_name,
     var->add_arguments(arg_name);
   }
 }
-
 REGISTER_OP_WITHOUT_GRADIENT(cos_sim, paddle::fluid::framework::CosineOp,
                              paddle::fluid::framework::CosineOpProtoAndCheckerMaker);
 REGISTER_OP_WITHOUT_GRADIENT(my_test_op, paddle::fluid::framework::MyTestOp,
@@ -209,7 +205,6 @@ TEST(OperatorRegistrar, Test) {
       reg("cos");
 }
 
-#ifdef PADDLE_WITH_CUDA
 namespace paddle {
 namespace fluid {
 namespace framework {
@@ -295,8 +290,8 @@ class OpWithMultiKernelTest : public OperatorWithKernel {
   framework::OpKernelType GetExpectedKernelType(
       const framework::ExecutionContext& ctx) const override {
     return framework::OpKernelType(proto::VarType::FP32, platform::CUDAPlace(0),
-                                   DataLayout::kAnyLayout,
-                                   framework::LibraryType::kCUDNN);
+                                   TensorDataLayout::kAnyLayout,
+                                   framework::Accelerator::kCUDNN);
   }
 };
 
@@ -382,4 +377,3 @@ TEST(OperatorRegistrar, OpWithMultiKernel) {
   op->Run(scope, cuda_place);
   EXPECT_EQ(op_test_value, -10);
 }
-#endif

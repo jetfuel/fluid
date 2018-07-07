@@ -14,11 +14,12 @@
 
 #pragma once
 
-#include "paddle/fluid/operators/math/math_function.h"
+#include "paddle/fluid/framework/math/math_function.h"
 #include "paddle/fluid/platform/dynload/cublas.h"
 
 namespace paddle {
-namespace operators {
+namespace fluid {
+namespace framework {
 namespace math {
 
 template <typename T>
@@ -244,5 +245,6 @@ void Blas<platform::CUDADeviceContext>::BatchedGEMM(
 }
 
 }  // namespace math
-}  // namespace operators
+}  // namespace framework
+}  // namespace fluid
 }  // namespace paddle

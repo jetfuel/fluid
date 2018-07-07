@@ -24,15 +24,12 @@ namespace paddle {
 namespace fluid {
 namespace framework {
 
-namespace {
-
-std::vector<std::string> accelerators = {"PLAIN", "MKLDNN", "CUDNN"};
-
-}  // namespace
-
 Accelerator::Accelerator(const char* type) {
   std::string key(type);
   std::transform(key.begin(), key.end(), key.begin(), ::toupper);
+
+  std::vector<std::string> accelerators = {"PLAIN", "MKLDNN", "CUDNN"};
+  std::vector<std::string> non_accelerators = {"CPU", "CUDA"};
 
   for (int i = 0; i < accelerators.size(); ++i) {
     if (key == accelerators[i]) {
@@ -40,10 +37,17 @@ Accelerator::Accelerator(const char* type) {
       return;
     }
   }
+  for (auto& plain : non_accelerators) {
+    if (key == plain) {
+      type_ = static_cast<Accelerator::Type>(0);
+      return;
+    }
+  }
   PADDLE_THROW("Unknown Accelerator %s", type);
 }
 
 std::string Accelerator::ToString() const {
+  std::vector<std::string> accelerators = {"PLAIN", "MKLDNN", "CUDNN"};
   return accelerators[type_];
 }
 

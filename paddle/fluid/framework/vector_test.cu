@@ -13,9 +13,9 @@
    limitations under the License. */
 #include <cuda_runtime.h>
 
-#include "glog/logging.h"
-#include "gtest/gtest.h"
-#include "paddle/fluid/framework/mixed_vector.h"
+#include <glog/logging.h>
+#include <gtest/gtest.h>
+#include "paddle/fluid/framework/vector.h"
 #include "paddle/fluid/platform/gpu_info.h"
 
 template <typename T>
