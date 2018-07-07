@@ -6,6 +6,4 @@ endif()
 
 cc_library(blas SRCS blas.cc DEPS cblas framework_proto device_context)
 cc_test(math_function_test SRCS math_function_test.cc DEPS math_function device_context tensor blas)
-if (WITH_GPU)
-    nv_test(math_function_gpu_test SRCS math_function_test.cu)
-endif()
+nv_test(math_function_gpu_test SRCS math_function_test.cu DEPS math_function device_context tensor blas)
