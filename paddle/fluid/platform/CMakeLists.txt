@@ -1,8 +1,4 @@
-if(WITH_GPU)
-  nv_library(enforce SRCS enforce.cc DEPS glog)
-else()
-  cc_library(enforce SRCS enforce.cc DEPS glog)
-endif()
+cc_library(enforce SRCS enforce.cc DEPS glog)
 cc_test(enforce_test SRCS enforce_test.cc DEPS stringpiece enforce gtest)
 
 cc_library(cpu_info SRCS cpu_info.cc DEPS gflags glog enforce)
