@@ -12,19 +12,20 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
 
-#define EIGEN_USE_GPU
+// #define EIGEN_USE_GPU
 #include <vector>
 #include "paddle/fluid/framework/data_type.h"
-#include "paddle/fluid/operators/math/blas.h"
-#include "paddle/fluid/operators/math/math_function.h"
-#include "paddle/fluid/operators/math/math_function_impl.h"
+#include "paddle/fluid/framework/math/blas.h"
+#include "paddle/fluid/framework/math/math_function.h"
+#include "paddle/fluid/framework/math/math_function_impl.h"
 #include "paddle/fluid/platform/float16.h"
 
 namespace paddle {
-namespace operators {
+namespace fluid {
+namespace framework {
 namespace math {
 
-using float16 = paddle::platform::float16;
+using float16 = paddle::fluid::platform::float16;
 
 template struct SetConstant<platform::CUDADeviceContext, platform::float16>;
 template struct SetConstant<platform::CUDADeviceContext, float>;
@@ -148,5 +149,6 @@ template struct RowwiseMean<platform::CUDADeviceContext, float>;
 template struct RowwiseMean<platform::CUDADeviceContext, double>;
 
 }  // namespace math
-}  // namespace operators
+}  // namespace framework
+}  // namespace fluid
 }  // namespace paddle
