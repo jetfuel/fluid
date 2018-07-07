@@ -21,7 +21,7 @@
 #include "paddle/fluid/framework/tensor_data_layout.h"
 #include "paddle/fluid/platform/device_context.h"
 #include "paddle/fluid/platform/enforce.h"
-// #include "paddle/fluid/operators/math/math_function.h"
+#include "paddle/fluid/framework/math/math_function.h"
 
 namespace paddle {
 namespace fluid {
@@ -53,18 +53,14 @@ struct CastTensorDataLayout {
 
   template <typename T>
   void operator()() {
-    // TODO(yi): Add the implementation back after porting
-    // operators/math/math_function.h to framework/tensor_math.h.
-
-    // auto place = ctx_->GetPlace();
-    // if (platform::is_cpu_place(place)) {
-    //   operators::math::Transpose<platform::CPUDeviceContext, T, 4> trans4;
-    //   auto* context = static_cast<const platform::CPUDeviceContext*>(ctx_);
-    //   trans4(*context, in_, out_, axis_);
-    // } else {
-    //   PADDLE_THROW("Unsupport CPU <-> GPU!");
-    // }
-    PADDLE_THROW("CastTensorDataLayout not yet implemented");
+    auto place = ctx_->GetPlace();
+    if (platform::is_cpu_place(place)) {
+      framework::math::Transpose<platform::CPUDeviceContext, T, 4> trans4;
+      auto* context = static_cast<const platform::CPUDeviceContext*>(ctx_);
+      trans4(*context, in_, out_, axis_);
+    } else {
+      PADDLE_THROW("Unsupport CPU <-> GPU!");
+    }
   }
 };
 
@@ -73,37 +69,33 @@ struct CastTensorDataLayout {
 void TransDataLayout(const OpKernelType& kernel_type_for_var,
                      const OpKernelType& expected_kernel_type, const Tensor& in,
                      Tensor* out) {
-  // TODO(yi): Add the implementation back after porting
-  // operators/math/math_function.h to framework/tensor_math.h.
+  PADDLE_ENFORCE(
+      platform::places_are_same_class(kernel_type_for_var.place_,
+                                      expected_kernel_type.place_),
+      "TransDataLayout only support DataLayout transform on same place!");
 
-  // PADDLE_ENFORCE(
-  //     platform::places_are_same_class(kernel_type_for_var.place_,
-  //                                     expected_kernel_type.place_),
-  //     "TransDataLayout only support DataLayout transform on same place!");
+  PADDLE_ENFORCE(arity(in.dims()) == 4, "Input Arity only support 4!");
 
-  // PADDLE_ENFORCE(arity(in.dims()) == 4, "Input Arity only support 4!");
+  auto& pool = platform::DeviceContextPool::Instance();
 
-  // auto& pool = platform::DeviceContextPool::Instance();
+  auto src_dim = in.dims();
+  std::vector<int64_t> dst_dim;
 
-  // auto src_dim = in.dims();
-  // std::vector<int64_t> dst_dim;
+  auto axis = GetAxis(kernel_type_for_var.data_layout_,
+                      expected_kernel_type.data_layout_);
+  dst_dim.resize(axis.size());
+  for (size_t i = 0; i < axis.size(); i++) {
+    dst_dim[i] = src_dim[axis[i]];
+  }
 
-  // auto axis = GetAxis(kernel_type_for_var.data_layout_,
-  //                     expected_kernel_type.data_layout_);
-  // dst_dim.resize(axis.size());
-  // for (size_t i = 0; i < axis.size(); i++) {
-  //   dst_dim[i] = src_dim[axis[i]];
-  // }
+  out->Resize(make_ddim(dst_dim));
+  out->mutable_data(expected_kernel_type.place_, in.type());
 
-  // out->Resize(make_ddim(dst_dim));
-  // out->mutable_data(expected_kernel_type.place_, in.type());
+  framework::VisitDataType(
+      framework::ToDataType(in.type()),
+      CastTensorDataLayout(pool.Get(expected_kernel_type.place_), axis, in, out));
 
-  // framework::VisitDataType(
-  //     framework::ToDataType(in.type()),
-  //     CastTensorDataLayout(pool.Get(expected_kernel_type.place_), axis, in, out));
-
-  // out->set_layout(expected_kernel_type.data_layout_);
-  PADDLE_THROW("TransDataLayout not yet implemented");
+  out->set_layout(expected_kernel_type.data_layout_);
 }
 
 }  // namespace framework

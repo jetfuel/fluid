@@ -18,8 +18,6 @@ limitations under the License. */
 #include <unordered_map>
 #include <vector>
 #include "paddle/fluid/framework/attribute.h"
-// #include "paddle/fluid/framework/type_defs.h"
-// #include "paddle/fluid/framework/var_desc.h"
 
 namespace paddle {
 namespace fluid {
@@ -139,14 +137,14 @@ class OpDesc {
 
 /// If a variable is a empty variable, that name will be used.
 constexpr char kEmptyVarName[] = "@EMPTY@";
+constexpr char kTempVarName[] = "@TEMP@";
+constexpr char kGradVarSuffix[] = "@GRAD";
 
 inline std::string TempVarName(const std::string& var_name) {
-  constexpr char kTempVarName[] = "@TEMP@";
   return var_name + kTempVarName;
 }
 
 inline std::string GradVarName(const std::string& var_name) {
-  constexpr char kGradVarSuffix[] = "@GRAD";
   return var_name + kGradVarSuffix;
 }
 
