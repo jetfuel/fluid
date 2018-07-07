@@ -54,7 +54,6 @@ static DataTypeMap* InitDataTypeMap() {
   RegisterType<cc_type>(retv, proto_type, #cc_type)
 
   // NOTE: Add your customize type here.
-  RegType(platform::float16, proto::VarType::FP16);
   RegType(float, proto::VarType::FP32);
   RegType(double, proto::VarType::FP64);
   RegType(int, proto::VarType::INT32);

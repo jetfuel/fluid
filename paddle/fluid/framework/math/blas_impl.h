@@ -70,11 +70,6 @@ struct CBlas<double> {
 };
 
 template <>
-struct CBlas<platform::float16> {
-  static void GEMM(...) { PADDLE_THROW("float16 GEMM not supported on CPU"); }
-};
-
-template <>
 template <typename T>
 void Blas<platform::CPUDeviceContext>::GEMM(CBLAS_TRANSPOSE transA,
                                             CBLAS_TRANSPOSE transB, int M,
