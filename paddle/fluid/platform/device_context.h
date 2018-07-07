@@ -57,13 +57,6 @@ class CPUDeviceContext : public DeviceContext {
   std::unique_ptr<Eigen::DefaultDevice> eigen_device_;
 };
 
-template <typename Place>
-struct DefaultDeviceContextType;
-
-template <>
-struct DefaultDeviceContextType<platform::CPUPlace> {
-  using TYPE = CPUDeviceContext;
-};
 
 #ifdef PADDLE_WITH_CUDA
 
@@ -114,11 +107,6 @@ class CUDADeviceContext : public DeviceContext {
   int max_threads_per_mp;
 };
 
-template <>
-struct DefaultDeviceContextType<platform::CUDAPlace> {
-  using TYPE = CUDADeviceContext;
-};
-
 // Currently, CUDAPinnedDeviceContext is only used to data copying.
 class CUDAPinnedDeviceContext : public DeviceContext {
  public:
@@ -138,62 +126,30 @@ template <>
 struct DefaultDeviceContextType<platform::CUDAPinnedPlace> {
   using TYPE = CUDAPinnedDeviceContext;
 };
-#endif
 
-#ifdef PADDLE_WITH_MKLDNN
-class MKLDNNDeviceContext : public CPUDeviceContext {
- public:
-  explicit MKLDNNDeviceContext(CPUPlace place);
-
-  /* \brief  Get the active engine */
-  const mkldnn::engine& GetEngine() const { return engine_; }
-
-  // Set data to blob (i.e. name/data pair). Create blob if not existing
-  void SetBlob(const std::string& name, std::shared_ptr<void> data) const;
-
-  // Find a saved blob. Return nullptr if not found
-  std::shared_ptr<void> GetBlob(const std::string& name) const;
-
- private:
-  mkldnn::engine engine_;
-  std::shared_ptr<std::unordered_map<std::string, std::shared_ptr<void>>>
-      p_blobs_;
-};
-#endif
+#endif  // PADDLE_WITH_CUDA
 
 /*! \brief device context pool singleton */
 class DeviceContextPool {
  public:
-  explicit DeviceContextPool(const std::vector<platform::Place>& places);
-
   static DeviceContextPool& Instance() {
-    if (pool_ == nullptr)
-      pool_ = Init();
-    return *pool_;
+    if (the_pool_ == nullptr)
+      the_pool_ = Init();
+    return *the_pool_;
   }
 
-  /*! \brief  Create should only called by Init function */
-
-  /*! \brief  Return handle of single device context. */
   platform::DeviceContext* Get(const platform::Place& place);
 
-  template <typename Place>
-  const typename DefaultDeviceContextType<Place>::TYPE* GetByPlace(
-      const Place& place) {
-    return reinterpret_cast<
-        const typename DefaultDeviceContextType<Place>::TYPE*>(Get(place));
-  }
-
-  size_t size() const { return device_contexts_.size(); }
+  size_t size() const { return cuda_device_contexts_.size() + 1 /*cpu_device_context_*/; }
 
  private:
   static DeviceContextPool* Init();
+  static DeviceContextPool* the_pool_;
 
-  static DeviceContextPool* pool_;
-  std::unordered_map<const platform::Place,
-                     std::unique_ptr<platform::DeviceContext>, PlaceHash>
-      device_contexts_;
-  DISABLE_COPY_AND_ASSIGN(DeviceContextPool);
+#ifdef PADDLE_WITH_CUDA
+  std::vector<std::unique_ptr<CUDADeviceContext> > cuda_device_contexts_;
+#endif  // PADDLE_WITH_CUDA
+  std::unique_ptr<CPUDeviceContext> cpu_device_context_;
 };
 
 }  // namespace platform

@@ -15,6 +15,7 @@ limitations under the License. */
 #include <vector>
 
 #include "paddle/fluid/memory/memory.h"
+#include "paddle/fluid/platform/gpu_info.h"
 
 namespace paddle {
 namespace fluid {
@@ -25,15 +26,12 @@ DeviceContextPool* DeviceContextPool::pool_ = nullptr;
 platform::DeviceContext* DeviceContextPool::Get(const platform::Place& place) {
   auto it = device_contexts_.find(place);
   if (it == device_contexts_.end()) {
-    PADDLE_THROW(
-        "'Place' is not supported, Please re-compile with WITH_GPU "
-        "option");
+    PADDLE_THROW("DeviceContextPool::Get : Unknown place type");
   }
   return it->second.get();
 }
 
-DeviceContextPool::DeviceContextPool(
-    const std::vector<platform::Place>& places) {
+DeviceContextPool::DeviceContextPool(const std::vector<platform::Place>& places) {
   PADDLE_ENFORCE_GT(places.size(), 0);
   using PtrType = std::unique_ptr<DeviceContext>;
   std::unordered_set<Place, PlaceHash> set;
@@ -43,17 +41,12 @@ DeviceContextPool::DeviceContextPool(
 
   for (auto& p : set) {
     if (platform::is_cpu_place(p)) {
-#ifdef PADDLE_WITH_MKLDNN
       device_contexts_.emplace(
-          p, PtrType(new MKLDNNDeviceContext(boost::get<CPUPlace>(p))));
-#else
-      device_contexts_.emplace(
-          p, PtrType(new CPUDeviceContext(boost::get<CPUPlace>(p))));
-#endif
+          p, PtrType(new CPUDeviceContext(dynamic_cast<const CPUPlace&>(p))));
     } else if (platform::is_gpu_place(p)) {
 #ifdef PADDLE_WITH_CUDA
       device_contexts_.emplace(
-          p, PtrType(new CUDADeviceContext(boost::get<CUDAPlace>(p))));
+          p, PtrType(new CUDADeviceContext(dynamic_cast<const CUDAPlace&>(p))));
 #else
       PADDLE_THROW(
           "'CUDAPlace' is not supported, Please re-compile with WITH_GPU "
@@ -63,7 +56,7 @@ DeviceContextPool::DeviceContextPool(
 #ifdef PADDLE_WITH_CUDA
       device_contexts_.emplace(
           p,
-          PtrType(new CUDAPinnedDeviceContext(boost::get<CUDAPinnedPlace>(p))));
+          PtrType(new CUDAPinnedDeviceContext(dynamic_cast<const CUDAPinnedPlace&>(p))));
 #else
       PADDLE_THROW(
           "'CUDAPlace' is not supported, Please re-compile with WITH_GPU "
@@ -214,48 +207,12 @@ Eigen::DefaultDevice* CUDAPinnedDeviceContext::eigen_device() const {
 }
 
 Place CUDAPinnedDeviceContext::GetPlace() const { return place_; }
+
 #endif  // PADDLE_WITH_CUDA
 
-#ifdef PADDLE_WITH_MKLDNN
-MKLDNNDeviceContext::MKLDNNDeviceContext(CPUPlace place)
-    : CPUDeviceContext(place), engine_(mkldnn::engine::cpu, 0), p_blobs_() {
-  p_blobs_.reset(new std::unordered_map<std::string, std::shared_ptr<void>>());
-}
-
-void MKLDNNDeviceContext::SetBlob(const std::string& name,
-                                  std::shared_ptr<void> data) const {
-  std::unordered_map<std::string, std::shared_ptr<void>>* p;
-  p = p_blobs_.get();
-
-  auto it = p->find(name);
-
-  if (it == p->end()) {
-    (*p)[name] = data;  // create new blob
-  } else {
-    it->second = data;  // set data to existing blob
-  }
-
-  return;
-}
-
-std::shared_ptr<void> MKLDNNDeviceContext::GetBlob(
-    const std::string& name) const {
-  std::unordered_map<std::string, std::shared_ptr<void>>* p;
-  p = p_blobs_.get();
-
-  auto it = p->find(name);
-
-  if (it != p->end()) {
-    return it->second;
-  }
-
-  return nullptr;
-}
-
-#endif  // PADDLE_WITH_MKLDNN
 
 DeviceContextPool* DeviceContextPool::Init() {
-  std::vector<platform::Place> places;
+  DeviceContextPool* pool = new DeviceContextPool();
 
 #ifdef PADDLE_WITH_CUDA
   int num_cuda_devices = 0;
@@ -266,12 +223,14 @@ DeviceContextPool* DeviceContextPool::Init() {
   }
 
   for (int i = 0; i < num_cuda_devices; ++i) {
-    places.emplace_back(platform::CUDAPlace(i));
+    pool->cuda_device_contexts_.push_back(
+        std::unique_ptr<CUDADeviceContext>(
+            new CUDADeviceContext(CUDAPlace(i))));
   }
 #endif  // PADDLE_WITH_CUDA
 
-  places.emplace_back(platform::CPUPlace());
-  return new DeviceContextPool(places);
+  pool->cpu_device_context_ =
+      std::unique_ptr<CPUDeviceContext>(DeviceContextPool(CPUPlace()));
 }
 
 }  // namespace platform

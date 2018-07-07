@@ -95,7 +95,7 @@ std::ostream &operator<<(std::ostream &os, const Place &p) {
   return os;
 };
 
-int PlaceHash::which_place(const Place& p) {
+int which_place(const Place& p) {
   int r = -1;
   if (is_cpu_place(p))
     r = 0;

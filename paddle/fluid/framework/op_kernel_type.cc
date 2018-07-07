@@ -18,7 +18,7 @@ namespace fluid {
 namespace framework {
 
 size_t OpKernelType::Hash::operator()(const OpKernelType& key) const {
-  int place = key.place_.which();
+  int place = platform::which_place(key.place_);
   int data_type = static_cast<int>(key.data_type_) << LEFT_SHIFT;
   int data_layout = static_cast<int>(key.data_layout_.type_) << (LEFT_SHIFT * 2);
   int accelerator = static_cast<int>(key.accelerator_.type_)

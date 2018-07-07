@@ -28,6 +28,8 @@ namespace memory {
 
 using BuddyAllocator = detail::BuddyAllocator;
 
+namespace {
+
 BuddyAllocator* GetCPUBuddyAllocator() {
   static detail::BuddyAllocator* a = nullptr;
   if (a == nullptr) {
@@ -38,28 +40,8 @@ BuddyAllocator* GetCPUBuddyAllocator() {
   return a;
 }
 
-template <>
-void* Alloc<platform::CPUPlace>(platform::CPUPlace place, size_t size) {
-  VLOG(10) << "Allocate " << size << " bytes on " << platform::Place(place);
-  void* p = GetCPUBuddyAllocator()->Alloc(size);
-  VLOG(10) << "  pointer=" << p;
-  return p;
-}
-
-template <>
-void Free<platform::CPUPlace>(platform::CPUPlace place, void* p) {
-  VLOG(10) << "Free pointer=" << p << " on " << platform::Place(place);
-  GetCPUBuddyAllocator()->Free(p);
-}
-
-template <>
-size_t Used<platform::CPUPlace>(platform::CPUPlace place) {
-  return GetCPUBuddyAllocator()->Used();
-}
-
-#ifdef PADDLE_WITH_CUDA
-
 BuddyAllocator* GetGPUBuddyAllocator(int gpu_id) {
+#ifdef PADDLE_WITH_CUDA
   static BuddyAllocator** as = NULL;
   if (as == NULL) {
     int gpu_num = platform::GetCUDADeviceCount();
@@ -81,39 +63,13 @@ BuddyAllocator* GetGPUBuddyAllocator(int gpu_id) {
              << "' to change the fraction of GPU usage.\n\n";
   }
   return as[gpu_id];
-}
-
-template <>
-size_t Used<platform::CUDAPlace>(platform::CUDAPlace place) {
-  return GetGPUBuddyAllocator(place.device)->Used();
-}
-
-template <>
-void* Alloc<platform::CUDAPlace>(platform::CUDAPlace place, size_t size) {
-  auto* buddy_allocator = GetGPUBuddyAllocator(place.device);
-  auto* ptr = buddy_allocator->Alloc(size);
-  if (ptr == nullptr) {
-    int cur_dev = platform::GetCurrentDeviceId();
-    platform::SetDeviceId(place.device);
-    size_t avail, total;
-    platform::GpuMemoryUsage(&avail, &total);
-    LOG(WARNING) << "Cannot allocate " << size << " bytes in GPU "
-                 << place.device << ", available " << avail << " bytes";
-    LOG(WARNING) << "total " << total;
-    LOG(WARNING) << "GpuMinChunkSize " << platform::GpuMinChunkSize();
-    LOG(WARNING) << "GpuMaxChunkSize " << platform::GpuMaxChunkSize();
-    LOG(WARNING) << "GPU memory used: " << Used<platform::CUDAPlace>(place);
-    platform::SetDeviceId(cur_dev);
-  }
-  return ptr;
-}
-
-template <>
-void Free<platform::CUDAPlace>(platform::CUDAPlace place, void* p) {
-  GetGPUBuddyAllocator(place.device)->Free(p);
+#else  // PADDLE_WITH_CUDA
+  PADDLE_THROW("GetGPUBuddyAllocator is disabled by macro PADDLE_WITH_CUDA");
+#endif  // PADDLE_WITH_CUDA
 }
 
 BuddyAllocator* GetCUDAPinnedBuddyAllocator() {
+#ifdef PADDLE_WITH_CUDA
   static BuddyAllocator* ba = NULL;
   if (ba == NULL) {
     ba = new BuddyAllocator(new detail::CUDAPinnedAllocator,
@@ -121,54 +77,53 @@ BuddyAllocator* GetCUDAPinnedBuddyAllocator() {
                             platform::CUDAPinnedMaxChunkSize());
   }
   return ba;
+#else  // PADDLE_WITH_CUDA
+  PADDLE_THROW("GetCUDAPinnedBuddyAllocator is disabled by macro PADDLE_WITH_CUDA");
+#endif  // PADDLE_WITH_CUDA
 }
 
-template <>
-size_t Used<platform::CUDAPinnedPlace>(platform::CUDAPinnedPlace place) {
-  return GetCUDAPinnedBuddyAllocator()->Used();
+// GPUID assumes that p is of type CUDAPlace and returns
+// CUDAPlace.deivce.  It throws an exception if p is not CUDAPlace.
+int GPUID(const platform::Place& p) {
+  return dynamic_cast<const platform::CUDAPlace&>(p).device;
 }
 
-template <>
-void* Alloc<platform::CUDAPinnedPlace>(platform::CUDAPinnedPlace place,
-                                       size_t size) {
-  auto* buddy_allocator = GetCUDAPinnedBuddyAllocator();
-  void* ptr = buddy_allocator->Alloc(size);
+}  // namespace
 
-  if (ptr == nullptr) {
-    LOG(WARNING) << "cudaMallocHost Cannot allocate " << size
-                 << " bytes in CUDAPinnedPlace";
-  }
-  return ptr;
+void* Alloc(const platform::Place& p, size_t size) {
+  VLOG(10) << "Allocate " << size << " bytes on " << p;
+  void* r = platform::is_cpu_place(p) ?
+            GetCPUBuddyAllocator()->Alloc(size) :
+            (platform::is_gpu_place(p) ?
+             GetGPUBuddyAllocator(GPUID(p))->Alloc(size) :
+             (platform::is_cuda_pinned_place(p) ?
+              GetCUDAPinnedBuddyAllocator()->Alloc(size) :
+              nullptr));
+  VLOG(10) << "  pointer=" << r;
+  return r;
 }
 
-template <>
-void Free<platform::CUDAPinnedPlace>(platform::CUDAPinnedPlace place, void* p) {
-  GetCUDAPinnedBuddyAllocator()->Free(p);
-}
-#endif
-
-size_t Usage::operator()(const platform::CPUPlace& cpu) const {
-  return Used(cpu);
-}
-
-size_t Usage::operator()(const platform::CUDAPlace& gpu) const {
-#ifdef PADDLE_WITH_CUDA
-  return Used(gpu);
-#else
-  PADDLE_THROW("'CUDAPlace' is not supported in CPU only device.");
-#endif
+void Free(const platform::Place& p, void* m) {
+  VLOG(10) << "Free pointer=" << p << " on " << p;
+  if (platform::is_cpu_place(p))
+    GetCPUBuddyAllocator()->Free(m);
+  else if (platform::is_gpu_place(p))
+    GetGPUBuddyAllocator(GPUID(p))->Free(m);
+  else if (platform::is_cuda_pinned_place(p))
+    GetCUDAPinnedBuddyAllocator()->Free(m);
+  else
+    PADDLE_THROW("Free : unknown place type");
 }
 
-size_t Usage::operator()(const platform::CUDAPinnedPlace& cuda_pinned) const {
-#ifdef PADDLE_WITH_CUDA
-  return Used(cuda_pinned);
-#else
-  PADDLE_THROW("'CUDAPinnedPlace' is not supported in CPU only device.");
-#endif
-}
-
-size_t memory_usage(const platform::Place& p) {
-  return boost::apply_visitor(Usage(), p);
+size_t Used(const platform::CPUPlace& p) {
+  return
+      platform::is_cpu_place(p) ?
+      GetCPUBuddyAllocator()->Used() :
+      (platform::is_gpu_place(p) ?
+       GetGPUBuddyAllocator(GPUID(p))->Used() :
+       (platform::is_cuda_pinned_place(p) ?
+        GetCUDAPinnedBuddyAllocator()->Used() :
+        static_cast<size_t>(-1)));
 }
 
 }  // namespace memory

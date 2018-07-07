@@ -46,8 +46,8 @@ TEST(Place, Default) {
   using paddle::fluid::platform::default_gpu;
   using paddle::fluid::platform::default_cuda_pinned;
 
-  using paddle::fluid::platform::PlaceHash;
-  EXPECT_EQ(0, PlaceHash::which_place(get_place()));
+  using paddle::fluid::platform::which_place;
+  EXPECT_EQ(0, which_place(get_place()));
 
   EXPECT_TRUE(is_gpu_place(default_gpu()));
   EXPECT_TRUE(is_cpu_place(default_cpu()));

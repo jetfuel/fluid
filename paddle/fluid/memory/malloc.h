@@ -11,7 +11,6 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. */
-
 #pragma once
 
 #include "paddle/fluid/platform/place.h"
@@ -33,8 +32,7 @@ namespace memory {
  *          function is invoked, you must check the returned memory
  *          address is valid or not.
  */
-template <typename Place>
-void* Alloc(Place place, size_t size);
+void* Alloc(const platform::Place& place, size_t size);
 
 /**
  * \brief   Free memory block in one place.
@@ -43,8 +41,7 @@ void* Alloc(Place place, size_t size);
  * \param[in]  ptr    Memory block address to free.
  *
  */
-template <typename Place>
-void Free(Place place, void* ptr);
+void Free(const platform::Place& place, void* ptr);
 
 /**
  * \brief   Total size of used memory in one place.
@@ -52,16 +49,7 @@ void Free(Place place, void* ptr);
  * \param[in]  place  Allocation place (CPU or GPU).
  *
  */
-template <typename Place>
-size_t Used(Place place);
-
-struct Usage : public boost::static_visitor<size_t> {
-  size_t operator()(const platform::CPUPlace& cpu) const;
-  size_t operator()(const platform::CUDAPlace& gpu) const;
-  size_t operator()(const platform::CUDAPinnedPlace& cuda_pinned) const;
-};
-
-size_t memory_usage(const platform::Place& p);
+size_t Used(const platform::Place& place);
 
 /**
  * \brief   Free memory block in one place.

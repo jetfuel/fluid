@@ -74,8 +74,9 @@ bool is_cuda_pinned_place(const Place &);
 bool places_are_same_class(const Place &, const Place &);
 bool is_same_place(const Place &, const Place &);
 
+int which_place(const Place& p);
+
 struct PlaceHash {
-  static int which_place(const Place& p);
   std::size_t operator()(const Place &p) const;
 };
 
