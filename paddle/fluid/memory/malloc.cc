@@ -99,7 +99,8 @@ void* Alloc(const platform::Place& p, size_t size) {
              (platform::is_cuda_pinned_place(p) ?
               GetCUDAPinnedBuddyAllocator()->Alloc(size) :
               nullptr));
-  VLOG(10) << "  pointer=" << r;
+  if (r == nullptr) 
+    LOG(WARNING) << "Failed allocate memory (" << size << ") at " << p;
   return r;
 }
 
