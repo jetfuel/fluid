@@ -18,8 +18,6 @@ limitations under the License. */
 #include "paddle/fluid/framework/framework.pb.h"
 #include "paddle/fluid/platform/enforce.h"
 
-#include "paddle/fluid/platform/float16.h"
-
 namespace paddle {
 namespace fluid {
 namespace framework {
@@ -30,9 +28,6 @@ extern std::type_index ToTypeIndex(proto::VarType::Type type);
 template <typename Visitor>
 inline void VisitDataType(proto::VarType::Type type, Visitor visitor) {
   switch (type) {
-    case proto::VarType::FP16:
-      visitor.template operator()<platform::float16>();
-      break;
     case proto::VarType::FP32:
       visitor.template operator()<float>();
       break;

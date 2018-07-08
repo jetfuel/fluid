@@ -21,9 +21,6 @@ limitations under the License. */
 #define EIGEN_USE_GPU
 #endif
 
-#ifdef PADDLE_WITH_MKLDNN
-#include <mkldnn.hpp>
-#endif
 
 #include "paddle/fluid/platform/enforce.h"
 #include "paddle/fluid/platform/place.h"

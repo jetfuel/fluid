@@ -28,14 +28,7 @@ DEFINE_double(fraction_of_cpu_memory_to_use, 1,
               "Default use 100% of CPU memory for PaddlePaddle,"
               "reserve the rest for page tables, etc");
 
-DEFINE_uint64(initial_cpu_memory_in_mb,
-#ifdef PADDLE_WITH_MKLDNN
-              /* Aligned with mozga-intel, MKLDNN need at least 5000 MB
-               * to obtain the best performance*/
-              5000,
-#else
-              500,
-#endif
+DEFINE_uint64(initial_cpu_memory_in_mb, 500,
               "Initial CPU memory for PaddlePaddle, in MD unit.");
 
 DEFINE_double(

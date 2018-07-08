@@ -14,7 +14,6 @@ limitations under the License. */
 
 #include "paddle/fluid/framework/op_kernel_type.h"
 #include <gtest/gtest.h>
-#include <iostream>
 
 TEST(OpKernelType, ToString) {
   using OpKernelType = paddle::fluid::framework::OpKernelType;

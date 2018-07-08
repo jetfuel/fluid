@@ -210,7 +210,6 @@ Place CUDAPinnedDeviceContext::GetPlace() const { return place_; }
 
 #endif  // PADDLE_WITH_CUDA
 
-
 DeviceContextPool* DeviceContextPool::Init() {
   DeviceContextPool* pool = new DeviceContextPool();
 

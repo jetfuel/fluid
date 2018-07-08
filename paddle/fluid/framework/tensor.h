@@ -32,28 +32,6 @@ namespace fluid {
 namespace framework {
 
 class Tensor {
-#ifdef PADDLE_WITH_MKLDNN
-
- public:
-  inline mkldnn::memory::format format() const { return format_; }
-
-  inline void set_format(const mkldnn::memory::format format) {
-    format_ = format;
-  }
-
- protected:
-  /**
-   * @brief the detail format of memory block which have layout as kMKLDNN
-   *
-   * @note MKLDNN lib support various memory format like nchw, nhwc, nChw8C,
-   *       nChw16c, etc. For a MKLDNN memory block, layout will be set as
-   *       TensorDataLayout::kMKLDNN meanwhile detail memory format will be kept in
-   *       this field.
-   */
-
-  mkldnn::memory::format format_ = mkldnn::memory::format::format_undef;
-#endif
-
  public:
   template <typename T, size_t D, int MajorType, typename IndexType>
   friend struct EigenTensor;

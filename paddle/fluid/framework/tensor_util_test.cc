@@ -240,19 +240,6 @@ TEST(TensorContainsNAN, CPU) {
     buf[1] = 0.0;
     ASSERT_FALSE(paddle::fluid::framework::TensorContainsNAN(src));
   }
-
-  {
-    paddle::fluid::framework::Tensor src;
-    paddle::fluid::platform::float16* buf =
-        src.mutable_data<paddle::fluid::platform::float16>(
-            {3}, paddle::fluid::platform::CPUPlace());
-    buf[0] = 0.0;
-    buf[1].x = 0x7fff;
-    buf[2] = 0.0;
-    ASSERT_TRUE(paddle::fluid::framework::TensorContainsNAN(src));
-    buf[1] = 0.0;
-    ASSERT_FALSE(paddle::fluid::framework::TensorContainsNAN(src));
-  }
 }
 
 TEST(TensorContainsInf, CPU) {
@@ -261,19 +248,6 @@ TEST(TensorContainsInf, CPU) {
     double* buf = src.mutable_data<double>({3}, paddle::fluid::platform::CPUPlace());
     buf[0] = 1.0;
     buf[1] = INFINITY;
-    buf[2] = 0.0;
-    ASSERT_TRUE(paddle::fluid::framework::TensorContainsInf(src));
-    buf[1] = 1.0;
-    ASSERT_FALSE(paddle::fluid::framework::TensorContainsInf(src));
-  }
-
-  {
-    paddle::fluid::framework::Tensor src;
-    paddle::fluid::platform::float16* buf =
-        src.mutable_data<paddle::fluid::platform::float16>(
-            {3}, paddle::fluid::platform::CPUPlace());
-    buf[0] = 1.0;
-    buf[1].x = 0x7c00;
     buf[2] = 0.0;
     ASSERT_TRUE(paddle::fluid::framework::TensorContainsInf(src));
     buf[1] = 1.0;

@@ -7,8 +7,4 @@ if (NOT APPLE)
   list(APPEND CUDA_SRCS nccl.cc)
 endif()
 
-if (TENSORRT_FOUND)
-  list(APPEND CUDA_SRCS tensorrt.cc)
-endif()
-
 nv_library(dynload_cuda SRCS ${CUDA_SRCS} DEPS dynamic_loader)

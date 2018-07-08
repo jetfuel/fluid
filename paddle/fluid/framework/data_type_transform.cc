@@ -76,10 +76,6 @@ void TransDataType(const OpKernelType& kernel_type_for_var,
   auto ctx = pool.Get(in.place());
 
   switch (src_type) {
-    case proto::VarType::FP16:
-      framework::VisitDataType(dst_type,
-                               CastDataType<platform::float16>(in, out, ctx));
-      break;
     case proto::VarType::FP32:
       framework::VisitDataType(dst_type, CastDataType<float>(in, out, ctx));
       break;

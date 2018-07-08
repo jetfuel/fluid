@@ -19,6 +19,7 @@ limitations under the License. */
 #include "paddle/fluid/framework/data_type.h"
 #include "paddle/fluid/framework/accelerator.h"
 #include "paddle/fluid/platform/place.h"
+#include "paddle/fluid/platform/device_context.h"
 
 namespace paddle {
 namespace fluid {
