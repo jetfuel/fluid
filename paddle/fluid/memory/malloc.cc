@@ -115,7 +115,7 @@ void Free(const platform::Place& p, void* m) {
     PADDLE_THROW("Free : unknown place type");
 }
 
-size_t Used(const platform::CPUPlace& p) {
+size_t Used(const platform::Place& p) {
   return
       platform::is_cpu_place(p) ?
       GetCPUBuddyAllocator()->Used() :

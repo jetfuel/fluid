@@ -137,7 +137,7 @@ class Tensor {
     virtual std::type_index type() const = 0;
     virtual platform::Place place() const = 0;
     virtual void set_type(std::type_index type) = 0;
-    virtual void set_place(platform::Place place) = 0;
+    virtual void set_place(const platform::Place& place) = 0;
   };
 
   template <typename Place>
@@ -145,25 +145,32 @@ class Tensor {
     PlaceholderImpl(Place place, size_t size, std::type_index type)
         : ptr_(static_cast<uint8_t*>(memory::Alloc(place, size)),
                memory::PODDeleter<uint8_t, Place>(place)),
-          place_(place),
+          place_(platform::clone_place(place)),
           size_(size),
           type_(type) {
       PADDLE_ENFORCE_NOT_NULL(ptr_, "Insufficient %s memory to allocation.",
                               (is_cpu_place(place_) ? "CPU" : "GPU"));
     }
-
+    ~PlaceholderImpl() {
+      delete place_;
+    }
+    
     virtual size_t size() const { return size_; }
     virtual platform::Place place() const { return place_; }
     virtual void* ptr() const { return static_cast<void*>(ptr_.get()); }
     virtual std::type_index type() const { return type_; }
     virtual void set_type(std::type_index type) { type_ = type; }
-    virtual void set_place(platform::Place place) { place_ = place; }
+
+    virtual void set_place(const platform::Place& p) {
+      if (place_ != nullptr) delete place_;
+      place_ = platform::clone_place(p);
+    }
 
     /*! the pointer of memory block. */
     std::unique_ptr<uint8_t, memory::PODDeleter<uint8_t, Place>> ptr_;
 
     /*! the place of memory block. */
-    platform::Place place_;
+    platform::Place* place_;
 
     /*! the size of memory block. */
     size_t size_;

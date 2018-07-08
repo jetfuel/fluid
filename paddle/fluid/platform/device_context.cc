@@ -21,49 +21,39 @@ namespace paddle {
 namespace fluid {
 namespace platform {
 
-DeviceContextPool* DeviceContextPool::pool_ = nullptr;
+DeviceContextPool* DeviceContextPool::the_pool_ = nullptr;
 
-platform::DeviceContext* DeviceContextPool::Get(const platform::Place& place) {
-  auto it = device_contexts_.find(place);
-  if (it == device_contexts_.end()) {
-    PADDLE_THROW("DeviceContextPool::Get : Unknown place type");
+DeviceContextPool::DeviceContextPool() {
+#ifdef PADDLE_WITH_CUDA
+  int num_cuda_devices = 0;
+  try {
+    num_cuda_devices = platform::GetCUDADeviceCount();
+  } catch (const std::exception &exp) {
+    LOG(WARNING) << "Compiled with WITH_GPU, but no GPU found in runtime.";
   }
-  return it->second.get();
+
+  for (int i = 0; i < num_cuda_devices; ++i) {
+    cuda_device_contexts_.push_back(
+        std::unique_ptr<CUDADeviceContext>(
+            new CUDADeviceContext(CUDAPlace(i))));
+  }
+#endif  // PADDLE_WITH_CUDA
+
+  cpu_device_context_ =
+      std::unique_ptr<CPUDeviceContext>(new CPUDeviceContext(CPUPlace()));
 }
 
-DeviceContextPool::DeviceContextPool(const std::vector<platform::Place>& places) {
-  PADDLE_ENFORCE_GT(places.size(), 0);
-  using PtrType = std::unique_ptr<DeviceContext>;
-  std::unordered_set<Place, PlaceHash> set;
-  for (auto& p : places) {
-    set.insert(p);
-  }
-
-  for (auto& p : set) {
-    if (platform::is_cpu_place(p)) {
-      device_contexts_.emplace(
-          p, PtrType(new CPUDeviceContext(dynamic_cast<const CPUPlace&>(p))));
-    } else if (platform::is_gpu_place(p)) {
+DeviceContext* DeviceContextPool::Get(const platform::Place& p) {
+  DeviceContext* r = nullptr;
+  if (is_cpu_place(p))
+    r = cpu_device_context_.get();
 #ifdef PADDLE_WITH_CUDA
-      device_contexts_.emplace(
-          p, PtrType(new CUDADeviceContext(dynamic_cast<const CUDAPlace&>(p))));
-#else
-      PADDLE_THROW(
-          "'CUDAPlace' is not supported, Please re-compile with WITH_GPU "
-          "option");
-#endif
-    } else if (platform::is_cuda_pinned_place(p)) {
-#ifdef PADDLE_WITH_CUDA
-      device_contexts_.emplace(
-          p,
-          PtrType(new CUDAPinnedDeviceContext(dynamic_cast<const CUDAPinnedPlace&>(p))));
-#else
-      PADDLE_THROW(
-          "'CUDAPlace' is not supported, Please re-compile with WITH_GPU "
-          "option");
-#endif
-    }
-  }
+  else if (is_gpu_place(p))
+    r = cuda_device_contexts_[dynamic_cast<const CUDAPlace&>(p).device].get();
+#endif  // PADDLE_WITH_CUDA
+  else
+    PADDLE_THROW("DeviceContextPool::Get : unknown place type");
+  return r;
 }
 
 CPUDeviceContext::CPUDeviceContext() {
@@ -210,27 +200,6 @@ Place CUDAPinnedDeviceContext::GetPlace() const { return place_; }
 
 #endif  // PADDLE_WITH_CUDA
 
-DeviceContextPool* DeviceContextPool::Init() {
-  DeviceContextPool* pool = new DeviceContextPool();
-
-#ifdef PADDLE_WITH_CUDA
-  int num_cuda_devices = 0;
-  try {
-    num_cuda_devices = platform::GetCUDADeviceCount();
-  } catch (const std::exception &exp) {
-    LOG(WARNING) << "Compiled with WITH_GPU, but no GPU found in runtime.";
-  }
-
-  for (int i = 0; i < num_cuda_devices; ++i) {
-    pool->cuda_device_contexts_.push_back(
-        std::unique_ptr<CUDADeviceContext>(
-            new CUDADeviceContext(CUDAPlace(i))));
-  }
-#endif  // PADDLE_WITH_CUDA
-
-  pool->cpu_device_context_ =
-      std::unique_ptr<CPUDeviceContext>(DeviceContextPool(CPUPlace()));
-}
 
 }  // namespace platform
 }  // namespace fluid

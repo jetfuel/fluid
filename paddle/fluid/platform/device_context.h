@@ -119,25 +119,28 @@ class CUDAPinnedDeviceContext : public DeviceContext {
   std::unique_ptr<Eigen::DefaultDevice> eigen_device_;
 };
 
-template <>
-struct DefaultDeviceContextType<platform::CUDAPinnedPlace> {
-  using TYPE = CUDAPinnedDeviceContext;
-};
-
 #endif  // PADDLE_WITH_CUDA
 
 /*! \brief device context pool singleton */
 class DeviceContextPool {
  public:
+  DeviceContextPool();
+  
   static DeviceContextPool& Instance() {
     if (the_pool_ == nullptr)
       the_pool_ = Init();
     return *the_pool_;
   }
 
-  platform::DeviceContext* Get(const platform::Place& place);
+  DeviceContext* Get(const platform::Place& place);
 
-  size_t size() const { return cuda_device_contexts_.size() + 1 /*cpu_device_context_*/; }
+  size_t size() const {
+#ifdef PADDLE_WITH_CUDA
+    return cuda_device_contexts_.size() + 1 /*cpu_device_context_*/;
+#else  // PADDLE_WITH_CUDA
+    return 1;
+#endif  // PADDLE_WITH_CUDA
+  }
 
  private:
   static DeviceContextPool* Init();

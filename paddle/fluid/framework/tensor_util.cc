@@ -36,8 +36,7 @@ void TensorCopy(const Tensor& src, const platform::Place& dst_place,
   auto size = src.numel() * SizeOfType(src.type());
 
   if (platform::is_cpu_place(src_place) && platform::is_cpu_place(dst_place)) {
-    memory::Copy(boost::get<platform::CPUPlace>(dst_place), dst_ptr,
-                 boost::get<platform::CPUPlace>(src_place), src_ptr, size);
+    memory::Copy(dst_place, dst_ptr, src_place, src_ptr, size);
   }
 #ifdef PADDLE_WITH_CUDA
   else if (platform::is_gpu_place(src_place) &&  // NOLINT
@@ -99,8 +98,7 @@ void TensorCopySync(const Tensor& src, const platform::Place& dst_place,
   auto dst_ptr = dst->mutable_data(dst_place, src.type());
   auto size = src.numel() * SizeOfType(src.type());
   if (platform::is_cpu_place(src_place) && platform::is_cpu_place(dst_place)) {
-    memory::Copy(boost::get<platform::CPUPlace>(dst_place), dst_ptr,
-                 boost::get<platform::CPUPlace>(src_place), src_ptr, size);
+    memory::Copy(dst_place, dst_ptr, src_place, src_ptr, size);
   }
 #ifdef PADDLE_WITH_CUDA
   else if (platform::is_gpu_place(src_place) &&  // NOLINT
@@ -162,7 +160,7 @@ struct AnyVisitor : public boost::static_visitor<bool> {
     framework::Tensor out;
     out.Resize({1});
     out.mutable_data<bool>(place);
-    auto* ctx = platform::DeviceContextPool::Instance().GetByPlace(place);
+    auto* ctx = platform::DeviceContextPool::Instance().Get(place);
     AnyImpl(predicate_, tensor_, *ctx, &out);
     return this->GetResult(out, place);
   }

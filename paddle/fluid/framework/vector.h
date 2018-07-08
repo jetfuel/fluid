@@ -307,14 +307,13 @@ class Vector {
   void ImmutableCUDA(platform::Place place) const {
     if (IsDirty()) {
       if (IsInCPU()) {
-        TensorCopy(cpu_vec_, boost::get<platform::CUDAPlace>(place),
-                   &cuda_vec_);
+        TensorCopy(cpu_vec_, place, &cuda_vec_);
         WaitPlace(place);
         UnsetFlag(kDirty);
         SetFlag(kDataInCUDA);
       } else if (IsInCUDA() && !(place == cuda_vec_.place())) {
         framework::Tensor tmp;
-        TensorCopy(cuda_vec_, boost::get<platform::CUDAPlace>(place), &tmp);
+        TensorCopy(cuda_vec_, place, &tmp);
         WaitPlace(cuda_vec_.place());
         cuda_vec_.ShareDataWith(tmp);
         // Still dirty
@@ -325,14 +324,13 @@ class Vector {
     } else {
       if (!IsInCUDA()) {
         // Even data is not dirty. However, data is not in CUDA. Copy data.
-        TensorCopy(cpu_vec_, boost::get<platform::CUDAPlace>(place),
-                   &cuda_vec_);
+        TensorCopy(cpu_vec_, place, &cuda_vec_);
         WaitPlace(place);
         SetFlag(kDataInCUDA);
       } else if (!(place == cuda_vec_.place())) {
         framework::Tensor tmp;
         WaitPlace(cuda_vec_.place());
-        TensorCopy(cuda_vec_, boost::get<platform::CUDAPlace>(place), &tmp);
+        TensorCopy(cuda_vec_, place, &tmp);
         WaitPlace(cuda_vec_.place());
         WaitPlace(place);
         cuda_vec_.ShareDataWith(tmp);
@@ -363,9 +361,7 @@ class Vector {
 
   static void WaitPlace(const platform::Place place) {
     if (platform::is_gpu_place(place)) {
-      platform::DeviceContextPool::Instance()
-          .Get(boost::get<platform::CUDAPlace>(place))
-          ->Wait();
+      platform::DeviceContextPool::Instance().Get(place)->Wait();
     }
   }
 

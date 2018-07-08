@@ -32,6 +32,8 @@ struct Place {
   // Place, so we make the destructuor pure virtual.  However, we have
   // a type PlaceList=vector<Place>, which prevents us from doing so.
   virtual ~Place() {}
+  bool operator==(const Place &) const;
+  bool operator!=(const Place &) const;
 };
 
 struct CPUPlace : public Place {
@@ -63,6 +65,10 @@ using PlaceList = std::vector<Place>;
 
 void set_place(const Place &);
 const Place &get_place();
+
+// Place is an interface, if we want to save an instance, we'd need to
+// copy the instance by calling clone_place.
+const Place* clone_place(const Place& p);
 
 const Place& default_gpu();
 const Place& default_cpu();

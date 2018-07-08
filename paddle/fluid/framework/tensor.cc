@@ -46,7 +46,7 @@ void* Tensor::mutable_data(platform::Place place, std::type_index type) {
       holder_->size() < size + offset_) {
     if (platform::is_cpu_place(place)) {
       holder_.reset(new PlaceholderImpl<platform::CPUPlace>(
-          boost::get<platform::CPUPlace>(place), size, type));
+          dynamic_cast<const platform::CPUPlace&>(place), size, type));
     } else if (platform::is_gpu_place(place) ||
                platform::is_cuda_pinned_place(place)) {
 #ifndef PADDLE_WITH_CUDA

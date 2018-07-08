@@ -84,6 +84,14 @@ bool is_same_place(const Place &p1, const Place &p2) {
        true);
 }
 
+bool Place::operator==(const Place& p) const {
+  return is_same_place(*this, p);
+}
+
+bool Place::operator!=(const Place& p) const {
+  return !is_same_place(*this, p);
+}
+
 std::ostream &operator<<(std::ostream &os, const Place &p) {
   if (is_cpu_place(p)) {
     os << "CPUPlace";

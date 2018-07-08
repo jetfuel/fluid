@@ -21,44 +21,21 @@ namespace paddle {
 namespace fluid {
 namespace memory {
 
-/**
- * \brief   Copy memory from one place to another place.
- *
- * \param[in]  DstPlace Destination allocation place (CPU).
- * \param[in]  dst      Destination memory address.
- * \param[in]  SrcPlace Source allocation place (CPU).
- * \param[in]  src      Source memory address.
- * \param[in]  num      memory size in bytes to copy.
- *
- */
+// None of template arguments DstPlace and SrcPlace could be
+// CUDAPlace; otherwise, refer to the next function template.
 template <typename DstPlace, typename SrcPlace>
-void Copy(DstPlace, void* dst, SrcPlace, const void* src, size_t num);
+void Copy(const DstPlace& dst_place, void* dst,
+          const SrcPlace& src_place, const void* src, size_t num);
 
 #ifdef PADDLE_WITH_CUDA
-
-/**
- * \brief   Copy memory from one place to another place.
- *
- * \param[in]  DstPlace Destination allocation place (CPU or GPU).
- * \param[in]  dst      Destination memory address.
- * \param[in]  SrcPlace Source allocation place (CPU or GPU).
- * \param[in]  src      Source memory address.
- * \param[in]  num      memory size in bytes to copy.
- * \param[in]  stream   CUDA stream.
- *
- * \note    For GPU memory copy, CUDA stream need to be specified
- *          for asynchronously memory copy.
- *
- */
+// When any one of DstPlace or SrcPlace is CUDAPlace, users are allows
+// to specify a CUDA stream.
 template <typename DstPlace, typename SrcPlace>
-void Copy(DstPlace,
-          void* dst,
-          SrcPlace,
-          const void* src,
-          size_t num,
+void Copy(const DstPlace& dst_place, void* dst,
+          const SrcPlace& src_place, const void* src, size_t num,
           cudaStream_t stream);
-
 #endif
+
 }  // namespace memory
 }  // namespace fluid
 }  // namespace paddle

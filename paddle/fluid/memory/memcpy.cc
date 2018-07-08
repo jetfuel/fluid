@@ -21,20 +21,22 @@ namespace fluid {
 namespace memory {
 
 template <>
-void Copy<platform::CPUPlace, platform::CPUPlace>(platform::CPUPlace,
-                                                  void* dst,
-                                                  platform::CPUPlace,
-                                                  const void* src,
-                                                  size_t num) {
+void Copy<platform::CPUPlace, platform::CPUPlace>(
+    const platform::CPUPlace&,
+    void* dst,
+    const platform::CPUPlace&,
+    const void* src,
+    size_t num) {
   std::memcpy(dst, src, num);
 }
 
 #ifdef PADDLE_WITH_CUDA
+
 template <>
 void Copy<platform::CPUPlace, platform::CUDAPlace>(
-    platform::CPUPlace dst_place,
+    const platform::CPUPlace& dst_place,
     void* dst,
-    platform::CUDAPlace src_place,
+    const platform::CUDAPlace& src_place,
     const void* src,
     size_t num,
     cudaStream_t stream) {
@@ -48,9 +50,9 @@ void Copy<platform::CPUPlace, platform::CUDAPlace>(
 
 template <>
 void Copy<platform::CUDAPlace, platform::CPUPlace>(
-    platform::CUDAPlace dst_place,
+    const platform::CUDAPlace& dst_place,
     void* dst,
-    platform::CPUPlace src_place,
+    const platform::CPUPlace& src_place,
     const void* src,
     size_t num,
     cudaStream_t stream) {
@@ -64,9 +66,9 @@ void Copy<platform::CUDAPlace, platform::CPUPlace>(
 
 template <>
 void Copy<platform::CUDAPlace, platform::CUDAPlace>(
-    platform::CUDAPlace dst_place,
+    const platform::CUDAPlace& dst_place,
     void* dst,
-    platform::CUDAPlace src_place,
+    const platform::CUDAPlace& src_place,
     const void* src,
     size_t num,
     cudaStream_t stream) {
@@ -90,39 +92,42 @@ void Copy<platform::CUDAPlace, platform::CUDAPlace>(
 
 template <>
 void Copy<platform::CPUPlace, platform::CUDAPinnedPlace>(
-    platform::CPUPlace dst_place,
+    const platform::CPUPlace& dst_place,
     void* dst,
-    platform::CUDAPinnedPlace src_place,
+    const platform::CUDAPinnedPlace& src_place,
     const void* src,
-    size_t num) {
+    size_t num,
+    cudaStream_t stream) {
   std::memcpy(dst, src, num);
 }
 
 template <>
 void Copy<platform::CUDAPinnedPlace, platform::CPUPlace>(
-    platform::CUDAPinnedPlace dst_place,
+    const platform::CUDAPinnedPlace& dst_place,
     void* dst,
-    platform::CPUPlace src_place,
+    const platform::CPUPlace& src_place,
     const void* src,
-    size_t num) {
+    size_t num,
+    cudaStream_t stream) {
   std::memcpy(dst, src, num);
 }
 
 template <>
 void Copy<platform::CUDAPinnedPlace, platform::CUDAPinnedPlace>(
-    platform::CUDAPinnedPlace dst_place,
+    const platform::CUDAPinnedPlace& dst_place,
     void* dst,
-    platform::CUDAPinnedPlace src_place,
+    const platform::CUDAPinnedPlace& src_place,
     const void* src,
-    size_t num) {
+    size_t num,
+    cudaStream_t stream) {
   std::memcpy(dst, src, num);
 }
 
 template <>
 void Copy<platform::CUDAPinnedPlace, platform::CUDAPlace>(
-    platform::CUDAPinnedPlace dst_place,
+    const platform::CUDAPinnedPlace& dst_place,
     void* dst,
-    platform::CUDAPlace src_place,
+    const platform::CUDAPlace& src_place,
     const void* src,
     size_t num,
     cudaStream_t stream) {
@@ -136,9 +141,9 @@ void Copy<platform::CUDAPinnedPlace, platform::CUDAPlace>(
 
 template <>
 void Copy<platform::CUDAPlace, platform::CUDAPinnedPlace>(
-    platform::CUDAPlace dst_place,
+    const platform::CUDAPlace& dst_place,
     void* dst,
-    platform::CUDAPinnedPlace src_place,
+    const platform::CUDAPinnedPlace& src_place,
     const void* src,
     size_t num,
     cudaStream_t stream) {
@@ -150,7 +155,81 @@ void Copy<platform::CUDAPlace, platform::CUDAPinnedPlace>(
   }
 }
 
-#endif
+#endif  // PADDLE_WITH_CUDA
+
+
+#define MEMCPY_CASE(dst, src)               \
+  (platform::is_##dst##_place(dst_place) && \
+   platform::is_##src##_place(src_place))
+
+#define MEMCPY_CALL(dstp, srcp)                                         \
+  Copy(dynamic_cast<const platform::dstp&>(dst_place), dst,             \
+       dynamic_cast<const platform::srcp&>(src_place), src, num)
+
+#define MEMCPY_CASE_CALL(dst, src, dstp, srcp)          \
+  if MEMCPY_CASE(dst, src) MEMCPY_CALL(dstp, srcp)
+
+template<>
+void Copy<platform::Place, platform::Place>(
+    const platform::Place& dst_place, void* dst,
+    const platform::Place& src_place, const void* src, size_t num) {
+
+#define MEMCPY_CALL_NULL(dstp, srcp)                                    \
+  Copy(dynamic_cast<const platform::dstp&>(dst_place), dst,             \
+       dynamic_cast<const platform::srcp&>(src_place), src, num, NULL)
+
+#define MEMCPY_CASE_CALL_NULL(dst, src, dstp, srcp)          \
+  if MEMCPY_CASE(dst, src) MEMCPY_CALL_NULL(dstp, srcp)
+  
+  MEMCPY_CASE_CALL(cpu, cpu, CPUPlace, CPUPlace);
+#ifdef PADDLE_WITH_CUDA
+  else MEMCPY_CASE_CALL_STREAM(cpu, gpu, CPUPlace, CUDAPlace);
+  else MEMCPY_CASE_CALL_STREAM(gpu, cpu, CUDAPlace, CPUPlace);
+  else MEMCPY_CASE_CALL_STREAM(gpu, gpu, CUDAPlace, CUDAPlace);
+  else MEMCPY_CASE_CALL(cpu, cuda_pinned, CPUPlace, CUDAPinnedPlace);
+  else MEMCPY_CASE_CALL(cuda_pinned, cpu, CUDAPinnedPlace, CPUPlace);
+  else MEMCPY_CASE_CALL(cuda_pinned, cuda_pinned, CUDAPinnedPlace, CUDAPinnedPlace);
+  else MEMCPY_CASE_CALL_STREAM(gpu, cuda_pinned, CUDAPlace, CUDAPinnedPlace);
+  else MEMCPY_CASE_CALL_STREAM(cuda_pinned, gpu, CUDAPinnedPlace, CUDAPlace);
+#endif  // PADDLE_WITH_CUDA
+  
+#undef MEMCPY_CALL_NULL
+#undef MEMCPY_CASE_CALL_NULL
+}
+
+#ifdef PADDLE_WITH_CUDA
+template<>
+void Copy<platform::Place, platform::Place>(
+    const platform::Place& dst_place, void* dst,
+    const platform::Place& src_place, const void* src, size_t num,
+    cudaStream_t stream) {
+
+#define MEMCPY_CALL_STREAM(dstp, srcp)                                  \
+  Copy(dynamic_cast<const platform::dstp&>(dst_place), dst,             \
+       dynamic_cast<const platform::srcp&>(src_place), src, num, stream)
+
+#define MEMCPY_CASE_CALL_STREAM(dst, src, dstp, srcp)          \
+  if MEMCPY_CASE(dst, src) MEMCPY_CALL_STREAM(dstp, srcp)
+  
+  MEMCPY_CASE_CALL(cpu, cpu, CPUPlace, CPUPlace);
+  else MEMCPY_CASE_CALL_STREAM(cpu, gpu, CPUPlace, CUDAPlace);
+  else MEMCPY_CASE_CALL_STREAM(gpu, cpu, CUDAPlace, CPUPlace);
+  else MEMCPY_CASE_CALL_STREAM(gpu, gpu, CUDAPlace, CUDAPlace);
+  else MEMCPY_CASE_CALL(cpu, cuda_pinned, CPUPlace, CUDAPinnedPlace);
+  else MEMCPY_CASE_CALL(cuda_pinned, cpu, CUDAPinnedPlace, CPUPlace);
+  else MEMCPY_CASE_CALL(cuda_pinned, cuda_pinned, CUDAPinnedPlace, CUDAPinnedPlace);
+  else MEMCPY_CASE_CALL_STREAM(gpu, cuda_pinned, CUDAPlace, CUDAPinnedPlace);
+  else MEMCPY_CASE_CALL_STREAM(cuda_pinned, gpu, CUDAPinnedPlace, CUDAPlace);
+
+#undef MEMCPY_CALL_STREAM
+#undef MEMCPY_CASE_CALL_STREAM
+}
+
+#undef MEMCPY_CASE
+#undef MEMCPY_CALL
+#undef MEMCPY_CASE_CALL
+
+#endif  // PADDLE_WITH_CUDA
 
 }  // namespace memory
 }  // namespace fluid
