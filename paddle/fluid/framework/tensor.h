@@ -135,7 +135,7 @@ class Tensor {
     virtual void* ptr() const = 0;
     virtual size_t size() const = 0;
     virtual std::type_index type() const = 0;
-    virtual platform::Place place() const = 0;
+    virtual const platform::Place& place() const = 0;
     virtual void set_type(std::type_index type) = 0;
     virtual void set_place(const platform::Place& place) = 0;
   };
@@ -149,14 +149,14 @@ class Tensor {
           size_(size),
           type_(type) {
       PADDLE_ENFORCE_NOT_NULL(ptr_, "Insufficient %s memory to allocation.",
-                              (is_cpu_place(place_) ? "CPU" : "GPU"));
+                              (platform::is_cpu_place(*place_) ? "CPU" : "GPU"));
     }
     ~PlaceholderImpl() {
       delete place_;
     }
     
     virtual size_t size() const { return size_; }
-    virtual platform::Place place() const { return place_; }
+    virtual const platform::Place& place() const { return *place_; }
     virtual void* ptr() const { return static_cast<void*>(ptr_.get()); }
     virtual std::type_index type() const { return type_; }
     virtual void set_type(std::type_index type) { type_ = type; }
@@ -170,7 +170,7 @@ class Tensor {
     std::unique_ptr<uint8_t, memory::PODDeleter<uint8_t, Place>> ptr_;
 
     /*! the place of memory block. */
-    platform::Place* place_;
+    const platform::Place* place_;
 
     /*! the size of memory block. */
     size_t size_;

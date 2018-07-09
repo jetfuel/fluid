@@ -23,16 +23,14 @@ namespace memory {
 
 // None of template arguments DstPlace and SrcPlace could be
 // CUDAPlace; otherwise, refer to the next function template.
-template <typename DstPlace, typename SrcPlace>
-void Copy(const DstPlace& dst_place, void* dst,
-          const SrcPlace& src_place, const void* src, size_t num);
+void Copy(const platform::Place& dst_place, void* dst,
+          const platform::Place& src_place, const void* src, size_t num);
 
 #ifdef PADDLE_WITH_CUDA
 // When any one of DstPlace or SrcPlace is CUDAPlace, users are allows
 // to specify a CUDA stream.
-template <typename DstPlace, typename SrcPlace>
-void Copy(const DstPlace& dst_place, void* dst,
-          const SrcPlace& src_place, const void* src, size_t num,
+void Copy(const platform::Place& dst_place, void* dst,
+          const platform::Place& src_place, const void* src, size_t num,
           cudaStream_t stream);
 #endif
 

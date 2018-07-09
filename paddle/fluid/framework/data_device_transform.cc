@@ -25,8 +25,8 @@ void TransDataDevice(const Tensor &in, const platform::Place &dst_place,
   VLOG(3) << "DeviceTransform in, src_place " << in.place()
           << " dst_place: " << dst_place;
 
-  PADDLE_ENFORCE_NE(
-      in.place().which(), dst_place.which(),
+  PADDLE_ENFORCE(
+      platform::places_are_same_class(in.place(), dst_place),
       "Currently, model parallelism is only supported between CPU and CUDA");
 
   // FIXME(zcd): TransDataDevice is used to transform data from GPU to CPU and

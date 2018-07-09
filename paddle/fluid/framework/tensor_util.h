@@ -43,9 +43,6 @@ void TensorToVector(const Tensor& src, const platform::DeviceContext& ctx,
 template <typename T>
 void TesnorToVector(const Tensor& src, std::vector<T>* dst);
 
-bool TensorContainsNAN(const framework::Tensor& tensor);
-bool TensorContainsInf(const framework::Tensor& tensor);
-
 void TensorToStream(std::ostream& os, const Tensor& tensor,
                     const platform::DeviceContext& dev_ctx);
 void TensorFromStream(std::istream& is, Tensor* tensor,

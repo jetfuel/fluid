@@ -20,8 +20,12 @@ namespace paddle {
 namespace fluid {
 namespace memory {
 
+template <typename DstPlace, typename SrcPlace>
+void CopyImpl(const DstPlace& dst_place, void* dst,
+          const SrcPlace& src_place, const void* src, size_t num);
+
 template <>
-void Copy<platform::CPUPlace, platform::CPUPlace>(
+void CopyImpl<platform::CPUPlace, platform::CPUPlace>(
     const platform::CPUPlace&,
     void* dst,
     const platform::CPUPlace&,
@@ -32,8 +36,13 @@ void Copy<platform::CPUPlace, platform::CPUPlace>(
 
 #ifdef PADDLE_WITH_CUDA
 
+template <typename DstPlace, typename SrcPlace>
+void CopyImpl(const DstPlace& dst_place, void* dst,
+          const SrcPlace& src_place, const void* src, size_t num,
+          cudaStream_t stream);
+
 template <>
-void Copy<platform::CPUPlace, platform::CUDAPlace>(
+void CopyImpl<platform::CPUPlace, platform::CUDAPlace>(
     const platform::CPUPlace& dst_place,
     void* dst,
     const platform::CUDAPlace& src_place,
@@ -49,7 +58,7 @@ void Copy<platform::CPUPlace, platform::CUDAPlace>(
 }
 
 template <>
-void Copy<platform::CUDAPlace, platform::CPUPlace>(
+void CopyImpl<platform::CUDAPlace, platform::CPUPlace>(
     const platform::CUDAPlace& dst_place,
     void* dst,
     const platform::CPUPlace& src_place,
@@ -65,7 +74,7 @@ void Copy<platform::CUDAPlace, platform::CPUPlace>(
 }
 
 template <>
-void Copy<platform::CUDAPlace, platform::CUDAPlace>(
+void CopyImpl<platform::CUDAPlace, platform::CUDAPlace>(
     const platform::CUDAPlace& dst_place,
     void* dst,
     const platform::CUDAPlace& src_place,
@@ -91,7 +100,7 @@ void Copy<platform::CUDAPlace, platform::CUDAPlace>(
 }
 
 template <>
-void Copy<platform::CPUPlace, platform::CUDAPinnedPlace>(
+void CopyImpl<platform::CPUPlace, platform::CUDAPinnedPlace>(
     const platform::CPUPlace& dst_place,
     void* dst,
     const platform::CUDAPinnedPlace& src_place,
@@ -102,7 +111,7 @@ void Copy<platform::CPUPlace, platform::CUDAPinnedPlace>(
 }
 
 template <>
-void Copy<platform::CUDAPinnedPlace, platform::CPUPlace>(
+void CopyImpl<platform::CUDAPinnedPlace, platform::CPUPlace>(
     const platform::CUDAPinnedPlace& dst_place,
     void* dst,
     const platform::CPUPlace& src_place,
@@ -113,7 +122,7 @@ void Copy<platform::CUDAPinnedPlace, platform::CPUPlace>(
 }
 
 template <>
-void Copy<platform::CUDAPinnedPlace, platform::CUDAPinnedPlace>(
+void CopyImpl<platform::CUDAPinnedPlace, platform::CUDAPinnedPlace>(
     const platform::CUDAPinnedPlace& dst_place,
     void* dst,
     const platform::CUDAPinnedPlace& src_place,
@@ -124,7 +133,7 @@ void Copy<platform::CUDAPinnedPlace, platform::CUDAPinnedPlace>(
 }
 
 template <>
-void Copy<platform::CUDAPinnedPlace, platform::CUDAPlace>(
+void CopyImpl<platform::CUDAPinnedPlace, platform::CUDAPlace>(
     const platform::CUDAPinnedPlace& dst_place,
     void* dst,
     const platform::CUDAPlace& src_place,
@@ -140,7 +149,7 @@ void Copy<platform::CUDAPinnedPlace, platform::CUDAPlace>(
 }
 
 template <>
-void Copy<platform::CUDAPlace, platform::CUDAPinnedPlace>(
+void CopyImpl<platform::CUDAPlace, platform::CUDAPinnedPlace>(
     const platform::CUDAPlace& dst_place,
     void* dst,
     const platform::CUDAPinnedPlace& src_place,
@@ -163,19 +172,17 @@ void Copy<platform::CUDAPlace, platform::CUDAPinnedPlace>(
    platform::is_##src##_place(src_place))
 
 #define MEMCPY_CALL(dstp, srcp)                                         \
-  Copy(dynamic_cast<const platform::dstp&>(dst_place), dst,             \
+  CopyImpl(dynamic_cast<const platform::dstp&>(dst_place), dst,             \
        dynamic_cast<const platform::srcp&>(src_place), src, num)
 
 #define MEMCPY_CASE_CALL(dst, src, dstp, srcp)          \
   if MEMCPY_CASE(dst, src) MEMCPY_CALL(dstp, srcp)
 
-template<>
-void Copy<platform::Place, platform::Place>(
-    const platform::Place& dst_place, void* dst,
-    const platform::Place& src_place, const void* src, size_t num) {
+void Copy(const platform::Place& dst_place, void* dst,
+          const platform::Place& src_place, const void* src, size_t num) {
 
 #define MEMCPY_CALL_NULL(dstp, srcp)                                    \
-  Copy(dynamic_cast<const platform::dstp&>(dst_place), dst,             \
+  CopyImpl(dynamic_cast<const platform::dstp&>(dst_place), dst,             \
        dynamic_cast<const platform::srcp&>(src_place), src, num, NULL)
 
 #define MEMCPY_CASE_CALL_NULL(dst, src, dstp, srcp)          \
@@ -198,14 +205,12 @@ void Copy<platform::Place, platform::Place>(
 }
 
 #ifdef PADDLE_WITH_CUDA
-template<>
-void Copy<platform::Place, platform::Place>(
-    const platform::Place& dst_place, void* dst,
-    const platform::Place& src_place, const void* src, size_t num,
-    cudaStream_t stream) {
+void Copy(const platform::Place& dst_place, void* dst,
+          const platform::Place& src_place, const void* src, size_t num,
+          cudaStream_t stream) {
 
 #define MEMCPY_CALL_STREAM(dstp, srcp)                                  \
-  Copy(dynamic_cast<const platform::dstp&>(dst_place), dst,             \
+  CopyImpl(dynamic_cast<const platform::dstp&>(dst_place), dst,             \
        dynamic_cast<const platform::srcp&>(src_place), src, num, stream)
 
 #define MEMCPY_CASE_CALL_STREAM(dst, src, dstp, srcp)          \

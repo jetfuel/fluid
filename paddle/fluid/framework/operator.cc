@@ -401,6 +401,10 @@ InferShapeVarPtr RuntimeInferShapeContext::GetVarPtr(const std::string& name) {
   return scope_.FindVar(name);
 }
 
+// TODO(yi): Add this function back after we know how to re-implement
+// TensorContainsInf and TensorContainsNaN with the re-implemented
+// Place class hierarchy in platform/place.{h,cc}.
+/*
 static void CheckTensorNANOrInf(const std::string& name,
                                 const framework::Tensor& tensor) {
   if (tensor.memory_size() == 0) {
@@ -415,6 +419,7 @@ static void CheckTensorNANOrInf(const std::string& name,
   PADDLE_ENFORCE(!framework::TensorContainsNAN(tensor),
                  "Tensor %s contains NAN", name);
 }
+*/
 
 void OperatorWithKernel::RunImpl(const Scope& scope,
                                  const platform::Place& place) const {
@@ -498,6 +503,8 @@ void OperatorWithKernel::RunImpl(const Scope& scope,
     new_dev_ctx->Wait();
   }
 
+  // TODO(yi): Add this back after we re-implement CheckTensorNaNorInf.
+  /*
   if (FLAGS_check_nan_inf) {
     for (auto& vname : OutputVars(true)) {
       auto* var = new_scope.FindVar(vname);
@@ -507,6 +514,7 @@ void OperatorWithKernel::RunImpl(const Scope& scope,
       }
     }
   }
+  */
 }
 
 proto::VarType::Type OperatorWithKernel::IndicateDataType(

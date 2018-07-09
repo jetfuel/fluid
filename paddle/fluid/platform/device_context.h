@@ -128,7 +128,7 @@ class DeviceContextPool {
   
   static DeviceContextPool& Instance() {
     if (the_pool_ == nullptr)
-      the_pool_ = Init();
+      the_pool_ = new DeviceContextPool();
     return *the_pool_;
   }
 

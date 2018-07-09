@@ -229,32 +229,6 @@ TEST(TensorToVector, Tensor) {
 #endif
 }
 
-TEST(TensorContainsNAN, CPU) {
-  {
-    paddle::fluid::framework::Tensor src;
-    float* buf = src.mutable_data<float>({3}, paddle::fluid::platform::CPUPlace());
-    buf[0] = 0.0;
-    buf[1] = NAN;
-    buf[2] = 0.0;
-    ASSERT_TRUE(paddle::fluid::framework::TensorContainsNAN(src));
-    buf[1] = 0.0;
-    ASSERT_FALSE(paddle::fluid::framework::TensorContainsNAN(src));
-  }
-}
-
-TEST(TensorContainsInf, CPU) {
-  {
-    paddle::fluid::framework::Tensor src;
-    double* buf = src.mutable_data<double>({3}, paddle::fluid::platform::CPUPlace());
-    buf[0] = 1.0;
-    buf[1] = INFINITY;
-    buf[2] = 0.0;
-    ASSERT_TRUE(paddle::fluid::framework::TensorContainsInf(src));
-    buf[1] = 1.0;
-    ASSERT_FALSE(paddle::fluid::framework::TensorContainsInf(src));
-  }
-}
-
 TEST(Tensor, FromAndToStream) {
   framework::Tensor src_tensor;
   int array[6] = {1, 2, 3, 4, 5, 6};
