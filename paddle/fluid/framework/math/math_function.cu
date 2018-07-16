@@ -18,16 +18,13 @@ limitations under the License. */
 #include "paddle/fluid/framework/math/blas.h"
 #include "paddle/fluid/framework/math/math_function.h"
 #include "paddle/fluid/framework/math/math_function_impl.h"
-#include "paddle/fluid/platform/float16.h"
 
 namespace paddle {
 namespace fluid {
 namespace framework {
 namespace math {
 
-using float16 = paddle::fluid::platform::float16;
 
-template struct SetConstant<platform::CUDADeviceContext, platform::float16>;
 template struct SetConstant<platform::CUDADeviceContext, float>;
 template struct SetConstant<platform::CUDADeviceContext, double>;
 template struct SetConstant<platform::CUDADeviceContext, int>;
@@ -36,8 +33,7 @@ template struct SetConstant<platform::CUDADeviceContext, bool>;
 
 #define DEFINE_GPU_TRANS(RANK)                                          \
   template struct Transpose<platform::CUDADeviceContext, float, RANK>;  \
-  template struct Transpose<platform::CUDADeviceContext, double, RANK>; \
-  template struct Transpose<platform::CUDADeviceContext, float16, RANK>;
+  template struct Transpose<platform::CUDADeviceContext, double, RANK>;
 
 DEFINE_GPU_TRANS(1);
 DEFINE_GPU_TRANS(2);

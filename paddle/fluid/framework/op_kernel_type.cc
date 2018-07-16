@@ -36,15 +36,6 @@ OpKernelType::OpKernelType(proto::VarType::Type data_type, platform::Place place
       place_(place),
       accelerator_(accelerator) {}
 
-OpKernelType::OpKernelType(proto::VarType::Type data_type,
-                           const platform::DeviceContext& dev_ctx,
-                           TensorDataLayout data_layout,
-                           Accelerator accelerator)
-    : data_type_(data_type),
-      data_layout_(data_layout),
-      place_(dev_ctx.GetPlace()),
-      accelerator_(accelerator) {}
-
 std::ostream& operator<<(std::ostream& os, const OpKernelType& kernel_key) {
   os << "data_type[" << kernel_key.data_type_ << "]:data_layout["
      << kernel_key.data_layout_ << "]:place[" << kernel_key.place_

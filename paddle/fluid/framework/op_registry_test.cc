@@ -223,7 +223,7 @@ class OpWithKernelTest : public OperatorWithKernel {
 
   framework::OpKernelType GetExpectedKernelType(
       const framework::ExecutionContext& ctx) const override {
-    return framework::OpKernelType(proto::VarType::FP32, ctx.device_context());
+    return framework::OpKernelType(proto::VarType::FP32, ctx.device_context().GetPlace());
   }
 };
 

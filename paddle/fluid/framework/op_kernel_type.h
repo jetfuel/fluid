@@ -19,7 +19,6 @@ limitations under the License. */
 #include "paddle/fluid/framework/data_type.h"
 #include "paddle/fluid/framework/accelerator.h"
 #include "paddle/fluid/platform/place.h"
-#include "paddle/fluid/platform/device_context.h"
 
 namespace paddle {
 namespace fluid {
@@ -39,11 +38,6 @@ struct OpKernelType {
   Accelerator accelerator_;
 
   OpKernelType(proto::VarType::Type data_type, platform::Place place,
-               TensorDataLayout data_layout = TensorDataLayout::kAnyLayout,
-               Accelerator accelerator = Accelerator::kPlain);
-
-  OpKernelType(proto::VarType::Type data_type,
-               const platform::DeviceContext& dev_ctx,
                TensorDataLayout data_layout = TensorDataLayout::kAnyLayout,
                Accelerator accelerator = Accelerator::kPlain);
 

@@ -18,14 +18,6 @@
 #include "paddle/fluid/framework/math/blas.h"
 #include "paddle/fluid/platform/device_context.h"
 
-void fill_fp16_data(paddle::fluid::platform::float16* in_ptr, size_t size,
-                    const std::vector<float>& data) {
-  PADDLE_ENFORCE_EQ(size, data.size());
-  for (size_t i = 0; i < data.size(); ++i) {
-    in_ptr[i] = paddle::fluid::platform::float16(data[i]);
-  }
-}
-
 template <typename T>
 inline paddle::fluid::framework::math::BlasT<paddle::fluid::platform::CUDADeviceContext, T>
 GetBlas(const paddle::fluid::platform::CUDADeviceContext& context) {
@@ -65,45 +57,6 @@ TEST(math_function, notrans_mul_trans_fp32) {
   EXPECT_EQ(out_ptr[3], 50);
 }
 
-TEST(math_function, notrans_mul_trans_fp16) {
-  paddle::fluid::framework::Tensor input1;
-  paddle::fluid::framework::Tensor input1_gpu;
-  paddle::fluid::framework::Tensor input2_gpu;
-  paddle::fluid::framework::Tensor out_gpu;
-  paddle::fluid::framework::Tensor out;
-
-  paddle::fluid::platform::CPUPlace cpu_place;
-  paddle::fluid::platform::CUDAPlace gpu_place(0);
-  paddle::fluid::platform::CUDADeviceContext context(gpu_place);
-
-  // fp16 GEMM in cublas requires GPU compute capability >= 53
-  if (context.GetComputeCapability() < 53) {
-    return;
-  }
-
-  paddle::fluid::platform::float16* input1_ptr =
-      input1.mutable_data<paddle::fluid::platform::float16>({2, 3}, cpu_place);
-  fill_fp16_data(input1_ptr, input1.numel(), {0, 1, 2, 3, 4, 5});
-
-  paddle::fluid::framework::TensorCopySync(input1, gpu_place, &input1_gpu);
-  paddle::fluid::framework::TensorCopySync(input1, gpu_place, &input2_gpu);
-
-  out_gpu.mutable_data<paddle::fluid::platform::float16>({2, 2}, gpu_place);
-
-  GetBlas<paddle::fluid::platform::float16>(context).MatMul(
-      input1_gpu, false, input2_gpu, true, paddle::fluid::platform::float16(1),
-      &out_gpu, paddle::fluid::platform::float16(0));
-
-  paddle::fluid::framework::TensorCopySync(out_gpu, cpu_place, &out);
-
-  paddle::fluid::platform::float16* out_ptr = out.data<paddle::fluid::platform::float16>();
-  context.Wait();
-  EXPECT_EQ(static_cast<float>(out_ptr[0]), 5);
-  EXPECT_EQ(static_cast<float>(out_ptr[1]), 14);
-  EXPECT_EQ(static_cast<float>(out_ptr[2]), 14);
-  EXPECT_EQ(static_cast<float>(out_ptr[3]), 50);
-}
-
 TEST(math_function, trans_mul_notrans_fp32) {
   paddle::fluid::framework::Tensor input1;
   paddle::fluid::framework::Tensor input1_gpu;
@@ -140,50 +93,6 @@ TEST(math_function, trans_mul_notrans_fp32) {
   EXPECT_EQ(out_ptr[6], 15);
   EXPECT_EQ(out_ptr[7], 22);
   EXPECT_EQ(out_ptr[8], 29);
-}
-
-TEST(math_function, trans_mul_notrans_fp16) {
-  paddle::fluid::framework::Tensor input1;
-  paddle::fluid::framework::Tensor input1_gpu;
-  paddle::fluid::framework::Tensor input2_gpu;
-  paddle::fluid::framework::Tensor out_gpu;
-  paddle::fluid::framework::Tensor out;
-
-  paddle::fluid::platform::CPUPlace cpu_place;
-  paddle::fluid::platform::CUDAPlace gpu_place(0);
-  paddle::fluid::platform::CUDADeviceContext context(gpu_place);
-
-  // fp16 GEMM in cublas requires GPU compute capability >= 53
-  if (context.GetComputeCapability() < 53) {
-    return;
-  }
-
-  paddle::fluid::platform::float16* input1_ptr =
-      input1.mutable_data<paddle::fluid::platform::float16>({2, 3}, cpu_place);
-  fill_fp16_data(input1_ptr, input1.numel(), {0, 1, 2, 3, 4, 5});
-
-  paddle::fluid::framework::TensorCopySync(input1, gpu_place, &input1_gpu);
-  paddle::fluid::framework::TensorCopySync(input1, gpu_place, &input2_gpu);
-
-  out_gpu.mutable_data<paddle::fluid::platform::float16>({3, 3}, gpu_place);
-
-  GetBlas<paddle::fluid::platform::float16>(context).MatMul(
-      input1_gpu, true, input2_gpu, false, paddle::fluid::platform::float16(1),
-      &out_gpu, paddle::fluid::platform::float16(0));
-
-  paddle::fluid::framework::TensorCopySync(out_gpu, cpu_place, &out);
-
-  paddle::fluid::platform::float16* out_ptr = out.data<paddle::fluid::platform::float16>();
-  context.Wait();
-  EXPECT_EQ(static_cast<float>(out_ptr[0]), 9);
-  EXPECT_EQ(static_cast<float>(out_ptr[1]), 12);
-  EXPECT_EQ(static_cast<float>(out_ptr[2]), 15);
-  EXPECT_EQ(static_cast<float>(out_ptr[3]), 12);
-  EXPECT_EQ(static_cast<float>(out_ptr[4]), 17);
-  EXPECT_EQ(static_cast<float>(out_ptr[5]), 22);
-  EXPECT_EQ(static_cast<float>(out_ptr[6]), 15);
-  EXPECT_EQ(static_cast<float>(out_ptr[7]), 22);
-  EXPECT_EQ(static_cast<float>(out_ptr[8]), 29);
 }
 
 TEST(math_function, gemm_notrans_cublas_fp32) {
@@ -240,67 +149,6 @@ TEST(math_function, gemm_notrans_cublas_fp32) {
   EXPECT_EQ(input3_ptr[7], 99);
 }
 
-TEST(math_function, gemm_notrans_cublas_fp16) {
-  paddle::fluid::framework::Tensor input1;
-  paddle::fluid::framework::Tensor input2;
-  paddle::fluid::framework::Tensor input3;
-  paddle::fluid::framework::Tensor input1_gpu;
-  paddle::fluid::framework::Tensor input2_gpu;
-  paddle::fluid::framework::Tensor input3_gpu;
-
-  paddle::fluid::platform::CPUPlace cpu_place;
-  paddle::fluid::platform::CUDAPlace gpu_place(0);
-  paddle::fluid::platform::CUDADeviceContext context(gpu_place);
-
-  // fp16 GEMM in cublas requires GPU compute capability >= 53
-  if (context.GetComputeCapability() < 53) {
-    return;
-  }
-
-  int m = 2;
-  int n = 3;
-  int k = 3;
-  paddle::fluid::platform::float16* input1_ptr =
-      input1.mutable_data<paddle::fluid::platform::float16>({2, 3}, cpu_place);
-  fill_fp16_data(input1_ptr, input1.numel(), {0, 1, 2, 3, 4, 5});
-  paddle::fluid::platform::float16* input2_ptr =
-      input2.mutable_data<paddle::fluid::platform::float16>({3, 4}, cpu_place);
-  fill_fp16_data(input2_ptr, input2.numel(),
-                 {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11});
-  paddle::fluid::platform::float16* input3_ptr =
-      input3.mutable_data<paddle::fluid::platform::float16>({2, 4}, cpu_place);
-  fill_fp16_data(input3_ptr, input3.numel(), {0, 1, 2, 3, 4, 5, 6, 7});
-
-  paddle::fluid::framework::TensorCopySync(input1, gpu_place, &input1_gpu);
-  paddle::fluid::framework::TensorCopySync(input2, gpu_place, &input2_gpu);
-  paddle::fluid::framework::TensorCopySync(input3, gpu_place, &input3_gpu);
-  paddle::fluid::platform::float16* a = input1_gpu.data<paddle::fluid::platform::float16>();
-  paddle::fluid::platform::float16* b = input2_gpu.data<paddle::fluid::platform::float16>();
-  paddle::fluid::platform::float16* c =
-      input3_gpu.mutable_data<paddle::fluid::platform::float16>(gpu_place);
-
-  GetBlas<paddle::fluid::platform::float16>(context).GEMM(
-      false, false, m, n, k, static_cast<paddle::fluid::platform::float16>(1), a, 3,
-      b + 1, 4, static_cast<paddle::fluid::platform::float16>(1), c + 1, 4);
-
-  paddle::fluid::framework::TensorCopySync(input3_gpu, cpu_place, &input3);
-
-  // numpy code:
-  // a = np.arange(6).reshape(2, 3)
-  // b = np.arange(12).reshape(3, 4)[:, 1:]
-  // c = np.arange(8).reshape(2, 4)[:, 1:]
-  // out = np.arange(8).reshape(2, 4)
-  // out[:, 1:] = np.dot(a, b) + c
-  context.Wait();
-  EXPECT_EQ(static_cast<float>(input3_ptr[0]), 0);
-  EXPECT_EQ(static_cast<float>(input3_ptr[1]), 24);
-  EXPECT_EQ(static_cast<float>(input3_ptr[2]), 28);
-  EXPECT_EQ(static_cast<float>(input3_ptr[3]), 32);
-  EXPECT_EQ(static_cast<float>(input3_ptr[4]), 4);
-  EXPECT_EQ(static_cast<float>(input3_ptr[5]), 73);
-  EXPECT_EQ(static_cast<float>(input3_ptr[6]), 86);
-  EXPECT_EQ(static_cast<float>(input3_ptr[7]), 99);
-}
 
 TEST(math_function, gemm_trans_cublas_fp32) {
   paddle::fluid::framework::Tensor input1;
@@ -348,62 +196,6 @@ TEST(math_function, gemm_trans_cublas_fp32) {
   EXPECT_EQ(input3_ptr[5], 73);
   EXPECT_EQ(input3_ptr[6], 86);
   EXPECT_EQ(input3_ptr[7], 99);
-}
-
-TEST(math_function, gemm_trans_cublas_fp16) {
-  paddle::fluid::framework::Tensor input1;
-  paddle::fluid::framework::Tensor input2;
-  paddle::fluid::framework::Tensor input3;
-  paddle::fluid::framework::Tensor input1_gpu;
-  paddle::fluid::framework::Tensor input2_gpu;
-  paddle::fluid::framework::Tensor input3_gpu;
-
-  paddle::fluid::platform::CPUPlace cpu_place;
-  paddle::fluid::platform::CUDAPlace gpu_place(0);
-  paddle::fluid::platform::CUDADeviceContext context(gpu_place);
-
-  // fp16 GEMM in cublas requires GPU compute capability >= 53
-  if (context.GetComputeCapability() < 53) {
-    return;
-  }
-
-  int m = 2;
-  int n = 3;
-  int k = 3;
-  paddle::fluid::platform::float16* input1_ptr =
-      input1.mutable_data<paddle::fluid::platform::float16>({2, 3}, cpu_place);
-  fill_fp16_data(input1_ptr, input1.numel(), {0, 1, 2, 3, 4, 5});
-  paddle::fluid::platform::float16* input2_ptr =
-      input2.mutable_data<paddle::fluid::platform::float16>({4, 3}, cpu_place);
-  fill_fp16_data(input2_ptr, input2.numel(),
-                 {0, 4, 8, 1, 5, 9, 2, 6, 10, 3, 7, 11});
-  paddle::fluid::platform::float16* input3_ptr =
-      input3.mutable_data<paddle::fluid::platform::float16>({2, 4}, cpu_place);
-  fill_fp16_data(input3_ptr, input3.numel(), {0, 1, 2, 3, 4, 5, 6, 7});
-
-  paddle::fluid::framework::TensorCopySync(input1, gpu_place, &input1_gpu);
-  paddle::fluid::framework::TensorCopySync(input2, gpu_place, &input2_gpu);
-  paddle::fluid::framework::TensorCopySync(input3, gpu_place, &input3_gpu);
-  paddle::fluid::platform::float16* a = input1_gpu.data<paddle::fluid::platform::float16>();
-  paddle::fluid::platform::float16* b = input2_gpu.data<paddle::fluid::platform::float16>();
-  paddle::fluid::platform::float16* c =
-      input3_gpu.mutable_data<paddle::fluid::platform::float16>(gpu_place);
-
-  GetBlas<paddle::fluid::platform::float16>(context).GEMM(
-      false, true, m, n, k, static_cast<paddle::fluid::platform::float16>(1), a, 3,
-      b + 3, 3, static_cast<paddle::fluid::platform::float16>(1), c + 1, 4);
-
-  paddle::fluid::framework::TensorCopySync(input3_gpu, cpu_place, &input3);
-
-  context.Wait();
-  EXPECT_EQ(static_cast<float>(input3_ptr[0]), 0);
-  EXPECT_EQ(static_cast<float>(input3_ptr[1]), 24);
-  EXPECT_EQ(static_cast<float>(input3_ptr[2]), 28);
-  EXPECT_EQ(static_cast<float>(input3_ptr[3]), 32);
-  EXPECT_EQ(static_cast<float>(input3_ptr[4]), 4);
-  EXPECT_EQ(static_cast<float>(input3_ptr[5]), 73);
-  EXPECT_EQ(static_cast<float>(input3_ptr[6]), 86);
-  EXPECT_EQ(static_cast<float>(input3_ptr[7]), 99);
 }
 
 template <typename T>
