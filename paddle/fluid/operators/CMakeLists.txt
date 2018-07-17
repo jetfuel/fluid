@@ -1,0 +1,6 @@
+add_subdirectory(math)
+if (WITH_GPU)
+    nv_library(adam_op SRCS adam_op.cc adam_op.cu DEPS op_registry)
+else()
+    cc_library(adam_op SRCS adam_op.cc DEPS op_registry)
+endif ()

@@ -25,7 +25,8 @@ if(WITH_GPU)
     if(NOT CUDNN_FOUND)
         message(FATAL_ERROR "Paddle needs cudnn to compile")
     endif()
-    set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS} "-Xcompiler ${SIMD_FLAG}")
+    # Set :expt-relaxed-constexpr to suppress Eigen warnings
+    list(APPEND CUDA_NVCC_FLAGS "--expt-relaxed-constexpr")
 
     # Include cuda and cudnn
     include_directories(${CUDNN_INCLUDE_DIR})
