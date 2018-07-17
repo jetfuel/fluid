@@ -14,7 +14,8 @@ limitations under the License. */
 #include <sstream>
 #include <vector>
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+
 #include "paddle/fluid/framework/ddim.h"
 
 TEST(DDim, Equality) {
