@@ -16,12 +16,12 @@
 #include <map>
 #include <vector>
 
+#include "paddle/fluid/framework/math/math_function.h"
 #include "paddle/fluid/framework/op_kernel_type.h"
 #include "paddle/fluid/framework/tensor.h"
 #include "paddle/fluid/framework/tensor_data_layout.h"
 #include "paddle/fluid/platform/device_context.h"
 #include "paddle/fluid/platform/enforce.h"
-#include "paddle/fluid/framework/math/math_function.h"
 
 namespace paddle {
 namespace fluid {
@@ -29,9 +29,10 @@ namespace framework {
 
 namespace {
 
-std::vector<int> GetAxis(const TensorDataLayout& from, const TensorDataLayout& to) {
-  PADDLE_ENFORCE_NE(from, to,
-                    "layout transform should transform different layout");
+std::vector<int> GetAxis(const TensorDataLayout& from,
+                         const TensorDataLayout& to) {
+  PADDLE_ENFORCE_NE(
+      from, to, "layout transform should transform different layout");
   if (from == TensorDataLayout::kNCHW && to == TensorDataLayout::kNHWC) {
     return {0, 2, 3, 1};
   } else if (from == TensorDataLayout::kNHWC && to == TensorDataLayout::kNCHW) {
@@ -43,8 +44,9 @@ std::vector<int> GetAxis(const TensorDataLayout& from, const TensorDataLayout& t
 
 struct CastTensorDataLayout {
   CastTensorDataLayout(const platform::DeviceContext* ctx,
-                 const std::vector<int>& axis, const framework::Tensor& in,
-                 framework::Tensor* out)
+                       const std::vector<int>& axis,
+                       const framework::Tensor& in,
+                       framework::Tensor* out)
       : in_(in), out_(out), ctx_(ctx), axis_(axis) {}
   const framework::Tensor in_;
   framework::Tensor* out_;
@@ -67,7 +69,8 @@ struct CastTensorDataLayout {
 }  // namespace
 
 void TransDataLayout(const OpKernelType& kernel_type_for_var,
-                     const OpKernelType& expected_kernel_type, const Tensor& in,
+                     const OpKernelType& expected_kernel_type,
+                     const Tensor& in,
                      Tensor* out) {
   PADDLE_ENFORCE(
       platform::places_are_same_class(kernel_type_for_var.place_,
@@ -93,7 +96,8 @@ void TransDataLayout(const OpKernelType& kernel_type_for_var,
 
   framework::VisitDataType(
       framework::ToDataType(in.type()),
-      CastTensorDataLayout(pool.Get(expected_kernel_type.place_), axis, in, out));
+      CastTensorDataLayout(
+          pool.Get(expected_kernel_type.place_), axis, in, out));
 
   out->set_layout(expected_kernel_type.data_layout_);
 }

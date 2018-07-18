@@ -19,15 +19,9 @@ limitations under the License. */
 
 TEST(Accelerator, Constructor) {
   // Test no exceptions.
-  {
-    paddle::fluid::framework::Accelerator a("plain");
-  }
-  {
-     paddle::fluid::framework::Accelerator a("cuDNN");
-  }
-  {
-    paddle::fluid::framework::Accelerator a("Mkldnn");
-  }
+  { paddle::fluid::framework::Accelerator a("plain"); }
+  { paddle::fluid::framework::Accelerator a("cuDNN"); }
+  { paddle::fluid::framework::Accelerator a("Mkldnn"); }
 }
 
 TEST(Accelerator, ToString) {
@@ -65,5 +59,4 @@ TEST(Accelerator, StreamOutput) {
     ss << a;
     EXPECT_EQ(ss.str(), "MKLDNN");
   }
-
 }

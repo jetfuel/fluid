@@ -22,7 +22,8 @@ limitations under the License. */
 
 DECLARE_bool(use_pinned_memory);
 
-void TestAllocator(paddle::fluid::memory::detail::SystemAllocator* a, size_t size) {
+void TestAllocator(paddle::fluid::memory::detail::SystemAllocator* a,
+                   size_t size) {
   bool freed = false;
   {
     size_t index;

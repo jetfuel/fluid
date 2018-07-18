@@ -19,7 +19,8 @@
 #include "gtest/gtest.h"
 
 TEST(Recordio, ChunkHead) {
-  paddle::fluid::recordio::Header hdr(0, 1, paddle::fluid::recordio::Compressor::kGzip, 3);
+  paddle::fluid::recordio::Header hdr(
+      0, 1, paddle::fluid::recordio::Compressor::kGzip, 3);
   std::stringstream ss;
   hdr.Write(ss);
   ss.seekg(0, std::ios::beg);

@@ -25,9 +25,9 @@ limitations under the License. */
 
 #include <glog/logging.h>
 #include "paddle/fluid/framework/ddim.h"
-#include "paddle/fluid/framework/vector.h"
 #include "paddle/fluid/framework/tensor.h"
 #include "paddle/fluid/framework/tensor_util.h"
+#include "paddle/fluid/framework/vector.h"
 #include "paddle/fluid/platform/enforce.h"
 #include "paddle/fluid/platform/place.h"
 
@@ -37,7 +37,7 @@ namespace fluid {
 namespace recordio {
 class Writer;
 class Scanner;
-}
+}  // namespace recordio
 
 namespace framework {
 
@@ -60,7 +60,9 @@ using LoD = std::vector<Vector<size_t>>;
 
 std::ostream& operator<<(std::ostream& os, const LoD& lod);
 std::string LoDToString(const LoD& lod);
-LoD SliceInLevel(const LoD& in, size_t level, size_t elem_begin,
+LoD SliceInLevel(const LoD& in,
+                 size_t level,
+                 size_t elem_begin,
                  size_t elem_end);
 /*
  * Transform an LoD from relative offsets to absolute offsets.
@@ -167,7 +169,9 @@ std::ostream& operator<<(std::ostream& os, const LoDTensor& t);
  *  - [a0 a0 a0 a1 a1]
  */
 template <typename T>
-LoDTensor LodExpand(const LoDTensor& source, const LoD& lod, size_t level,
+LoDTensor LodExpand(const LoDTensor& source,
+                    const LoD& lod,
+                    size_t level,
                     const platform::Place& place) {
   LoD abs_lod = ToAbsOffset(lod);
   const auto& lod_level = lod[level];
@@ -185,8 +189,10 @@ LoDTensor LodExpand(const LoDTensor& source, const LoD& lod, size_t level,
   for (size_t ins = 0; ins < num_instances; ins++) {
     for (size_t elem = lod_level[ins]; elem < lod_level[ins + 1]; elem++) {
       auto slice = tensor.Slice(elem, elem + 1);
-      TensorCopy(source.Slice(ins, ins + 1), platform::CPUPlace(),
-                 platform::CPUDeviceContext(), &slice);
+      TensorCopy(source.Slice(ins, ins + 1),
+                 platform::CPUPlace(),
+                 platform::CPUDeviceContext(),
+                 &slice);
     }
   }
   return tensor;
@@ -214,9 +220,11 @@ void AppendLoD(LoD* lod, const LoD& lod_length);
  * You can pass ofstream or ostringstream to serilize to file
  * or to a in memory string. GPU tensor will be copied to CPU.
  */
-void SerializeToStream(std::ostream& os, const LoDTensor& tensor,
+void SerializeToStream(std::ostream& os,
+                       const LoDTensor& tensor,
                        const platform::DeviceContext& dev_ctx);
-void DeserializeFromStream(std::istream& is, LoDTensor* tensor,
+void DeserializeFromStream(std::istream& is,
+                           LoDTensor* tensor,
                            const platform::DeviceContext& dev_ctx);
 
 extern void WriteToRecordIO(recordio::Writer* writer,

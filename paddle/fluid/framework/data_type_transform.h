@@ -22,7 +22,8 @@ struct OpKernelType;
 class Tensor;
 
 void TransDataType(const OpKernelType& kernel_type_for_var,
-                   const OpKernelType& expected_kernel_type, const Tensor& in,
+                   const OpKernelType& expected_kernel_type,
+                   const Tensor& in,
                    Tensor* out);
 
 }  // namespace framework

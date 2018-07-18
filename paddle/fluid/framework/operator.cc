@@ -17,13 +17,13 @@ limitations under the License. */
 #include <glog/logging.h>
 #include <algorithm>
 
-#include "paddle/fluid/framework/var_type.h"
-#include "paddle/fluid/framework/op_kernel_type.h"
 #include "paddle/fluid/framework/data_transform.h"
-
+#include "paddle/fluid/framework/op_kernel_type.h"
+#include "paddle/fluid/framework/var_type.h"
 
 DECLARE_bool(benchmark);
-DEFINE_bool(check_nan_inf, false,
+DEFINE_bool(check_nan_inf,
+            false,
             "Checking whether operator produce NAN/INF or not. It will be "
             "extremely slow so please use this flag wisely.");
 
@@ -49,7 +49,8 @@ proto::VarType::Type GetDataTypeOfVar(const Variable* var) {
   }
 }
 
-static DDim GetDims(const Scope& scope, const std::string& name,
+static DDim GetDims(const Scope& scope,
+                    const std::string& name,
                     bool get_actual_dim = false) {
   Variable* var = scope.FindVar(name);
   if (var == nullptr) {
@@ -121,17 +122,21 @@ bool OperatorBase::HasInputs(const std::string& name) const {
 
 std::string OperatorBase::Input(const std::string& name) const {
   auto& ins = Inputs(name);
-  PADDLE_ENFORCE_LE(ins.size(), 1UL,
+  PADDLE_ENFORCE_LE(ins.size(),
+                    1UL,
                     "Operator %s's input %s should contain only one variable.",
-                    type_, name);
+                    type_,
+                    name);
   return ins.empty() ? kEmptyVarName : ins[0];
 }
 
 const std::vector<std::string>& OperatorBase::Inputs(
     const std::string& name) const {
   auto it = inputs_.find(name);
-  PADDLE_ENFORCE(it != inputs_.end(), "Operator %s does not have the input %s.",
-                 type_, name);
+  PADDLE_ENFORCE(it != inputs_.end(),
+                 "Operator %s does not have the input %s.",
+                 type_,
+                 name);
   return it->second;
 }
 
@@ -145,9 +150,11 @@ bool OperatorBase::HasOutputs(const std::string& name) const {
 
 std::string OperatorBase::Output(const std::string& name) const {
   auto& outs = Outputs(name);
-  PADDLE_ENFORCE_LE(outs.size(), 1UL,
+  PADDLE_ENFORCE_LE(outs.size(),
+                    1UL,
                     "Operator %s's output %s should contain only one variable.",
-                    type_, name);
+                    type_,
+                    name);
   return outs.empty() ? kEmptyVarName : outs[0];
 }
 
@@ -155,7 +162,9 @@ const std::vector<std::string>& OperatorBase::Outputs(
     const std::string& name) const {
   auto it = outputs_.find(name);
   PADDLE_ENFORCE(it != outputs_.end(),
-                 "Operator %s does not have an output called %s.", type_, name);
+                 "Operator %s does not have an output called %s.",
+                 type_,
+                 name);
   return it->second;
 }
 
@@ -220,7 +229,7 @@ OperatorBase::OperatorBase(const std::string& type,
     : type_(type), inputs_(inputs), outputs_(outputs), attrs_(attrs) {
   GenerateTemporaryNames();
   // FIXME(tonyyang-svail): check this
-//  CheckAllInputOutputSet();
+  //  CheckAllInputOutputSet();
 }
 
 std::vector<std::string> OperatorBase::InputVars() const {
@@ -243,7 +252,7 @@ std::vector<std::string> OperatorBase::OutputVars(bool has_intermediate) const {
 }
 
 // FIXME(tonyyang-svail): Operator should not depends on op_info
-//void OperatorBase::CheckAllInputOutputSet() const {
+// void OperatorBase::CheckAllInputOutputSet() const {
 //  auto& info_map = OpInfoMap::Instance();
 //  auto* op_info = info_map.GetNullable(Type());
 //  if (op_info == nullptr || op_info->proto_ == nullptr) return;
@@ -251,7 +260,8 @@ std::vector<std::string> OperatorBase::OutputVars(bool has_intermediate) const {
 //  for (auto& in : op_info->Proto().inputs()) {
 //    if (!in.dispensable()) {
 //      PADDLE_ENFORCE(inputs_.find(in.name()) != inputs_.end(),
-//                     "Operator %s's input, %s, is not set", Type(), in.name());
+//                     "Operator %s's input, %s, is not set", Type(),
+//                     in.name());
 //    }
 //  }
 //
@@ -312,8 +322,8 @@ bool ExecutionContext::HasInput(const std::string& name) const {
   if (length == 0) {
     return false;
   }
-  PADDLE_ENFORCE_EQ(length, 1UL,
-                    "Input %s should not have more than one inputs", name);
+  PADDLE_ENFORCE_EQ(
+      length, 1UL, "Input %s should not have more than one inputs", name);
   auto arg = ins[0];
   auto* var = arg == kEmptyVarName ? nullptr : scope_.FindVar(arg);
   return var != nullptr;
@@ -328,8 +338,8 @@ bool ExecutionContext::HasOutput(const std::string& name) const {
   if (length == 0) {
     return false;
   }
-  PADDLE_ENFORCE_EQ(length, 1UL,
-                    "Output %s should not have more than one inputs", name);
+  PADDLE_ENFORCE_EQ(
+      length, 1UL, "Output %s should not have more than one inputs", name);
   auto arg = outs[0];
   auto* var = arg == kEmptyVarName ? nullptr : scope_.FindVar(arg);
   return var != nullptr;
@@ -348,7 +358,9 @@ const std::vector<const Tensor*> ExecutionContext::MultiInput<Tensor>(
   auto names = op().Inputs(name);
   std::vector<const Tensor*> res;
   res.reserve(names.size());
-  std::transform(names.begin(), names.end(), std::back_inserter(res),
+  std::transform(names.begin(),
+                 names.end(),
+                 std::back_inserter(res),
                  [&](const std::string& sub_name) {
                    auto var = scope_.FindVar(sub_name);
                    return var == nullptr ? nullptr : GetTensorFromVar(var);
@@ -368,7 +380,9 @@ std::vector<Tensor*> ExecutionContext::MultiOutput<Tensor>(
   auto names = op().Outputs(name);
   std::vector<Tensor*> res;
   res.reserve(names.size());
-  std::transform(names.begin(), names.end(), std::back_inserter(res),
+  std::transform(names.begin(),
+                 names.end(),
+                 std::back_inserter(res),
                  [&](const std::string& sub_name) {
                    auto var = scope_.FindVar(sub_name);
                    return var == nullptr ? nullptr
@@ -392,7 +406,8 @@ bool OpSupportGPU(const std::string& op_type) {
   return false;
 }
 
-proto::VarType::Type RuntimeInferShapeContext::GetVarType(const std::string& name) const {
+proto::VarType::Type RuntimeInferShapeContext::GetVarType(
+    const std::string& name) const {
   auto* var = scope_.FindVar(name);
   return ToVarType(var->Type());
 }
@@ -410,10 +425,10 @@ static void CheckTensorNANOrInf(const std::string& name,
       tensor.type().hash_code() != typeid(double).hash_code()) {  // NOLINT
     return;
   }
-  PADDLE_ENFORCE(!framework::TensorContainsInf(tensor),
-                 "Tensor %s contains Inf", name);
-  PADDLE_ENFORCE(!framework::TensorContainsNAN(tensor),
-                 "Tensor %s contains NAN", name);
+  PADDLE_ENFORCE(
+      !framework::TensorContainsInf(tensor), "Tensor %s contains Inf", name);
+  PADDLE_ENFORCE(
+      !framework::TensorContainsNAN(tensor), "Tensor %s contains NAN", name);
 }
 
 void OperatorWithKernel::RunImpl(const Scope& scope,
@@ -447,7 +462,8 @@ void OperatorWithKernel::RunImpl(const Scope& scope,
 
   auto kernel_iter = kernels.find(expected_kernel_key);
   if (kernel_iter == kernels.end()) {
-    PADDLE_THROW("op %s does not have kernel for %s", type_,
+    PADDLE_THROW("op %s does not have kernel for %s",
+                 type_,
                  KernelTypeToString(expected_kernel_key));
   }
 
@@ -465,7 +481,8 @@ void OperatorWithKernel::RunImpl(const Scope& scope,
               var_name_item.first, *tensor_in, expected_kernel_key);
           if (NeedTransform(kernel_type_for_var, expected_kernel_key)) {
             auto out_var_names = OutputVars(true);
-            if (std::find(out_var_names.begin(), out_var_names.end(),
+            if (std::find(out_var_names.begin(),
+                          out_var_names.end(),
                           var_name) != out_var_names.end()) {
               inplace_vars.push_back(var_name);
             }
@@ -473,7 +490,9 @@ void OperatorWithKernel::RunImpl(const Scope& scope,
                     << kernel_type_for_var << " to " << expected_kernel_key;
             auto* trans_var = new_scope.Var(var_name);
             std::shared_ptr<Tensor> out(new Tensor);
-            DataTransform(expected_kernel_key, kernel_type_for_var, *tensor_in,
+            DataTransform(expected_kernel_key,
+                          kernel_type_for_var,
+                          *tensor_in,
                           out.get());
             CopyVariableWithTensor(*var, *(out.get()), trans_var);
           }
@@ -529,8 +548,10 @@ proto::VarType::Type OperatorWithKernel::IndicateDataType(
           int tmp = static_cast<int>(ToDataType(t->type()));
           PADDLE_ENFORCE(
               tmp == data_type || data_type == -1,
-              "DataType of Paddle Op %s must be the same. Get %d != %d", Type(),
-              data_type, tmp);
+              "DataType of Paddle Op %s must be the same. Get %d != %d",
+              Type(),
+              data_type,
+              tmp);
           data_type = tmp;
         }
       }
@@ -546,10 +567,11 @@ OpKernelType OperatorWithKernel::GetExpectedKernelType(
 }
 
 OpKernelType OperatorWithKernel::GetKernelTypeForVar(
-    const std::string& var_name, const Tensor& tensor,
+    const std::string& var_name,
+    const Tensor& tensor,
     const OpKernelType& expected_kernel_type) const {
-  return OpKernelType(expected_kernel_type.data_type_, tensor.place(),
-                      tensor.layout());
+  return OpKernelType(
+      expected_kernel_type.data_type_, tensor.place(), tensor.layout());
 }
 
 }  // namespace framework

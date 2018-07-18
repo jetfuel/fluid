@@ -20,8 +20,10 @@ namespace paddle {
 namespace fluid {
 namespace framework {
 
-void TensorCopy(const Tensor& src, const platform::Place& dst_place,
-                const platform::DeviceContext& ctx, Tensor* dst) {
+void TensorCopy(const Tensor& src,
+                const platform::Place& dst_place,
+                const platform::DeviceContext& ctx,
+                Tensor* dst) {
   VLOG(3) << "TensorCopy " << src.dims() << " from " << src.place() << " to "
           << dst_place;
   src.check_memory_size();
@@ -36,8 +38,11 @@ void TensorCopy(const Tensor& src, const platform::Place& dst_place,
   auto size = src.numel() * SizeOfType(src.type());
 
   if (platform::is_cpu_place(src_place) && platform::is_cpu_place(dst_place)) {
-    memory::Copy(boost::get<platform::CPUPlace>(dst_place), dst_ptr,
-                 boost::get<platform::CPUPlace>(src_place), src_ptr, size);
+    memory::Copy(boost::get<platform::CPUPlace>(dst_place),
+                 dst_ptr,
+                 boost::get<platform::CPUPlace>(src_place),
+                 src_ptr,
+                 size);
   }
 #ifdef PADDLE_WITH_CUDA
   else if (platform::is_gpu_place(src_place) &&  // NOLINT
@@ -75,7 +80,8 @@ void TensorCopy(const Tensor& src, const platform::Place& dst_place,
 #endif
 }
 
-void TensorCopy(const Tensor& src, const platform::Place& dst_place,
+void TensorCopy(const Tensor& src,
+                const platform::Place& dst_place,
                 Tensor* dst) {
   platform::DeviceContextPool& pool = platform::DeviceContextPool::Instance();
   const platform::DeviceContext* dev_ctx;
@@ -87,7 +93,8 @@ void TensorCopy(const Tensor& src, const platform::Place& dst_place,
   TensorCopy(src, dst_place, *dev_ctx, dst);
 }
 
-void TensorCopySync(const Tensor& src, const platform::Place& dst_place,
+void TensorCopySync(const Tensor& src,
+                    const platform::Place& dst_place,
                     Tensor* dst) {
   VLOG(3) << "TensorCopySync " << src.dims() << " from " << src.place()
           << " to " << dst_place;
@@ -99,8 +106,11 @@ void TensorCopySync(const Tensor& src, const platform::Place& dst_place,
   auto dst_ptr = dst->mutable_data(dst_place, src.type());
   auto size = src.numel() * SizeOfType(src.type());
   if (platform::is_cpu_place(src_place) && platform::is_cpu_place(dst_place)) {
-    memory::Copy(boost::get<platform::CPUPlace>(dst_place), dst_ptr,
-                 boost::get<platform::CPUPlace>(src_place), src_ptr, size);
+    memory::Copy(boost::get<platform::CPUPlace>(dst_place),
+                 dst_ptr,
+                 boost::get<platform::CPUPlace>(src_place),
+                 src_ptr,
+                 size);
   }
 #ifdef PADDLE_WITH_CUDA
   else if (platform::is_gpu_place(src_place) &&  // NOLINT
@@ -129,7 +139,9 @@ struct AnyDTypeVisitor {
   const DevCtx& ctx_;
   Tensor* out_;
 
-  AnyDTypeVisitor(Predicate predicate, const Tensor& tensor, const DevCtx& ctx,
+  AnyDTypeVisitor(Predicate predicate,
+                  const Tensor& tensor,
+                  const DevCtx& ctx,
                   Tensor* out)
       : predicate_(predicate), tensor_(tensor), ctx_(ctx), out_(out) {}
 
@@ -143,10 +155,13 @@ struct AnyDTypeVisitor {
 };
 
 template <typename Predicate, typename DevCtx>
-inline void AnyImpl(Predicate predicate, const framework::Tensor& tensor,
-                    const DevCtx& ctx, framework::Tensor* out) {
-  VisitDataType(ToDataType(tensor.type()), AnyDTypeVisitor<Predicate, DevCtx>(
-                                               predicate, tensor, ctx, out));
+inline void AnyImpl(Predicate predicate,
+                    const framework::Tensor& tensor,
+                    const DevCtx& ctx,
+                    framework::Tensor* out) {
+  VisitDataType(
+      ToDataType(tensor.type()),
+      AnyDTypeVisitor<Predicate, DevCtx>(predicate, tensor, ctx, out));
 }
 
 template <typename Predicate>
@@ -226,7 +241,8 @@ bool TensorContainsInf(const framework::Tensor& tensor) {
   return Any(tensor, predicate);
 }
 
-void TensorToStream(std::ostream& os, const Tensor& tensor,
+void TensorToStream(std::ostream& os,
+                    const Tensor& tensor,
                     const platform::DeviceContext& dev_ctx) {
   {  // the 1st field, uint32_t version
     constexpr uint32_t version = 0;
@@ -261,9 +277,11 @@ void TensorToStream(std::ostream& os, const Tensor& tensor,
       uintptr_t data = reinterpret_cast<uintptr_t>(data_ptr);
       while (size != 0) {
         size_t size_to_write = std::min(kBufSize, static_cast<size_t>(size));
-        memory::Copy(cpu, buf.get(),
+        memory::Copy(cpu,
+                     buf.get(),
                      boost::get<platform::CUDAPlace>(tensor.place()),
-                     reinterpret_cast<const void*>(data), size_to_write,
+                     reinterpret_cast<const void*>(data),
+                     size_to_write,
                      gpu_dev_ctx.stream());
         gpu_dev_ctx.Wait();
         os.write(buf.get(), size_to_write);
@@ -281,7 +299,8 @@ void TensorToStream(std::ostream& os, const Tensor& tensor,
 }
 
 struct DeserializedDataFunctor {
-  DeserializedDataFunctor(void** buf, Tensor* tensor,
+  DeserializedDataFunctor(void** buf,
+                          Tensor* tensor,
                           const platform::Place& place)
       : buf_(buf), tensor_(tensor), place_(place) {}
 
@@ -295,7 +314,8 @@ struct DeserializedDataFunctor {
   platform::Place place_;
 };
 
-void TensorFromStream(std::istream& is, Tensor* tensor,
+void TensorFromStream(std::istream& is,
+                      Tensor* tensor,
                       const platform::DeviceContext& dev_ctx) {
   uint32_t version;
   is.read(reinterpret_cast<char*>(&version), sizeof(version));

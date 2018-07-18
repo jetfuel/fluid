@@ -76,10 +76,14 @@ static void BuildVar(const std::string& param_name,
     var->add_arguments(arg_name);
   }
 }
-REGISTER_OP_WITHOUT_GRADIENT(cos_sim, paddle::fluid::framework::CosineOp,
-                             paddle::fluid::framework::CosineOpProtoAndCheckerMaker);
-REGISTER_OP_WITHOUT_GRADIENT(my_test_op, paddle::fluid::framework::MyTestOp,
-                             paddle::fluid::framework::MyTestOpProtoAndCheckerMaker);
+REGISTER_OP_WITHOUT_GRADIENT(
+    cos_sim,
+    paddle::fluid::framework::CosineOp,
+    paddle::fluid::framework::CosineOpProtoAndCheckerMaker);
+REGISTER_OP_WITHOUT_GRADIENT(
+    my_test_op,
+    paddle::fluid::framework::MyTestOp,
+    paddle::fluid::framework::MyTestOpProtoAndCheckerMaker);
 
 TEST(OpRegistry, CreateOp) {
   paddle::fluid::framework::proto::OpDesc op_desc;
@@ -201,7 +205,8 @@ class CosineOpComplete : public paddle::fluid::framework::CosineOp {
 
 TEST(OperatorRegistrar, Test) {
   paddle::fluid::framework::OperatorRegistrar<
-      CosineOpComplete, paddle::fluid::framework::CosineOpProtoAndCheckerMaker>
+      CosineOpComplete,
+      paddle::fluid::framework::CosineOpProtoAndCheckerMaker>
       reg("cos");
 }
 
@@ -240,13 +245,15 @@ class OpKernelTest : public paddle::fluid::framework::OpKernel<T> {
 REGISTER_OP_WITHOUT_GRADIENT(op_with_kernel,
                              paddle::fluid::framework::OpWithKernelTest,
                              paddle::fluid::framework::OpKernelTestMaker);
-REGISTER_OP_CPU_KERNEL(
-    op_with_kernel,
-    paddle::fluid::framework::OpKernelTest<paddle::fluid::platform::CPUDeviceContext, float>);
+REGISTER_OP_CPU_KERNEL(op_with_kernel,
+                       paddle::fluid::framework::OpKernelTest<
+                           paddle::fluid::platform::CPUDeviceContext,
+                           float>);
 
 REGISTER_OP_CUDA_KERNEL(op_with_kernel,
                         paddle::fluid::framework::OpKernelTest<
-                            paddle::fluid::platform::CUDADeviceContext, float>);
+                            paddle::fluid::platform::CUDADeviceContext,
+                            float>);
 
 TEST(OperatorRegistrar, CPU) {
   paddle::fluid::framework::proto::OpDesc op_desc;
@@ -289,7 +296,8 @@ class OpWithMultiKernelTest : public OperatorWithKernel {
 
   framework::OpKernelType GetExpectedKernelType(
       const framework::ExecutionContext& ctx) const override {
-    return framework::OpKernelType(proto::VarType::FP32, platform::CUDAPlace(0),
+    return framework::OpKernelType(proto::VarType::FP32,
+                                   platform::CUDAPlace(0),
                                    TensorDataLayout::kAnyLayout,
                                    framework::Accelerator::kCUDNN);
   }
@@ -351,16 +359,24 @@ REGISTER_OP_WITHOUT_GRADIENT(op_with_multi_kernel,
                              paddle::fluid::framework::OpWithMultiKernelTest,
                              paddle::fluid::framework::OpKernelTestMaker);
 REGISTER_OP_KERNEL(
-    op_with_multi_kernel, CPU, paddle::fluid::platform::CPUPlace,
+    op_with_multi_kernel,
+    CPU,
+    paddle::fluid::platform::CPUPlace,
     paddle::fluid::framework::OpMultiKernelTest<CPUDeviceContext, float>);
 REGISTER_OP_KERNEL(
-    op_with_multi_kernel, MKLDNN, paddle::fluid::platform::CPUPlace,
+    op_with_multi_kernel,
+    MKLDNN,
+    paddle::fluid::platform::CPUPlace,
     paddle::fluid::framework::OpMultiKernelTest2<CPUDeviceContext, float>);
 REGISTER_OP_KERNEL(
-    op_with_multi_kernel, CUDA, paddle::fluid::platform::CUDAPlace,
+    op_with_multi_kernel,
+    CUDA,
+    paddle::fluid::platform::CUDAPlace,
     paddle::fluid::framework::OpMultiKernelTest<CUDADeviceContext, float>);
 REGISTER_OP_KERNEL(
-    op_with_multi_kernel, CUDNN, paddle::fluid::platform::CUDAPlace,
+    op_with_multi_kernel,
+    CUDNN,
+    paddle::fluid::platform::CUDAPlace,
     paddle::fluid::framework::OpMultiKernelTest2<CUDADeviceContext, float>);
 
 TEST(OperatorRegistrar, OpWithMultiKernel) {

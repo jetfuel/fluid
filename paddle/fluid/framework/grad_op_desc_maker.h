@@ -33,7 +33,8 @@ namespace framework {
 class GradOpDescMaker {
  public:
   explicit GradOpDescMaker(
-      const OpDesc& fwd_op, const std::unordered_set<std::string>& no_grad_set,
+      const OpDesc& fwd_op,
+      const std::unordered_set<std::string>& no_grad_set,
       std::unordered_map<std::string, std::string>* grad_to_var);
 
   virtual ~GradOpDescMaker() = default;

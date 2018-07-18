@@ -30,18 +30,19 @@ extern void* nccl_dso_handle;
 
 #ifdef PADDLE_USE_DSO
 
-#define DECLARE_DYNAMIC_LOAD_NCCL_WRAP(__name)                           \
-  struct DynLoad__##__name {                                             \
-    template <typename... Args>                                          \
-    auto operator()(Args... args) -> decltype(__name(args...)) {         \
-      using nccl_func = decltype(&::__name);                             \
-      std::call_once(nccl_dso_flag, []() {                               \
-        nccl_dso_handle = paddle::fluid::platform::dynload::GetNCCLDsoHandle(); \
-      });                                                                \
-      static void* p_##__name = dlsym(nccl_dso_handle, #__name);         \
-      return reinterpret_cast<nccl_func>(p_##__name)(args...);           \
-    }                                                                    \
-  };                                                                     \
+#define DECLARE_DYNAMIC_LOAD_NCCL_WRAP(__name)                    \
+  struct DynLoad__##__name {                                      \
+    template <typename... Args>                                   \
+    auto operator()(Args... args) -> decltype(__name(args...)) {  \
+      using nccl_func = decltype(&::__name);                      \
+      std::call_once(nccl_dso_flag, []() {                        \
+        nccl_dso_handle =                                         \
+            paddle::fluid::platform::dynload::GetNCCLDsoHandle(); \
+      });                                                         \
+      static void* p_##__name = dlsym(nccl_dso_handle, #__name);  \
+      return reinterpret_cast<nccl_func>(p_##__name)(args...);    \
+    }                                                             \
+  };                                                              \
   extern DynLoad__##__name __name
 #else
 #define DECLARE_DYNAMIC_LOAD_NCCL_WRAP(__name) \

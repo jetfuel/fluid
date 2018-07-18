@@ -45,16 +45,18 @@ struct OpInfoFillTypeID {
                       : (std::is_base_of<GradOpDescMaker, T>::value
                              ? kGradOpDescMaker
                              : (std::is_base_of<InferShapeBase, T>::value
-                                ? kShapeInference
-                                : static_cast<OpInfoFillType>(
-                                    -1))));
-// FIXME(tonyyang-svail): change to the following when adding back VarTypeInference
-//                             : (std::is_base_of<VarTypeInference, T>::value
-//                                    ? kVarTypeInference
-//                                    : (std::is_base_of<InferShapeBase, T>::value
-//                                           ? kShapeInference
-//                                           : static_cast<OpInfoFillType>(
-//                                                 -1)))));
+                                    ? kShapeInference
+                                    : static_cast<OpInfoFillType>(-1))));
+    // FIXME(tonyyang-svail): change to the following when adding back
+    // VarTypeInference
+    //                             : (std::is_base_of<VarTypeInference,
+    //                             T>::value
+    //                                    ? kVarTypeInference
+    //                                    : (std::is_base_of<InferShapeBase,
+    //                                    T>::value
+    //                                           ? kShapeInference
+    //                                           : static_cast<OpInfoFillType>(
+    //                                                 -1)))));
   }
 };
 
@@ -87,7 +89,8 @@ class OperatorRegistrarRecursive<I, true, ARGS...> {
 template <typename T>
 struct OpInfoFiller<T, kOperator> {
   void operator()(const char* op_type, OpInfo* info) const {
-    info->creator_ = [](const std::string& type, const VariableNameMap& inputs,
+    info->creator_ = [](const std::string& type,
+                        const VariableNameMap& inputs,
                         const VariableNameMap& outputs,
                         const AttributeMap& attrs) {
       return new T(type, inputs, outputs, attrs);
@@ -106,7 +109,8 @@ struct OpInfoFiller<T, kOpProtoAndCheckerMaker> {
     PADDLE_ENFORCE(
         info->proto_->IsInitialized(),
         "Fail to initialize %s's OpProto, because %s is not initialized",
-        op_type, info->proto_->InitializationErrorString());
+        op_type,
+        info->proto_->InitializationErrorString());
   }
 };
 
@@ -123,9 +127,10 @@ struct OpInfoFiller<T, kGradOpDescMaker> {
   }
 };
 
-// FIXME(tonyyang-svail): change to the following when adding back VarTypeInference
-//template <typename T>
-//struct OpInfoFiller<T, kVarTypeInference> {
+// FIXME(tonyyang-svail): change to the following when adding back
+// VarTypeInference
+// template <typename T>
+// struct OpInfoFiller<T, kVarTypeInference> {
 //  void operator()(const char* op_type, OpInfo* info) const {
 //    info->infer_var_type_ = [](const OpDesc& fwd_op, BlockDesc* block) {
 //      T inference;

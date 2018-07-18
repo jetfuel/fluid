@@ -49,29 +49,45 @@ template <typename DeviceContext>
 struct Transform {
   // The unary version.
   template <typename InputIter, typename OutputIter, typename UnaryOperation>
-  void operator()(const DeviceContext& context, InputIter first, InputIter last,
-                  OutputIter result, UnaryOperation op);
+  void operator()(const DeviceContext& context,
+                  InputIter first,
+                  InputIter last,
+                  OutputIter result,
+                  UnaryOperation op);
 
   // The binary version.
-  template <typename InputIter1, typename InputIter2, typename OutputIter,
+  template <typename InputIter1,
+            typename InputIter2,
+            typename OutputIter,
             typename BinaryOperation>
-  void operator()(const DeviceContext& context, InputIter1 first1,
-                  InputIter1 last1, InputIter2 first2, OutputIter result,
+  void operator()(const DeviceContext& context,
+                  InputIter1 first1,
+                  InputIter1 last1,
+                  InputIter2 first2,
+                  OutputIter result,
                   BinaryOperation op);
 };
 
 template <>
 struct Transform<platform::CPUDeviceContext> {
   template <typename InputIter, typename OutputIter, typename UnaryOperation>
-  void operator()(const platform::CPUDeviceContext& context, InputIter first,
-                  InputIter last, OutputIter result, UnaryOperation op) {
+  void operator()(const platform::CPUDeviceContext& context,
+                  InputIter first,
+                  InputIter last,
+                  OutputIter result,
+                  UnaryOperation op) {
     std::transform(first, last, result, op);
   }
 
-  template <typename InputIter1, typename InputIter2, typename OutputIter,
+  template <typename InputIter1,
+            typename InputIter2,
+            typename OutputIter,
             typename BinaryOperation>
-  void operator()(const platform::CPUDeviceContext& context, InputIter1 first1,
-                  InputIter1 last1, InputIter2 first2, OutputIter result,
+  void operator()(const platform::CPUDeviceContext& context,
+                  InputIter1 first1,
+                  InputIter1 last1,
+                  InputIter2 first2,
+                  OutputIter result,
                   BinaryOperation op) {
     std::transform(first1, last1, first2, result, op);
   }
@@ -81,20 +97,29 @@ struct Transform<platform::CPUDeviceContext> {
 template <>
 struct Transform<platform::CUDADeviceContext> {
   template <typename InputIter, typename OutputIter, typename UnaryOperation>
-  void operator()(const platform::CUDADeviceContext& context, InputIter first,
-                  InputIter last, OutputIter result, UnaryOperation op) {
+  void operator()(const platform::CUDADeviceContext& context,
+                  InputIter first,
+                  InputIter last,
+                  OutputIter result,
+                  UnaryOperation op) {
     auto place = context.GetPlace();
     PADDLE_ENFORCE(is_gpu_place(place), "It must use GPU place.");
     thrust::transform(thrust::cuda::par.on(context.stream()),
                       details::CastToCUDATransformIterator(first),
                       details::CastToCUDATransformIterator(last),
-                      details::CastToCUDATransformIterator(result), op);
+                      details::CastToCUDATransformIterator(result),
+                      op);
   }
 
-  template <typename InputIter1, typename InputIter2, typename OutputIter,
+  template <typename InputIter1,
+            typename InputIter2,
+            typename OutputIter,
             typename BinaryOperation>
-  void operator()(const platform::CUDADeviceContext& context, InputIter1 first1,
-                  InputIter1 last1, InputIter2 first2, OutputIter result,
+  void operator()(const platform::CUDADeviceContext& context,
+                  InputIter1 first1,
+                  InputIter1 last1,
+                  InputIter2 first2,
+                  OutputIter result,
                   BinaryOperation op) {
     auto place = context.GetPlace();
     PADDLE_ENFORCE(is_gpu_place(place), "It must use GPU place.");
@@ -102,7 +127,8 @@ struct Transform<platform::CUDADeviceContext> {
                       details::CastToCUDATransformIterator(first1),
                       details::CastToCUDATransformIterator(last1),
                       details::CastToCUDATransformIterator(first2),
-                      details::CastToCUDATransformIterator(result), op);
+                      details::CastToCUDATransformIterator(result),
+                      op);
   }
 };
 #endif

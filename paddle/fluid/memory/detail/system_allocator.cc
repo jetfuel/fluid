@@ -135,8 +135,8 @@ void* CUDAPinnedAllocator::Alloc(size_t* index, size_t size) {
   // NOTE: here, we use CUDAPinnedMaxAllocSize as the maximum memory size
   // of host pinned allocation. Allocates too much would reduce
   // the amount of memory available to the underlying system for paging.
-  size_t usable =
-      paddle::fluid::platform::CUDAPinnedMaxAllocSize() - cuda_pinnd_alloc_size_;
+  size_t usable = paddle::fluid::platform::CUDAPinnedMaxAllocSize() -
+                  cuda_pinnd_alloc_size_;
 
   if (size > usable) {
     LOG(WARNING) << "Cannot malloc " << size / 1024.0 / 1024.0

@@ -20,14 +20,16 @@ limitations under the License. */
 
 TEST(DDim, Equality) {
   // construct a DDim from an initialization list
-  paddle::fluid::framework::DDim ddim = paddle::fluid::framework::make_ddim({9, 1, 5});
+  paddle::fluid::framework::DDim ddim =
+      paddle::fluid::framework::make_ddim({9, 1, 5});
   EXPECT_EQ(ddim[0], 9);
   EXPECT_EQ(ddim[1], 1);
   EXPECT_EQ(ddim[2], 5);
 
   // construct a DDim from a vector
   std::vector<int64_t> vec({9, 1, 5});
-  paddle::fluid::framework::DDim vddim = paddle::fluid::framework::make_ddim(vec);
+  paddle::fluid::framework::DDim vddim =
+      paddle::fluid::framework::make_ddim(vec);
   EXPECT_EQ(ddim[0], 9);
   EXPECT_EQ(ddim[1], 1);
   EXPECT_EQ(ddim[2], 5);
@@ -44,7 +46,8 @@ TEST(DDim, Equality) {
   EXPECT_EQ(res_vec[1], 1);
   EXPECT_EQ(res_vec[2], 5);
   paddle::fluid::framework::Dim<3> d(3, 2, 1);
-  res_vec = paddle::fluid::framework::vectorize(paddle::fluid::framework::DDim(d));
+  res_vec =
+      paddle::fluid::framework::vectorize(paddle::fluid::framework::DDim(d));
   EXPECT_EQ(res_vec[0], 3);
   EXPECT_EQ(res_vec[1], 2);
   EXPECT_EQ(res_vec[2], 1);
@@ -67,19 +70,21 @@ TEST(DDim, Equality) {
 
   // product of a DDim
   EXPECT_EQ(paddle::fluid::framework::product(vddim), 45);
-  EXPECT_EQ(
-      paddle::fluid::framework::product(paddle::fluid::framework::make_ddim({3, 2, 5, 3})),
-      90);
+  EXPECT_EQ(paddle::fluid::framework::product(
+                paddle::fluid::framework::make_ddim({3, 2, 5, 3})),
+            90);
 
   // slice a DDim
   paddle::fluid::framework::DDim ddim2 =
       paddle::fluid::framework::make_ddim({1, 2, 3, 4, 5, 6});
-  paddle::fluid::framework::DDim ss = paddle::fluid::framework::slice_ddim(ddim2, 2, 5);
+  paddle::fluid::framework::DDim ss =
+      paddle::fluid::framework::slice_ddim(ddim2, 2, 5);
   EXPECT_EQ(arity(ss), 3);
   EXPECT_EQ(ss[0], 3);
   EXPECT_EQ(ss[1], 4);
   EXPECT_EQ(ss[2], 5);
-  paddle::fluid::framework::DDim ss2 = paddle::fluid::framework::slice_ddim(ddim2, 0, 6);
+  paddle::fluid::framework::DDim ss2 =
+      paddle::fluid::framework::slice_ddim(ddim2, 0, 6);
   EXPECT_EQ(arity(ss2), 6);
   EXPECT_EQ(ss2[0], 1);
   EXPECT_EQ(ss2[1], 2);
@@ -92,7 +97,8 @@ TEST(DDim, Equality) {
 TEST(DDim, Print) {
   // print a DDim
   std::stringstream ss;
-  paddle::fluid::framework::DDim ddim = paddle::fluid::framework::make_ddim({2, 3, 4});
+  paddle::fluid::framework::DDim ddim =
+      paddle::fluid::framework::make_ddim({2, 3, 4});
   ss << ddim;
   EXPECT_EQ("2, 3, 4", ss.str());
 }

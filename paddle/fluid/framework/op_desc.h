@@ -29,12 +29,14 @@ class OpDesc {
  public:
   OpDesc() {}
 
-  OpDesc(const std::string &type, const VariableNameMap &inputs,
-         const VariableNameMap &outputs, const AttributeMap &attrs);
+  OpDesc(const std::string &type,
+         const VariableNameMap &inputs,
+         const VariableNameMap &outputs,
+         const AttributeMap &attrs);
 
   void CopyFrom(const OpDesc &op_desc);
 
-  const proto::OpDesc& Proto();
+  const proto::OpDesc &Proto();
 
   std::string Type() const { return desc_.type(); }
 
@@ -116,7 +118,9 @@ class OpDesc {
     std::vector<typename MapType::key_type> ret_val;
     ret_val.reserve(map.size());
     std::transform(
-        map.begin(), map.end(), std::back_inserter(ret_val),
+        map.begin(),
+        map.end(),
+        std::back_inserter(ret_val),
         [](const typename MapType::value_type &pair) { return pair.first; });
     return ret_val;
   }
@@ -134,17 +138,16 @@ class OpDesc {
   bool need_update_{false};
 };
 
-
 /// If a variable is a empty variable, that name will be used.
 constexpr char kEmptyVarName[] = "@EMPTY@";
 constexpr char kTempVarName[] = "@TEMP@";
 constexpr char kGradVarSuffix[] = "@GRAD";
 
-inline std::string TempVarName(const std::string& var_name) {
+inline std::string TempVarName(const std::string &var_name) {
   return var_name + kTempVarName;
 }
 
-inline std::string GradVarName(const std::string& var_name) {
+inline std::string GradVarName(const std::string &var_name) {
   return var_name + kGradVarSuffix;
 }
 

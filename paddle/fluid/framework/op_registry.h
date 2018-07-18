@@ -53,7 +53,8 @@ template <typename... ARGS>
 struct OperatorRegistrar : public Registrar {
   explicit OperatorRegistrar(const char* op_type) {
     PADDLE_ENFORCE(!OpInfoMap::Instance().Has(op_type),
-                   "'%s' is registered more than once.", op_type);
+                   "'%s' is registered more than once.",
+                   op_type);
     static_assert(sizeof...(ARGS) != 0,
                   "OperatorRegistrar should be invoked at least by OpClass");
     OpInfo info;
@@ -86,7 +87,8 @@ struct OpKernelRegistrarFunctor<PlaceType, false, I, KernelTypes...> {
     using T = typename KERNEL_TYPE::ELEMENT_TYPE;
     std::string library(accelerator);
     std::string data_layout = "ANYLAYOUT";
-    OpKernelType key(ToDataType(std::type_index(typeid(T))), PlaceType(),
+    OpKernelType key(ToDataType(std::type_index(typeid(T))),
+                     PlaceType(),
                      TensorDataLayout(data_layout),
                      Accelerator(accelerator));
     OperatorWithKernel::AllOpKernels()[op_type][key].reset(new KERNEL_TYPE);
@@ -141,7 +143,7 @@ class OpKernelRegistrar : public Registrar {
     DEFINE_OP_CONSTRUCTOR(_OpClass_##op_type##_, op_class);                   \
   };                                                                          \
   static ::paddle::fluid::framework::OperatorRegistrar<_OpClass_##op_type##_, \
-                                                ##__VA_ARGS__>                \
+                                                       ##__VA_ARGS__>         \
       __op_registrar_##op_type##__(#op_type);                                 \
   int TouchOpRegistrar_##op_type() {                                          \
     __op_registrar_##op_type##__.Touch();                                     \
@@ -154,23 +156,26 @@ class OpKernelRegistrar : public Registrar {
 /**
  * Macro to register OperatorKernel.
  */
-#define REGISTER_OP_KERNEL(op_type, accelerator, place_class, ...)                \
-  STATIC_ASSERT_GLOBAL_NAMESPACE(                                                 \
-      __reg_op_kernel_##op_type##_##accelerator##__,                              \
-      "REGISTER_OP_KERNEL must be called in global namespace");                   \
-  static ::paddle::fluid::framework::OpKernelRegistrar<place_class, __VA_ARGS__>  \
-      __op_kernel_registrar_##op_type##_##accelerator##__(#op_type,               \
-                                                           #accelerator);         \
-  int TouchOpKernelRegistrar_##op_type##_##accelerator() {                        \
-    __op_kernel_registrar_##op_type##_##accelerator##__.Touch();                  \
-    return 0;                                                                     \
+#define REGISTER_OP_KERNEL(op_type, accelerator, place_class, ...)       \
+  STATIC_ASSERT_GLOBAL_NAMESPACE(                                        \
+      __reg_op_kernel_##op_type##_##accelerator##__,                     \
+      "REGISTER_OP_KERNEL must be called in global namespace");          \
+  static ::paddle::fluid::framework::OpKernelRegistrar<place_class,      \
+                                                       __VA_ARGS__>      \
+      __op_kernel_registrar_##op_type##_##accelerator##__(#op_type,      \
+                                                          #accelerator); \
+  int TouchOpKernelRegistrar_##op_type##_##accelerator() {               \
+    __op_kernel_registrar_##op_type##_##accelerator##__.Touch();         \
+    return 0;                                                            \
   }
 
 #define REGISTER_OP_CUDA_KERNEL(op_type, ...) \
-  REGISTER_OP_KERNEL(op_type, CUDA, ::paddle::fluid::platform::CUDAPlace, __VA_ARGS__)
+  REGISTER_OP_KERNEL(                         \
+      op_type, CUDA, ::paddle::fluid::platform::CUDAPlace, __VA_ARGS__)
 
 #define REGISTER_OP_CPU_KERNEL(op_type, ...) \
-  REGISTER_OP_KERNEL(op_type, CPU, ::paddle::fluid::platform::CPUPlace, __VA_ARGS__)
+  REGISTER_OP_KERNEL(                        \
+      op_type, CPU, ::paddle::fluid::platform::CPUPlace, __VA_ARGS__)
 
 /**
  * Macro to mark what Operator and Kernel

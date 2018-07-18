@@ -84,8 +84,9 @@ DDim make_ddim(const std::vector<int64_t>& dims) {
 
 DDim make_ddim(const std::vector<int>& dims) {
   std::vector<int64_t> res(dims.size());
-  std::transform(dims.begin(), dims.end(), res.begin(),
-                 [](int d) { return static_cast<int64_t>(d); });
+  std::transform(dims.begin(), dims.end(), res.begin(), [](int d) {
+    return static_cast<int64_t>(d);
+  });
   return make_ddim(res);
 }
 

@@ -28,10 +28,16 @@ namespace paddle {
 namespace fluid {
 namespace framework {
 
-using Attribute =
-    boost::variant<boost::blank, int, float, std::string, std::vector<int>,
-                   std::vector<float>, std::vector<std::string>, bool,
-                   std::vector<bool>, int64_t>;
+using Attribute = boost::variant<boost::blank,
+                                 int,
+                                 float,
+                                 std::string,
+                                 std::vector<int>,
+                                 std::vector<float>,
+                                 std::vector<std::string>,
+                                 bool,
+                                 std::vector<bool>,
+                                 int64_t>;
 
 using AttributeMap = std::unordered_map<std::string, Attribute>;
 
@@ -49,8 +55,8 @@ class AttrReader {
 
   template <typename T>
   inline const T& Get(const std::string& name) const {
-    PADDLE_ENFORCE(attrs_.count(name) != 0, "%s should be in AttributeMap",
-                   name);
+    PADDLE_ENFORCE(
+        attrs_.count(name) != 0, "%s should be in AttributeMap", name);
     return boost::get<T>(attrs_.at(name));
   }
 
@@ -103,7 +109,8 @@ class EnumInContainer {
   explicit EnumInContainer(const std::unordered_set<T>& c) : container_(c) {}
   void operator()(T& val) const {
     PADDLE_ENFORCE(container_.find(val) != container_.end(),
-                   "Value %s is not in enum container %s", val,
+                   "Value %s is not in enum container %s",
+                   val,
                    ContainerDebugString());
   }
 
@@ -137,7 +144,9 @@ struct ExtractAttribute {
       attr_value = &boost::get<T>(attr);
     } catch (boost::bad_get& bad_get) {
       PADDLE_THROW("Cannot get attribute %s by type %s, its type is %s",
-                   attr_name_, typeid(T).name(), attr.type().name());
+                   attr_name_,
+                   typeid(T).name(),
+                   attr.type().name());
     }
     return attr_value;
   }
@@ -169,7 +178,8 @@ struct ExtractAttribute<bool> {
       attr_value = &boost::get<bool>(attr);
     } catch (boost::bad_get& bad_get) {
       PADDLE_THROW("Cannot get attribute %s by type bool, its type is %s",
-                   attr_name_, attr.type().name());
+                   attr_name_,
+                   attr.type().name());
     }
     return attr_value;
   }
@@ -195,7 +205,8 @@ struct ExtractAttribute<int64_t> {
       attr_value = &boost::get<int64_t>(attr);
     } catch (boost::bad_get& bad_get) {
       PADDLE_THROW("Cannot get attribute %s by type int64_t, its type is %s",
-                   attr_name_, attr.type().name());
+                   attr_name_,
+                   attr.type().name());
     }
     return attr_value;
   }
@@ -232,7 +243,8 @@ class TypedAttrChecker {
 
   TypedAttrChecker& SetDefault(const T& default_value) {
     PADDLE_ENFORCE(default_value_setter_.empty(),
-                   "%s can't have more than one default value!", attr_name_);
+                   "%s can't have more than one default value!",
+                   attr_name_);
     default_value_setter_.push_back(DefaultValueSetter<T>(default_value));
     return *this;
   }
@@ -247,7 +259,8 @@ class TypedAttrChecker {
     if (!attr_map.count(attr_name_)) {
       // user do not set this attr
       PADDLE_ENFORCE(!default_value_setter_.empty(),
-                     "Attribute '%s' is required!", attr_name_);
+                     "Attribute '%s' is required!",
+                     attr_name_);
       // default_value_setter_ has no more than one element
       T val;
       (default_value_setter_[0])(val);

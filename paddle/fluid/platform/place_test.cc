@@ -31,13 +31,18 @@ TEST(Place, Equality) {
 }
 
 TEST(Place, Default) {
-  EXPECT_TRUE(paddle::fluid::platform::is_gpu_place(paddle::fluid::platform::get_place()));
-  EXPECT_TRUE(paddle::fluid::platform::is_gpu_place(paddle::fluid::platform::default_gpu()));
-  EXPECT_TRUE(paddle::fluid::platform::is_cpu_place(paddle::fluid::platform::default_cpu()));
+  EXPECT_TRUE(paddle::fluid::platform::is_gpu_place(
+      paddle::fluid::platform::get_place()));
+  EXPECT_TRUE(paddle::fluid::platform::is_gpu_place(
+      paddle::fluid::platform::default_gpu()));
+  EXPECT_TRUE(paddle::fluid::platform::is_cpu_place(
+      paddle::fluid::platform::default_cpu()));
 
-  EXPECT_FALSE(paddle::fluid::platform::is_cpu_place(paddle::fluid::platform::get_place()));
+  EXPECT_FALSE(paddle::fluid::platform::is_cpu_place(
+      paddle::fluid::platform::get_place()));
   paddle::fluid::platform::set_place(paddle::fluid::platform::CPUPlace());
-  EXPECT_TRUE(paddle::fluid::platform::is_cpu_place(paddle::fluid::platform::get_place()));
+  EXPECT_TRUE(paddle::fluid::platform::is_cpu_place(
+      paddle::fluid::platform::get_place()));
 }
 
 TEST(Place, Print) {

@@ -82,11 +82,11 @@ float test_pinned_memory() {
       // cpu -> GPU on computation stream.
       // note: this operation is async for pinned memory.
       paddle::fluid::memory::Copy(cuda_place,
-                           gpu_mem[i],
-                           cpu_place,
-                           input_pinned_mem[i],
-                           data_size * sizeof(float),
-                           computation_stream);
+                                  gpu_mem[i],
+                                  cpu_place,
+                                  input_pinned_mem[i],
+                                  data_size * sizeof(float),
+                                  computation_stream);
 
       // call kernel on computation stream.
       Kernel<<<4, 1024, 0, computation_stream>>>(gpu_mem[i], data_size);
@@ -101,11 +101,11 @@ float test_pinned_memory() {
       // copy data GPU->CPU, on copy stream.
       // note: this operation is async for pinned memory.
       paddle::fluid::memory::Copy(cpu_place,
-                           output_pinned_mem[i],
-                           cuda_place,
-                           gpu_mem[i],
-                           data_size * sizeof(float),
-                           copying_stream);
+                                  output_pinned_mem[i],
+                                  cuda_place,
+                                  gpu_mem[i],
+                                  data_size * sizeof(float),
+                                  copying_stream);
     }
   }
 

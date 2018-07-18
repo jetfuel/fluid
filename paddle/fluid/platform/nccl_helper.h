@@ -85,7 +85,8 @@ struct NCCLContextMap {
 
   explicit NCCLContextMap(const std::vector<platform::Place> &places,
                           ncclUniqueId *nccl_id = nullptr,
-                          size_t num_trainers = 1, size_t trainer_id = 0) {
+                          size_t num_trainers = 1,
+                          size_t trainer_id = 0) {
     PADDLE_ENFORCE(!places.empty());
     order_.reserve(places.size());
     for (auto &p : places) {
@@ -94,7 +95,8 @@ struct NCCLContextMap {
       contexts_.emplace(dev_id, NCCLContext(dev_id));
     }
     PADDLE_ENFORCE_EQ(
-        order_.size(), contexts_.size(),
+        order_.size(),
+        contexts_.size(),
         "NCCL Context Map does not support contain two or more same device");
 
     if (places.size() <= 1) {

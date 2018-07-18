@@ -37,8 +37,10 @@ inline void VectorToRepeated(const std::vector<T> &vec,
   }
 }
 
-OpDesc::OpDesc(const std::string &type, const VariableNameMap &inputs,
-               const VariableNameMap &outputs, const AttributeMap &attrs) {
+OpDesc::OpDesc(const std::string &type,
+               const VariableNameMap &inputs,
+               const VariableNameMap &outputs,
+               const AttributeMap &attrs) {
   desc_.set_type(type);
   inputs_ = inputs;
   outputs_ = outputs;
@@ -54,15 +56,15 @@ void OpDesc::CopyFrom(const OpDesc &op_desc) {
   need_update_ = true;
 }
 
-const proto::OpDesc& OpDesc::Proto() {
+const proto::OpDesc &OpDesc::Proto() {
   Flush();
   return desc_;
 }
 
 const std::vector<std::string> &OpDesc::Input(const std::string &name) const {
   auto it = inputs_.find(name);
-  PADDLE_ENFORCE(it != inputs_.end(), "Input %s cannot be found in Op %s", name,
-                 Type());
+  PADDLE_ENFORCE(
+      it != inputs_.end(), "Input %s cannot be found in Op %s", name, Type());
   return it->second;
 }
 
@@ -82,8 +84,8 @@ void OpDesc::SetInput(const std::string &param_name,
 
 const std::vector<std::string> &OpDesc::Output(const std::string &name) const {
   auto it = outputs_.find(name);
-  PADDLE_ENFORCE(it != outputs_.end(), "Output %s cannot be found in Op %s",
-                 name, Type());
+  PADDLE_ENFORCE(
+      it != outputs_.end(), "Output %s cannot be found in Op %s", name, Type());
   return it->second;
 }
 
@@ -155,8 +157,8 @@ void OpDesc::Rename(const std::string &old_name, const std::string &new_name) {
 void OpDesc::RenameOutput(const std::string &old_name,
                           const std::string &new_name) {
   for (auto &output : outputs_) {
-    std::replace(output.second.begin(), output.second.end(), old_name,
-                 new_name);
+    std::replace(
+        output.second.begin(), output.second.end(), old_name, new_name);
   }
 
   auto it = attrs_.find(framework::OpProtoAndCheckerMaker::OpRoleVarAttrName());

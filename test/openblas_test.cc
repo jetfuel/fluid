@@ -17,12 +17,11 @@ limitations under the License. */
 
 #include "gtest/gtest.h"
 
-TEST(openblas, ddot)
-{
-    double m[2] = {1.0, 1.0};
-    double n[2] = {2.0, 2.0};
-    int result;
-    
-    result = cblas_ddot(2, m, 1, n, 1);
-    ASSERT_EQ(result, 4);
+TEST(openblas, ddot) {
+  double m[2] = {1.0, 1.0};
+  double n[2] = {2.0, 2.0};
+  int result;
+
+  result = cblas_ddot(2, m, 1, n, 1);
+  ASSERT_EQ(result, 4);
 }

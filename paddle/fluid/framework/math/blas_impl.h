@@ -72,32 +72,73 @@ struct CBlas<double> {
 template <>
 template <typename T>
 void Blas<platform::CPUDeviceContext>::GEMM(CBLAS_TRANSPOSE transA,
-                                            CBLAS_TRANSPOSE transB, int M,
-                                            int N, int K, T alpha, const T *A,
-                                            const T *B, T beta, T *C) const {
+                                            CBLAS_TRANSPOSE transB,
+                                            int M,
+                                            int N,
+                                            int K,
+                                            T alpha,
+                                            const T *A,
+                                            const T *B,
+                                            T beta,
+                                            T *C) const {
   int lda = (transA == CblasNoTrans) ? K : M;
   int ldb = (transB == CblasNoTrans) ? N : K;
   int ldc = N;
-  CBlas<T>::GEMM(CblasRowMajor, transA, transB, M, N, K, alpha, A, lda, B, ldb,
-                 beta, C, ldc);
+  CBlas<T>::GEMM(CblasRowMajor,
+                 transA,
+                 transB,
+                 M,
+                 N,
+                 K,
+                 alpha,
+                 A,
+                 lda,
+                 B,
+                 ldb,
+                 beta,
+                 C,
+                 ldc);
 }
 
 template <>
 template <typename T>
-void Blas<platform::CPUDeviceContext>::GEMM(bool transA, bool transB, int M,
-                                            int N, int K, T alpha, const T *A,
-                                            int lda, const T *B, int ldb,
-                                            T beta, T *C, int ldc) const {
-  CBlas<T>::GEMM(CblasRowMajor, transA == false ? CblasNoTrans : CblasTrans,
-                 transB == false ? CblasNoTrans : CblasTrans, M, N, K, alpha, A,
-                 lda, B, ldb, beta, C, ldc);
+void Blas<platform::CPUDeviceContext>::GEMM(bool transA,
+                                            bool transB,
+                                            int M,
+                                            int N,
+                                            int K,
+                                            T alpha,
+                                            const T *A,
+                                            int lda,
+                                            const T *B,
+                                            int ldb,
+                                            T beta,
+                                            T *C,
+                                            int ldc) const {
+  CBlas<T>::GEMM(CblasRowMajor,
+                 transA == false ? CblasNoTrans : CblasTrans,
+                 transB == false ? CblasNoTrans : CblasTrans,
+                 M,
+                 N,
+                 K,
+                 alpha,
+                 A,
+                 lda,
+                 B,
+                 ldb,
+                 beta,
+                 C,
+                 ldc);
 }
 
 template <typename DeviceContext>
 template <typename T>
-void Blas<DeviceContext>::MatMul(const framework::Tensor &mat_a, bool trans_a,
-                                 const framework::Tensor &mat_b, bool trans_b,
-                                 T alpha, framework::Tensor *mat_out,
+void Blas<DeviceContext>::MatMul(const framework::Tensor &mat_a,
+                                 bool trans_a,
+                                 const framework::Tensor &mat_b,
+                                 bool trans_b,
+                                 T alpha,
+                                 framework::Tensor *mat_out,
                                  T beta) const {
   auto dim_a = mat_a.dims();
   auto dim_b = mat_b.dims();
@@ -115,13 +156,23 @@ void Blas<DeviceContext>::MatMul(const framework::Tensor &mat_a, bool trans_a,
   CBLAS_TRANSPOSE transA = !trans_a ? CblasNoTrans : CblasTrans;
   CBLAS_TRANSPOSE transB = !trans_b ? CblasNoTrans : CblasTrans;
 
-  this->GEMM(transA, transB, M, N, K, alpha, mat_a.data<T>(), mat_b.data<T>(),
-             beta, mat_out->data<T>());
+  this->GEMM(transA,
+             transB,
+             M,
+             N,
+             K,
+             alpha,
+             mat_a.data<T>(),
+             mat_b.data<T>(),
+             beta,
+             mat_out->data<T>());
 }
 
 template <>
 template <typename T>
-void Blas<platform::CPUDeviceContext>::AXPY(int n, T alpha, const T *x,
+void Blas<platform::CPUDeviceContext>::AXPY(int n,
+                                            T alpha,
+                                            const T *x,
                                             T *y) const {
   CBlas<T>::AXPY(n, alpha, x, 1, y, 1);
 }
@@ -134,7 +185,9 @@ void Blas<platform::CPUDeviceContext>::VCOPY(int n, const T *x, T *y) const {
 
 template <>
 template <typename T>
-void Blas<platform::CPUDeviceContext>::VADD(int n, const T *x, const T *y,
+void Blas<platform::CPUDeviceContext>::VADD(int n,
+                                            const T *x,
+                                            const T *y,
                                             T *z) const {
   this->template VCOPY<T>(n, y, z);
   this->template AXPY<T>(n, 1., x, z);
@@ -142,8 +195,13 @@ void Blas<platform::CPUDeviceContext>::VADD(int n, const T *x, const T *y,
 
 template <>
 template <typename T>
-void Blas<platform::CPUDeviceContext>::GEMV(bool trans_a, int M, int N, T alpha,
-                                            const T *A, const T *B, T beta,
+void Blas<platform::CPUDeviceContext>::GEMV(bool trans_a,
+                                            int M,
+                                            int N,
+                                            T alpha,
+                                            const T *A,
+                                            const T *B,
+                                            T beta,
                                             T *C) const {
   CBLAS_TRANSPOSE transA = !trans_a ? CblasNoTrans : CblasTrans;
   CBlas<T>::GEMV(CblasRowMajor, transA, M, N, alpha, A, N, B, 1, beta, C, 1);
@@ -151,10 +209,19 @@ void Blas<platform::CPUDeviceContext>::GEMV(bool trans_a, int M, int N, T alpha,
 
 template <>
 template <typename T>
-void Blas<platform::CPUDeviceContext>::BatchedGEMM(
-    CBLAS_TRANSPOSE transA, CBLAS_TRANSPOSE transB, int M, int N, int K,
-    T alpha, const T *A, const T *B, T beta, T *C, int batchCount,
-    int64_t strideA, int64_t strideB) const {
+void Blas<platform::CPUDeviceContext>::BatchedGEMM(CBLAS_TRANSPOSE transA,
+                                                   CBLAS_TRANSPOSE transB,
+                                                   int M,
+                                                   int N,
+                                                   int K,
+                                                   T alpha,
+                                                   const T *A,
+                                                   const T *B,
+                                                   T beta,
+                                                   T *C,
+                                                   int batchCount,
+                                                   int64_t strideA,
+                                                   int64_t strideB) const {
   for (int k = 0; k < batchCount; ++k) {
     auto *Ak = &A[k * strideA];
     auto *Bk = &B[k * strideB];
@@ -168,23 +235,41 @@ template <typename T>
 void Blas<DeviceContext>::MatMul(const framework::Tensor &mat_a,
                                  const MatDescriptor &dim_a,
                                  const framework::Tensor &mat_b,
-                                 const MatDescriptor &dim_b, T alpha,
-                                 framework::Tensor *mat_out, T beta) const {
+                                 const MatDescriptor &dim_b,
+                                 T alpha,
+                                 framework::Tensor *mat_out,
+                                 T beta) const {
   PADDLE_ENFORCE_EQ(dim_a.width_, dim_b.height_);
   CBLAS_TRANSPOSE transA = !dim_a.trans_ ? CblasNoTrans : CblasTrans;
   CBLAS_TRANSPOSE transB = !dim_b.trans_ ? CblasNoTrans : CblasTrans;
   if (dim_a.batch_size_ == 0 && dim_b.batch_size_ == 0) {
-    this->template GEMM<T>(transA, transB, dim_a.height_, dim_b.width_,
-                           dim_a.width_, alpha, mat_a.data<T>(),
-                           mat_b.data<T>(), beta, mat_out->data<T>());
+    this->template GEMM<T>(transA,
+                           transB,
+                           dim_a.height_,
+                           dim_b.width_,
+                           dim_a.width_,
+                           alpha,
+                           mat_a.data<T>(),
+                           mat_b.data<T>(),
+                           beta,
+                           mat_out->data<T>());
   } else {
     PADDLE_ENFORCE(dim_a.batch_size_ == dim_b.batch_size_ ||
                    dim_a.batch_size_ == 0 || dim_b.batch_size_ == 0);
     this->template BatchedGEMM<T>(
-        transA, transB, dim_a.height_, dim_b.width_, dim_a.width_, alpha,
-        mat_a.data<T>(), mat_b.data<T>(), beta, mat_out->data<T>(),
+        transA,
+        transB,
+        dim_a.height_,
+        dim_b.width_,
+        dim_a.width_,
+        alpha,
+        mat_a.data<T>(),
+        mat_b.data<T>(),
+        beta,
+        mat_out->data<T>(),
         dim_a.batch_size_ == 0 ? dim_b.batch_size_ : dim_a.batch_size_,
-        dim_a.stride_, dim_b.stride_);
+        dim_a.stride_,
+        dim_b.stride_);
   }
 }
 

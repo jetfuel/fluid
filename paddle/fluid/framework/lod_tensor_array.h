@@ -20,6 +20,6 @@ namespace paddle {
 namespace fluid {
 namespace framework {
 using LoDTensorArray = std::vector<LoDTensor>;
-} // namespace framework
-} // namespace fluid
+}  // namespace framework
+}  // namespace fluid
 }  // namespace paddle

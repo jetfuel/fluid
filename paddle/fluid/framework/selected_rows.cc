@@ -40,8 +40,10 @@ struct ReAllocateVisitor {
 };
 
 struct TensorCopyVisitor {
-  TensorCopyVisitor(framework::Tensor* dst, int64_t dst_offset,
-                    const framework::Tensor src, int64_t src_offset,
+  TensorCopyVisitor(framework::Tensor* dst,
+                    int64_t dst_offset,
+                    const framework::Tensor src,
+                    int64_t src_offset,
                     int64_t size)
       : dst_(dst),
         dst_offset_(dst_offset),
@@ -53,8 +55,11 @@ struct TensorCopyVisitor {
   void operator()() const {
     // TODO(Yancey1989): support other place
     platform::CPUPlace cpu;
-    memory::Copy(cpu, dst_->mutable_data<T>(cpu) + dst_offset_, cpu,
-                 src_.data<T>() + src_offset_, size_ * sizeof(T));
+    memory::Copy(cpu,
+                 dst_->mutable_data<T>(cpu) + dst_offset_,
+                 cpu,
+                 src_.data<T>() + src_offset_,
+                 size_ * sizeof(T));
   }
 
   framework::Tensor* dst_;
@@ -64,7 +69,8 @@ struct TensorCopyVisitor {
   int64_t size_;
 };
 
-void SerializeToStream(std::ostream& os, const SelectedRows& selected_rows,
+void SerializeToStream(std::ostream& os,
+                       const SelectedRows& selected_rows,
                        const platform::DeviceContext& dev_ctx) {
   {  // the 1st field, uint32_t version
     constexpr uint32_t version = 0;
@@ -88,7 +94,8 @@ void SerializeToStream(std::ostream& os, const SelectedRows& selected_rows,
   TensorToStream(os, selected_rows.value(), dev_ctx);
 }
 
-void DeserializeFromStream(std::istream& is, SelectedRows* selected_rows,
+void DeserializeFromStream(std::istream& is,
+                           SelectedRows* selected_rows,
                            const platform::DeviceContext& dev_ctx) {
   {
     // the 1st field, unit32_t version for SelectedRows
@@ -130,7 +137,8 @@ std::vector<std::pair<int64_t, int64_t>> SelectedRows::Get(
     VLOG(3) << "keys is empty, please check data!";
   } else {
     int64_t value_width = value_->numel() / value_->dims()[0];
-    PADDLE_ENFORCE_EQ(value_width, value->numel() / value->dims()[0],
+    PADDLE_ENFORCE_EQ(value_width,
+                      value->numel() / value->dims()[0],
                       "output tensor should have the same shape with table "
                       "except the dims[0].");
 
@@ -140,10 +148,12 @@ std::vector<std::pair<int64_t, int64_t>> SelectedRows::Get(
         non_keys_pair.push_back(
             std::make_pair(keys[i], static_cast<int64_t>(i)));
       } else {
-        framework::VisitDataType(
-            framework::ToDataType(value_->type()),
-            TensorCopyVisitor(value, i * value_width, *value_.get(),
-                              index * value_width, value_width));
+        framework::VisitDataType(framework::ToDataType(value_->type()),
+                                 TensorCopyVisitor(value,
+                                                   i * value_width,
+                                                   *value_.get(),
+                                                   index * value_width,
+                                                   value_width));
       }
     }
   }
@@ -154,10 +164,12 @@ bool SelectedRows::Set(int64_t key, const framework::Tensor& value) {
   PADDLE_ENFORCE(value.IsInitialized(), "The value should be initialized.");
   if (value_->IsInitialized()) {
     PADDLE_ENFORCE_EQ(
-        value.type(), value_->type(),
+        value.type(),
+        value_->type(),
         "The type of the value should be same with the original value");
   }
-  PADDLE_ENFORCE_EQ(value.dims()[0], static_cast<size_t>(1),
+  PADDLE_ENFORCE_EQ(value.dims()[0],
+                    static_cast<size_t>(1),
                     "The first dim of value should be 1.");
   std::lock_guard<std::mutex> lock(*auto_grown_mutex_.get());
   auto index = Index(key);
@@ -178,8 +190,10 @@ bool SelectedRows::Set(int64_t key, const framework::Tensor& value) {
   framework::VisitDataType(
       framework::ToDataType(value.type()),
       TensorCopyVisitor(value_.get(),
-                        index * value_->numel() / value_->dims()[0], value,
-                        static_cast<int64_t>(0), value.numel()));
+                        index * value_->numel() / value_->dims()[0],
+                        value,
+                        static_cast<int64_t>(0),
+                        value.numel()));
   return is_new_key;
 }
 

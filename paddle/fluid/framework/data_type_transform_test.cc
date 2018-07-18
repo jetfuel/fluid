@@ -25,32 +25,38 @@ TEST(DataTypeTransform, CPUTransform) {
   auto place = paddle::fluid::platform::CPUPlace();
 
   auto kernel_fp16 = paddle::fluid::framework::OpKernelType(
-      paddle::fluid::framework::proto::VarType::FP16, place,
+      paddle::fluid::framework::proto::VarType::FP16,
+      place,
       paddle::fluid::framework::TensorDataLayout::kAnyLayout,
       paddle::fluid::framework::Accelerator::kPlain);
 
   auto kernel_fp32 = paddle::fluid::framework::OpKernelType(
-      paddle::fluid::framework::proto::VarType::FP32, place,
+      paddle::fluid::framework::proto::VarType::FP32,
+      place,
       paddle::fluid::framework::TensorDataLayout::kAnyLayout,
       paddle::fluid::framework::Accelerator::kPlain);
 
   auto kernel_fp64 = paddle::fluid::framework::OpKernelType(
-      paddle::fluid::framework::proto::VarType::FP64, place,
+      paddle::fluid::framework::proto::VarType::FP64,
+      place,
       paddle::fluid::framework::TensorDataLayout::kAnyLayout,
       paddle::fluid::framework::Accelerator::kPlain);
 
   auto kernel_int32 = paddle::fluid::framework::OpKernelType(
-      paddle::fluid::framework::proto::VarType::INT32, place,
+      paddle::fluid::framework::proto::VarType::INT32,
+      place,
       paddle::fluid::framework::TensorDataLayout::kAnyLayout,
       paddle::fluid::framework::Accelerator::kPlain);
 
   auto kernel_int64 = paddle::fluid::framework::OpKernelType(
-      paddle::fluid::framework::proto::VarType::INT64, place,
+      paddle::fluid::framework::proto::VarType::INT64,
+      place,
       paddle::fluid::framework::TensorDataLayout::kAnyLayout,
       paddle::fluid::framework::Accelerator::kPlain);
 
   auto kernel_bool = paddle::fluid::framework::OpKernelType(
-      paddle::fluid::framework::proto::VarType::BOOL, place,
+      paddle::fluid::framework::proto::VarType::BOOL,
+      place,
       paddle::fluid::framework::TensorDataLayout::kAnyLayout,
       paddle::fluid::framework::Accelerator::kPlain);
 
@@ -59,8 +65,8 @@ TEST(DataTypeTransform, CPUTransform) {
     paddle::fluid::framework::Tensor in;
     paddle::fluid::framework::Tensor out;
 
-    float* ptr =
-        in.mutable_data<float>(paddle::fluid::framework::make_ddim({2, 3}), place);
+    float* ptr = in.mutable_data<float>(
+        paddle::fluid::framework::make_ddim({2, 3}), place);
     int data_number = 2 * 3;
 
     for (int i = 0; i < data_number; ++i) {
@@ -73,7 +79,8 @@ TEST(DataTypeTransform, CPUTransform) {
       EXPECT_EQ(out_data_double[i], static_cast<double>(i / 3));
     }
 
-    paddle::fluid::framework::TransDataType(kernel_fp32, kernel_int32, in, &out);
+    paddle::fluid::framework::TransDataType(
+        kernel_fp32, kernel_int32, in, &out);
     int* out_data_int = out.data<int>();
     for (int i = 0; i < data_number; ++i) {
       EXPECT_EQ(out_data_int[i], static_cast<int>(i / 3));

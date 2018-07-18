@@ -14,32 +14,36 @@
 #include "paddle/fluid/framework/data_layout_transform.h"
 
 #include "gtest/gtest.h"
+#include "paddle/fluid/framework/math/math_function.h"
 #include "paddle/fluid/framework/op_kernel_type.h"
 #include "paddle/fluid/framework/tensor.h"
 #include "paddle/fluid/framework/tensor_data_layout.h"
 #include "paddle/fluid/platform/device_context.h"
 #include "paddle/fluid/platform/enforce.h"
-#include "paddle/fluid/framework/math/math_function.h"
 
 TEST(DataTransform, TensorDataLayoutFunction) {
   auto place = paddle::fluid::platform::CPUPlace();
   paddle::fluid::framework::Tensor in = paddle::fluid::framework::Tensor();
   paddle::fluid::framework::Tensor out = paddle::fluid::framework::Tensor();
-  in.mutable_data<double>(paddle::fluid::framework::make_ddim({2, 3, 1, 2}), place);
+  in.mutable_data<double>(paddle::fluid::framework::make_ddim({2, 3, 1, 2}),
+                          place);
   in.set_layout(paddle::fluid::framework::TensorDataLayout::kNHWC);
 
   auto kernel_nhwc = paddle::fluid::framework::OpKernelType(
-      paddle::fluid::framework::proto::VarType::FP32, place,
+      paddle::fluid::framework::proto::VarType::FP32,
+      place,
       paddle::fluid::framework::TensorDataLayout::kNHWC,
       paddle::fluid::framework::Accelerator::Type::kPlain);
   auto kernel_ncwh = paddle::fluid::framework::OpKernelType(
-      paddle::fluid::framework::proto::VarType::FP32, place,
+      paddle::fluid::framework::proto::VarType::FP32,
+      place,
       paddle::fluid::framework::TensorDataLayout::kNCHW,
       paddle::fluid::framework::Accelerator::Type::kPlain);
 
   paddle::fluid::framework::TransDataLayout(kernel_nhwc, kernel_ncwh, in, &out);
 
-  EXPECT_TRUE(out.layout() == paddle::fluid::framework::TensorDataLayout::kNCHW);
+  EXPECT_TRUE(out.layout() ==
+              paddle::fluid::framework::TensorDataLayout::kNCHW);
   EXPECT_TRUE(out.dims() == paddle::fluid::framework::make_ddim({2, 2, 3, 1}));
 
   TransDataLayout(kernel_ncwh, kernel_nhwc, in, &out);

@@ -58,13 +58,13 @@ inline const char* cudnnGetErrorString(cudnnStatus_t status) {
 #define CUDNN_VERSION_MIN(major, minor, patch) \
   (CUDNN_VERSION >= ((major)*1000 + (minor)*100 + (patch)))
 
-#define CUDNN_ENFORCE(condition)                                  \
-  do {                                                            \
-    cudnnStatus_t status = condition;                             \
-    if (status != CUDNN_STATUS_SUCCESS) {                         \
+#define CUDNN_ENFORCE(condition)                                         \
+  do {                                                                   \
+    cudnnStatus_t status = condition;                                    \
+    if (status != CUDNN_STATUS_SUCCESS) {                                \
       VLOG(1) << ::paddle::fluid::platform::cudnnGetErrorString(status); \
-      PADDLE_THROW("cuDNN call failed");                          \
-    }                                                             \
+      PADDLE_THROW("cuDNN call failed");                                 \
+    }                                                                    \
   } while (false)
 
 enum class DataLayout {  // Not use
@@ -190,9 +190,11 @@ class ScopedTensorDescriptor {
     if (groups > 1) {
       dims_with_group[1] = dims_with_group[1] / groups;
     }
-    PADDLE_ENFORCE(dynload::cudnnSetTensorNdDescriptor(
-        desc_, type, dims_with_group.size(), dims_with_group.data(),
-        strides.data()));
+    PADDLE_ENFORCE(dynload::cudnnSetTensorNdDescriptor(desc_,
+                                                       type,
+                                                       dims_with_group.size(),
+                                                       dims_with_group.data(),
+                                                       strides.data()));
     return desc_;
   }
 
@@ -200,8 +202,8 @@ class ScopedTensorDescriptor {
   inline cudnnTensorDescriptor_t descriptor(const DataLayout& order,
                                             const std::vector<int>& dims,
                                             const int groups = 1) {
-    return descriptor(GetCudnnTensorFormat(order), CudnnDataType<T>::type, dims,
-                      groups);
+    return descriptor(
+        GetCudnnTensorFormat(order), CudnnDataType<T>::type, dims, groups);
   }
 
  private:
@@ -231,9 +233,12 @@ class ScopedFilterDescriptor {
       kernel_with_group[0] /= groups;
       // NOTE: input filter(C) of the filter is already asserted to be C/groups.
     }
-    PADDLE_ENFORCE(dynload::cudnnSetFilterNdDescriptor(
-        desc_, type, format, kernel_with_group.size(),
-        kernel_with_group.data()));
+    PADDLE_ENFORCE(
+        dynload::cudnnSetFilterNdDescriptor(desc_,
+                                            type,
+                                            format,
+                                            kernel_with_group.size(),
+                                            kernel_with_group.data()));
     return desc_;
   }
 
@@ -241,8 +246,8 @@ class ScopedFilterDescriptor {
   inline cudnnFilterDescriptor_t descriptor(const DataLayout& order,
                                             const std::vector<int>& kernel,
                                             const int groups = 1) {
-    return descriptor(GetCudnnTensorFormat(order), CudnnDataType<T>::type,
-                      kernel, groups);
+    return descriptor(
+        GetCudnnTensorFormat(order), CudnnDataType<T>::type, kernel, groups);
   }
 
  private:
@@ -260,8 +265,10 @@ class ScopedConvolutionDescriptor {
   }
 
   inline cudnnConvolutionDescriptor_t descriptor(
-      cudnnDataType_t type, const std::vector<int>& pads,
-      const std::vector<int>& strides, const std::vector<int>& dilations) {
+      cudnnDataType_t type,
+      const std::vector<int>& pads,
+      const std::vector<int>& strides,
+      const std::vector<int>& dilations) {
     PADDLE_ENFORCE_EQ(pads.size(), strides.size());
     PADDLE_ENFORCE_EQ(pads.size(), dilations.size());
 
@@ -270,24 +277,32 @@ class ScopedConvolutionDescriptor {
     // instead of dilations and it is must be one.
     for (size_t i = 0; i < dilations.size(); ++i) {
       PADDLE_ENFORCE_EQ(
-          dilations[i], 1,
+          dilations[i],
+          1,
           "Dilations conv is not supported in this cuDNN version(%d.%d.%d).",
-          CUDNN_VERSION / 1000, CUDNN_VERSION % 1000 / 100,
+          CUDNN_VERSION / 1000,
+          CUDNN_VERSION % 1000 / 100,
           CUDNN_VERSION % 100);
     }
 #endif
 
     cudnnDataType_t compute_type =
         (type == CUDNN_DATA_DOUBLE) ? CUDNN_DATA_DOUBLE : CUDNN_DATA_FLOAT;
-    PADDLE_ENFORCE(dynload::cudnnSetConvolutionNdDescriptor(
-        desc_, pads.size(), pads.data(), strides.data(), dilations.data(),
-        CUDNN_CROSS_CORRELATION, compute_type));
+    PADDLE_ENFORCE(
+        dynload::cudnnSetConvolutionNdDescriptor(desc_,
+                                                 pads.size(),
+                                                 pads.data(),
+                                                 strides.data(),
+                                                 dilations.data(),
+                                                 CUDNN_CROSS_CORRELATION,
+                                                 compute_type));
     return desc_;
   }
 
   template <typename T>
   inline cudnnConvolutionDescriptor_t descriptor(
-      const std::vector<int>& pads, const std::vector<int>& strides,
+      const std::vector<int>& pads,
+      const std::vector<int>& strides,
       const std::vector<int>& dilations) {
     return descriptor(CudnnDataType<T>::type, pads, strides, dilations);
   }
@@ -313,9 +328,13 @@ class ScopedPoolingDescriptor {
     PADDLE_ENFORCE_EQ(kernel.size(), pads.size());
     PADDLE_ENFORCE_EQ(kernel.size(), strides.size());
     PADDLE_ENFORCE(dynload::cudnnSetPoolingNdDescriptor(
-        desc_, (GetPoolingMode(mode)),
+        desc_,
+        (GetPoolingMode(mode)),
         CUDNN_PROPAGATE_NAN,  // Always propagate nans.
-        kernel.size(), kernel.data(), pads.data(), strides.data()));
+        kernel.size(),
+        kernel.data(),
+        pads.data(),
+        strides.data()));
     return desc_;
   }
 

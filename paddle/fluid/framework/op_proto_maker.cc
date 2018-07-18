@@ -66,7 +66,8 @@ void OpProtoAndCheckerMaker::CheckReuseVars() {
   auto checker = [&](const std::string& name, const std::string& reused) {
     PADDLE_ENFORCE(
         names.count(reused),
-        "Output [%s] reuse Input [%s], but the input is not registered.", name,
+        "Output [%s] reuse Input [%s], but the input is not registered.",
+        name,
         reused);
   };
   for (auto& output : proto_->outputs()) {
@@ -86,7 +87,8 @@ void OpProtoAndCheckerMaker::operator()(proto::OpProto* proto,
       .InEnum(
           {static_cast<int>(OpRole::kForward),
            static_cast<int>(OpRole::kBackward),
-           static_cast<int>(OpRole::kOptimize), static_cast<int>(OpRole::kRPC),
+           static_cast<int>(OpRole::kOptimize),
+           static_cast<int>(OpRole::kRPC),
            static_cast<int>(OpRole::kLoss) | static_cast<int>(OpRole::kForward),
            static_cast<int>(OpRole::kLoss) |
                static_cast<int>(OpRole::kBackward),

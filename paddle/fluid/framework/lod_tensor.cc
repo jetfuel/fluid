@@ -86,7 +86,9 @@ std::string LoDToString(const LoD &lod) {
   return stream.str();
 }
 
-LoD SliceInLevel(const LoD &in, size_t level, size_t elem_begin,
+LoD SliceInLevel(const LoD &in,
+                 size_t level,
+                 size_t elem_begin,
                  size_t elem_end) {
   PADDLE_ENFORCE_LT(level, in.size());
   PADDLE_ENFORCE_LT(elem_end, in[level].size());
@@ -207,8 +209,10 @@ bool CheckAbsLoD(const LoD &in, int tensor_height) {
 }
 
 using LoDAndOffset = std::pair<LoD, std::pair<size_t, size_t>>;
-LoDAndOffset GetSubLoDAndAbsoluteOffset(const LoD &lod, size_t start_idx,
-                                        size_t end_idx, size_t start_level) {
+LoDAndOffset GetSubLoDAndAbsoluteOffset(const LoD &lod,
+                                        size_t start_idx,
+                                        size_t end_idx,
+                                        size_t start_level) {
   LoD sub_lod;
 
   for (size_t level_idx = start_level; level_idx < lod.size(); ++level_idx) {
@@ -244,7 +248,8 @@ void AppendLoD(LoD *lod, const LoD &lod_length) {
   }
 }
 
-void SerializeToStream(std::ostream &os, const LoDTensor &tensor,
+void SerializeToStream(std::ostream &os,
+                       const LoDTensor &tensor,
                        const platform::DeviceContext &dev_ctx) {
   {  // the 1st field, uint32_t version for LoDTensor
     constexpr uint32_t version = 0;
@@ -271,7 +276,8 @@ void SerializeToStream(std::ostream &os, const LoDTensor &tensor,
   TensorToStream(os, static_cast<Tensor>(tensor), dev_ctx);
 }
 
-void DeserializeFromStream(std::istream &is, LoDTensor *tensor,
+void DeserializeFromStream(std::istream &is,
+                           LoDTensor *tensor,
                            const platform::DeviceContext &dev_ctx) {
   {
     // the 1st field, unit32_t version for LoDTensor

@@ -307,8 +307,8 @@ class Vector {
   void ImmutableCUDA(platform::Place place) const {
     if (IsDirty()) {
       if (IsInCPU()) {
-        TensorCopy(cpu_vec_, boost::get<platform::CUDAPlace>(place),
-                   &cuda_vec_);
+        TensorCopy(
+            cpu_vec_, boost::get<platform::CUDAPlace>(place), &cuda_vec_);
         WaitPlace(place);
         UnsetFlag(kDirty);
         SetFlag(kDataInCUDA);
@@ -325,8 +325,8 @@ class Vector {
     } else {
       if (!IsInCUDA()) {
         // Even data is not dirty. However, data is not in CUDA. Copy data.
-        TensorCopy(cpu_vec_, boost::get<platform::CUDAPlace>(place),
-                   &cuda_vec_);
+        TensorCopy(
+            cpu_vec_, boost::get<platform::CUDAPlace>(place), &cuda_vec_);
         WaitPlace(place);
         SetFlag(kDataInCUDA);
       } else if (!(place == cuda_vec_.place())) {

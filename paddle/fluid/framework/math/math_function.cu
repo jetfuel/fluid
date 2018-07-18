@@ -44,14 +44,16 @@ DEFINE_GPU_TRANS(6);
 
 struct TensorSetConstantGPU {
   TensorSetConstantGPU(const platform::DeviceContext& context,
-                       framework::Tensor* tensor, float value)
+                       framework::Tensor* tensor,
+                       float value)
       : context_(context), tensor_(tensor), value_(value) {}
 
   template <typename T>
   void operator()() const {
     SetConstant<platform::CUDADeviceContext, T> functor;
     functor(reinterpret_cast<const platform::CUDADeviceContext&>(context_),
-            tensor_, static_cast<T>(value_));
+            tensor_,
+            static_cast<T>(value_));
   }
 
   const platform::DeviceContext& context_;
@@ -61,15 +63,16 @@ struct TensorSetConstantGPU {
 
 template <>
 void set_constant_with_place<platform::CUDAPlace>(
-    const platform::DeviceContext& context, framework::Tensor* tensor,
+    const platform::DeviceContext& context,
+    framework::Tensor* tensor,
     float value) {
   framework::VisitDataType(framework::ToDataType(tensor->type()),
                            TensorSetConstantGPU(context, tensor, value));
 }
 
 template <typename T>
-__global__ void RowwiseAddKernel(const T* a, const T* b, T* c, int width,
-                                 int num) {
+__global__ void RowwiseAddKernel(
+    const T* a, const T* b, T* c, int width, int num) {
   T tmp = 1.0 / width;
   for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < num;
        i += blockDim.x * gridDim.x) {
@@ -83,7 +86,8 @@ template <typename T>
 struct RowwiseAdd<platform::CUDADeviceContext, T> {
   void operator()(const platform::CUDADeviceContext& context,
                   const framework::Tensor& input,
-                  const framework::Tensor& vector, framework::Tensor* output) {
+                  const framework::Tensor& vector,
+                  framework::Tensor* output) {
     auto in_dims = input.dims();
     auto size = input.numel() / in_dims[0];
     PADDLE_ENFORCE_EQ(vector.numel(), size);
@@ -91,8 +95,11 @@ struct RowwiseAdd<platform::CUDADeviceContext, T> {
     int blocks = 512;
     int grids = (input.numel() + blocks - 1) / blocks;
     RowwiseAddKernel<T><<<grids, blocks, 0, context.stream()>>>(
-        input.data<T>(), vector.data<T>(), output->data<T>(),
-        static_cast<int>(in_dims[1]), static_cast<int>(input.numel()));
+        input.data<T>(),
+        vector.data<T>(),
+        output->data<T>(),
+        static_cast<int>(in_dims[1]),
+        static_cast<int>(input.numel()));
   }
 };
 
@@ -106,7 +113,8 @@ template struct ColwiseSum<platform::CUDADeviceContext, int64_t>;
 // and only failed for this case. So reimplemented it.
 template <>
 void ColwiseSum<platform::CUDADeviceContext, double>::operator()(
-    const platform::CUDADeviceContext& context, const framework::Tensor& input,
+    const platform::CUDADeviceContext& context,
+    const framework::Tensor& input,
     framework::Tensor* vector) {
   auto in_dims = input.dims();
   auto size = input.numel() / in_dims[0];
@@ -116,8 +124,14 @@ void ColwiseSum<platform::CUDADeviceContext, double>::operator()(
   SetConstant<platform::CUDADeviceContext, double> set;
   set(context, &one, static_cast<double>(1.0));
   GetBlas<platform::CUDADeviceContext, double>(context).GEMV(
-      true, static_cast<int>(in_dims[0]), static_cast<int>(in_dims[1]), 1.0,
-      input.data<double>(), one.data<double>(), 0.0, vector->data<double>());
+      true,
+      static_cast<int>(in_dims[0]),
+      static_cast<int>(in_dims[1]),
+      1.0,
+      input.data<double>(),
+      one.data<double>(),
+      0.0,
+      vector->data<double>());
 }
 
 template struct RowwiseSum<platform::CUDADeviceContext, float>;
@@ -127,7 +141,8 @@ template struct RowwiseSum<platform::CUDADeviceContext, float>;
 // and only failed for this case. So reimplemented it.
 template <>
 void RowwiseSum<platform::CUDADeviceContext, double>::operator()(
-    const platform::CUDADeviceContext& context, const framework::Tensor& input,
+    const platform::CUDADeviceContext& context,
+    const framework::Tensor& input,
     framework::Tensor* vector) {
   auto in_dims = input.dims();
   auto size = input.numel() / in_dims[0];
@@ -137,8 +152,14 @@ void RowwiseSum<platform::CUDADeviceContext, double>::operator()(
   SetConstant<platform::CUDADeviceContext, double> set;
   set(context, &one, static_cast<double>(1.0));
   GetBlas<platform::CUDADeviceContext, double>(context).GEMV(
-      true, static_cast<int>(in_dims[1]), static_cast<int>(in_dims[0]), 1.0,
-      one.data<double>(), input.data<double>(), 0.0, vector->data<double>());
+      true,
+      static_cast<int>(in_dims[1]),
+      static_cast<int>(in_dims[0]),
+      1.0,
+      one.data<double>(),
+      input.data<double>(),
+      0.0,
+      vector->data<double>());
 }
 
 template struct RowwiseMean<platform::CUDADeviceContext, float>;

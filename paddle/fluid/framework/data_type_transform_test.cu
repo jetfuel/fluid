@@ -28,27 +28,32 @@ TEST(DataTypeTransform, GPUTransform) {
   paddle::fluid::platform::CUDADeviceContext context(gpu_place);
 
   auto kernel_fp32 = paddle::fluid::framework::OpKernelType(
-      paddle::fluid::framework::proto::VarType::FP32, gpu_place,
+      paddle::fluid::framework::proto::VarType::FP32,
+      gpu_place,
       paddle::fluid::framework::TensorDataLayout::kAnyLayout,
       paddle::fluid::framework::Accelerator::kPlain);
 
   auto kernel_fp64 = paddle::fluid::framework::OpKernelType(
-      paddle::fluid::framework::proto::VarType::FP64, gpu_place,
+      paddle::fluid::framework::proto::VarType::FP64,
+      gpu_place,
       paddle::fluid::framework::TensorDataLayout::kAnyLayout,
       paddle::fluid::framework::Accelerator::kPlain);
 
   auto kernel_int32 = paddle::fluid::framework::OpKernelType(
-      paddle::fluid::framework::proto::VarType::INT32, gpu_place,
+      paddle::fluid::framework::proto::VarType::INT32,
+      gpu_place,
       paddle::fluid::framework::TensorDataLayout::kAnyLayout,
       paddle::fluid::framework::Accelerator::kPlain);
 
   auto kernel_int64 = paddle::fluid::framework::OpKernelType(
-      paddle::fluid::framework::proto::VarType::INT64, gpu_place,
+      paddle::fluid::framework::proto::VarType::INT64,
+      gpu_place,
       paddle::fluid::framework::TensorDataLayout::kAnyLayout,
       paddle::fluid::framework::Accelerator::kPlain);
 
   auto kernel_bool = paddle::fluid::framework::OpKernelType(
-      paddle::fluid::framework::proto::VarType::BOOL, gpu_place,
+      paddle::fluid::framework::proto::VarType::BOOL,
+      gpu_place,
       paddle::fluid::framework::TensorDataLayout::kAnyLayout,
       paddle::fluid::framework::Accelerator::kPlain);
 
@@ -59,16 +64,16 @@ TEST(DataTypeTransform, GPUTransform) {
     paddle::fluid::framework::Tensor out_gpu;
     paddle::fluid::framework::Tensor out;
 
-    float* in_ptr =
-        in.mutable_data<float>(paddle::fluid::framework::make_ddim({2, 3}), cpu_place);
+    float* in_ptr = in.mutable_data<float>(
+        paddle::fluid::framework::make_ddim({2, 3}), cpu_place);
     float arr[6] = {0, 1, 2, 3, 4, 5};
     int data_number = sizeof(arr) / sizeof(arr[0]);
     memcpy(in_ptr, arr, sizeof(arr));
 
     paddle::fluid::framework::TensorCopy(in, gpu_place, context, &in_gpu);
     context.Wait();
-    paddle::fluid::framework::TransDataType(kernel_fp32, kernel_fp64, in_gpu,
-                                     &out_gpu);
+    paddle::fluid::framework::TransDataType(
+        kernel_fp32, kernel_fp64, in_gpu, &out_gpu);
     paddle::fluid::framework::TensorCopy(out_gpu, cpu_place, context, &out);
     context.Wait();
 
@@ -77,8 +82,8 @@ TEST(DataTypeTransform, GPUTransform) {
       EXPECT_EQ(out_data_double[i], static_cast<double>(arr[i]));
     }
 
-    paddle::fluid::framework::TransDataType(kernel_fp32, kernel_int32, in_gpu,
-                                     &out_gpu);
+    paddle::fluid::framework::TransDataType(
+        kernel_fp32, kernel_int32, in_gpu, &out_gpu);
     paddle::fluid::framework::TensorCopy(out_gpu, cpu_place, context, &out);
     context.Wait();
 

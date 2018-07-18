@@ -134,7 +134,7 @@ TEST(TensorFromVector, Tensor) {
     }
 
     delete cpu_place;
-  }
+  }  // namespace framework
 
 #ifdef PADDLE_WITH_CUDA
   {
@@ -147,15 +147,18 @@ TEST(TensorFromVector, Tensor) {
     cpu_tensor.Resize(make_ddim({3, 3}));
     auto cpu_place = new paddle::fluid::platform::CPUPlace();
     paddle::fluid::platform::CPUDeviceContext cpu_ctx(*cpu_place);
-    paddle::fluid::framework::TensorFromVector<int>(src_vec, cpu_ctx, &cpu_tensor);
+    paddle::fluid::framework::TensorFromVector<int>(
+        src_vec, cpu_ctx, &cpu_tensor);
 
     // Copy to GPUTensor
     gpu_tensor.Resize(paddle::fluid::framework::make_ddim({3, 3}));
     auto gpu_place = new paddle::fluid::platform::CUDAPlace();
     paddle::fluid::platform::CUDADeviceContext gpu_ctx(*gpu_place);
-    paddle::fluid::framework::TensorFromVector<int>(src_vec, gpu_ctx, &gpu_tensor);
+    paddle::fluid::framework::TensorFromVector<int>(
+        src_vec, gpu_ctx, &gpu_tensor);
     // Copy from GPU to CPU tensor for comparison
-    paddle::fluid::framework::TensorCopy(gpu_tensor, *cpu_place, gpu_ctx, &dst_tensor);
+    paddle::fluid::framework::TensorCopy(
+        gpu_tensor, *cpu_place, gpu_ctx, &dst_tensor);
 
     // Sync before Compare Tensors
     gpu_ctx.Wait();
@@ -172,10 +175,13 @@ TEST(TensorFromVector, Tensor) {
     src_vec.erase(src_vec.begin(), src_vec.begin() + 5);
 
     cpu_tensor.Resize(paddle::fluid::framework::make_ddim({2, 2}));
-    paddle::fluid::framework::TensorFromVector<int>(src_vec, cpu_ctx, &cpu_tensor);
+    paddle::fluid::framework::TensorFromVector<int>(
+        src_vec, cpu_ctx, &cpu_tensor);
     gpu_tensor.Resize(paddle::fluid::framework::make_ddim({2, 2}));
-    paddle::fluid::framework::TensorFromVector<int>(src_vec, gpu_ctx, &gpu_tensor);
-    paddle::fluid::framework::TensorCopy(gpu_tensor, *cpu_place, gpu_ctx, &dst_tensor);
+    paddle::fluid::framework::TensorFromVector<int>(
+        src_vec, gpu_ctx, &gpu_tensor);
+    paddle::fluid::framework::TensorCopy(
+        gpu_tensor, *cpu_place, gpu_ctx, &dst_tensor);
 
     // Sync before Compare Tensors
     gpu_ctx.Wait();
@@ -193,12 +199,13 @@ TEST(TensorFromVector, Tensor) {
     delete gpu_place;
   }
 #endif
-}
+}  // namespace fluid
 
 TEST(TensorToVector, Tensor) {
   {
     paddle::fluid::framework::Tensor src;
-    int* src_ptr = src.mutable_data<int>({3, 3}, paddle::fluid::platform::CPUPlace());
+    int* src_ptr =
+        src.mutable_data<int>({3, 3}, paddle::fluid::platform::CPUPlace());
     for (int i = 0; i < 3 * 3; ++i) {
       src_ptr[i] = i;
     }
@@ -210,14 +217,15 @@ TEST(TensorToVector, Tensor) {
     for (int i = 0; i < 3 * 3; ++i) {
       EXPECT_EQ(src_ptr[i], dst[i]);
     }
-  }
+  }  // namespace paddle
 #ifdef PADDLE_WITH_CUDA
   {
     std::vector<int> src_vec = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     paddle::fluid::framework::Tensor gpu_tensor;
     paddle::fluid::platform::CUDAPlace place;
     paddle::fluid::platform::CUDADeviceContext gpu_ctx(place);
-    paddle::fluid::framework::TensorFromVector<int>(src_vec, gpu_ctx, &gpu_tensor);
+    paddle::fluid::framework::TensorFromVector<int>(
+        src_vec, gpu_ctx, &gpu_tensor);
 
     std::vector<int> dst;
     paddle::fluid::framework::TensorToVector<int>(gpu_tensor, gpu_ctx, &dst);
@@ -232,7 +240,8 @@ TEST(TensorToVector, Tensor) {
 TEST(TensorContainsNAN, CPU) {
   {
     paddle::fluid::framework::Tensor src;
-    float* buf = src.mutable_data<float>({3}, paddle::fluid::platform::CPUPlace());
+    float* buf =
+        src.mutable_data<float>({3}, paddle::fluid::platform::CPUPlace());
     buf[0] = 0.0;
     buf[1] = NAN;
     buf[2] = 0.0;
@@ -245,7 +254,8 @@ TEST(TensorContainsNAN, CPU) {
 TEST(TensorContainsInf, CPU) {
   {
     paddle::fluid::framework::Tensor src;
-    double* buf = src.mutable_data<double>({3}, paddle::fluid::platform::CPUPlace());
+    double* buf =
+        src.mutable_data<double>({3}, paddle::fluid::platform::CPUPlace());
     buf[0] = 1.0;
     buf[1] = INFINITY;
     buf[2] = 0.0;

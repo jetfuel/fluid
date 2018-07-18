@@ -218,7 +218,7 @@ DeviceContextPool* DeviceContextPool::Init() {
   int num_cuda_devices = 0;
   try {
     num_cuda_devices = platform::GetCUDADeviceCount();
-  } catch (const std::exception &exp) {
+  } catch (const std::exception& exp) {
     LOG(WARNING) << "Compiled with WITH_GPU, but no GPU found in runtime.";
   }
 

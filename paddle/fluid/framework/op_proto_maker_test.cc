@@ -13,10 +13,11 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 
 #include "paddle/fluid/framework/op_proto_maker.h"
-#include "paddle/fluid/platform/enforce.h"
 #include "gtest/gtest.h"
+#include "paddle/fluid/platform/enforce.h"
 
-class TestAttrProtoMaker : public paddle::fluid::framework::OpProtoAndCheckerMaker {
+class TestAttrProtoMaker
+    : public paddle::fluid::framework::OpProtoAndCheckerMaker {
  public:
   void Make() {
     AddAttr<float>("scale", "scale of test op");
@@ -32,7 +33,8 @@ TEST(ProtoMaker, DuplicatedAttr) {
                paddle::fluid::platform::EnforceNotMet);
 }
 
-class TestInOutProtoMaker : public paddle::fluid::framework::OpProtoAndCheckerMaker {
+class TestInOutProtoMaker
+    : public paddle::fluid::framework::OpProtoAndCheckerMaker {
  public:
   void Make() {
     AddInput("input", "input of test op");
@@ -48,7 +50,8 @@ TEST(ProtoMaker, DuplicatedInOut) {
                paddle::fluid::platform::EnforceNotMet);
 }
 
-class TestInplaceProtoMaker : public paddle::fluid::framework::OpProtoAndCheckerMaker {
+class TestInplaceProtoMaker
+    : public paddle::fluid::framework::OpProtoAndCheckerMaker {
  public:
   void Make() {
     AddInput("X", "input of test op");
@@ -65,5 +68,6 @@ TEST(ProtoMaker, InplaceOutput) {
                paddle::fluid::platform::EnforceNotMet);
   // proto_maker(&op_proto, &op_checker);
   // proto_maker.Make();
-  // ASSERT_THROW(proto_maker.Validate(), paddle::fluid::platform::EnforceNotMet);
+  // ASSERT_THROW(proto_maker.Validate(),
+  // paddle::fluid::platform::EnforceNotMet);
 }

@@ -31,7 +31,8 @@ class TensorDataLayout {
     kMKLDNN = 3  // all layouts supported by MKLDNN internally
   };
 
-  TensorDataLayout(TensorDataLayout::Type type) : type_(type) {}; // NOLINT: so could we compare.
+  TensorDataLayout(TensorDataLayout::Type type)
+      : type_(type){};  // NOLINT: so could we compare.
   explicit TensorDataLayout(const std::string& type);
   std::string ToString() const;
 

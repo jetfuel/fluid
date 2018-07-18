@@ -19,14 +19,16 @@ limitations under the License. */
 #include "glog/logging.h"
 #include "paddle/fluid/string/printf.h"
 
-DEFINE_bool(benchmark, false,
+DEFINE_bool(benchmark,
+            false,
             "Doing memory benchmark. It will make deleting scope synchronized, "
             "and add some memory usage logs."
             "Default cuda is asynchronous device, set to True will"
             "force op run in synchronous mode.");
 
 DEFINE_bool(
-    eager_delete_scope, true,
+    eager_delete_scope,
+    true,
     "Delete local scope eagerly. It will reduce GPU memory usage but "
     "slow down the destruction of variables.(around 1% performance harm)");
 
@@ -139,10 +141,12 @@ void Scope::RenameInternal(const std::string& origin_name,
                            const std::string& new_name) const {
   auto origin_it = vars_.find(origin_name);
   PADDLE_ENFORCE(origin_it != vars_.end(),
-                 "Cannot find original variable with name %s", origin_name);
+                 "Cannot find original variable with name %s",
+                 origin_name);
   auto new_it = vars_.find(new_name);
   PADDLE_ENFORCE(new_it == vars_.end(),
-                 "The variable with name %s is already in the scope", new_name);
+                 "The variable with name %s is already in the scope",
+                 new_name);
   vars_[new_name].reset(origin_it->second.release());
   vars_.erase(origin_it);
 }

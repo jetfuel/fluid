@@ -13,14 +13,14 @@ See the License for the specific language governing permissions and
 limitations under the License. */
 #include "paddle/fluid/platform/device_context.h"
 
-#include <vector>
 #include <glog/logging.h>
 #include <gtest/gtest.h>
+#include <vector>
 
 TEST(Device, Init) {
-  using paddle::fluid::platform::DeviceContext;
   using paddle::fluid::platform::CUDADeviceContext;
   using paddle::fluid::platform::CUDAPlace;
+  using paddle::fluid::platform::DeviceContext;
 
   int count = paddle::fluid::platform::GetCUDADeviceCount();
   for (int i = 0; i < count; i++) {
@@ -50,11 +50,11 @@ TEST(Device, CUDADeviceContext) {
 }
 
 TEST(Device, DeviceContextPool) {
-  using paddle::fluid::platform::DeviceContextPool;
-  using paddle::fluid::platform::CUDADeviceContext;
-  using paddle::fluid::platform::Place;
   using paddle::fluid::platform::CPUPlace;
+  using paddle::fluid::platform::CUDADeviceContext;
   using paddle::fluid::platform::CUDAPlace;
+  using paddle::fluid::platform::DeviceContextPool;
+  using paddle::fluid::platform::Place;
 
   DeviceContextPool& pool = DeviceContextPool::Instance();
   auto cpu_dev_ctx1 = pool.Get(CPUPlace());
@@ -70,16 +70,16 @@ TEST(Device, DeviceContextPool) {
 }
 
 int main(int argc, char** argv) {
-//  std::vector<paddle::fluid::platform::Place> places;
-//
-//  places.emplace_back(paddle::fluid::platform::CPUPlace());
-//  int count = paddle::fluid::platform::GetCUDADeviceCount();
-//  for (int i = 0; i < count; ++i) {
-//    places.emplace_back(paddle::fluid::platform::CUDAPlace(i));
-//  }
-//
-//  VLOG(0) << " DeviceCount " << count;
-//  paddle::fluid::platform::DeviceContextPool::Init(places);
+  //  std::vector<paddle::fluid::platform::Place> places;
+  //
+  //  places.emplace_back(paddle::fluid::platform::CPUPlace());
+  //  int count = paddle::fluid::platform::GetCUDADeviceCount();
+  //  for (int i = 0; i < count; ++i) {
+  //    places.emplace_back(paddle::fluid::platform::CUDAPlace(i));
+  //  }
+  //
+  //  VLOG(0) << " DeviceCount " << count;
+  //  paddle::fluid::platform::DeviceContextPool::Init(places);
 
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

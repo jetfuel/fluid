@@ -41,7 +41,8 @@ static void PassTensorData(Tensor* from, Tensor* to) {
 
 void DataTransform(const OpKernelType& expected_kernel_type,
                    const OpKernelType& kernel_type_for_var,
-                   const Tensor& input_tensor, Tensor* output_tensor) {
+                   const Tensor& input_tensor,
+                   Tensor* output_tensor) {
   bool transformed = false;
   Tensor in;
   in.ShareDataWith(input_tensor);
@@ -76,7 +77,8 @@ void DataTransform(const OpKernelType& expected_kernel_type,
   output_tensor->ShareDataWith(in);
 }
 
-void CopyVariableWithTensor(const Variable& in_var, const Tensor& tensor,
+void CopyVariableWithTensor(const Variable& in_var,
+                            const Tensor& tensor,
                             Variable* out_var) {
   if (in_var.IsType<LoDTensor>()) {
     auto& in_lod_tensor = in_var.Get<LoDTensor>();

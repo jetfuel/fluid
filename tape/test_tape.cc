@@ -15,14 +15,14 @@
 #include "gtest/gtest.h"
 #include "src/function.h"
 
-using paddle::tape::VariableHandle;
-using paddle::tape::Variable;
+using paddle::tape::Fill;
+using paddle::tape::get_global_tape;
 using paddle::tape::Linear;
 using paddle::tape::Mean;
-using paddle::tape::SGD;
-using paddle::tape::Fill;
 using paddle::tape::reset_global_tape;
-using paddle::tape::get_global_tape;
+using paddle::tape::SGD;
+using paddle::tape::Variable;
+using paddle::tape::VariableHandle;
 
 TEST(Tape, TestMLP) {
   LOG(INFO) << "TestMLP";

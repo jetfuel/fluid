@@ -22,8 +22,8 @@ TEST(OpKernelType, ToString) {
   using TensorDataLayout = paddle::fluid::framework::TensorDataLayout;
   using Accelerator = paddle::fluid::framework::Accelerator;
 
-  OpKernelType op_kernel_type(DataType::FP32, CPUPlace(), TensorDataLayout::kNCHW,
-                              Accelerator::kCUDNN);
+  OpKernelType op_kernel_type(
+      DataType::FP32, CPUPlace(), TensorDataLayout::kNCHW, Accelerator::kCUDNN);
 
   ASSERT_EQ(paddle::fluid::framework::KernelTypeToString(op_kernel_type),
             "data_type[float]:data_layout[NCHW]:place[CPUPlace]:accelerator["
@@ -38,9 +38,11 @@ TEST(OpKernelType, Hash) {
   using TensorDataLayout = paddle::fluid::framework::TensorDataLayout;
   using Accelerator = paddle::fluid::framework::Accelerator;
 
-  OpKernelType op_kernel_type_1(DataType::FP32, CPUPlace(), TensorDataLayout::kNCHW,
-                                Accelerator::kCUDNN);
-  OpKernelType op_kernel_type_2(DataType::FP32, CUDAPlace(0), TensorDataLayout::kNCHW,
+  OpKernelType op_kernel_type_1(
+      DataType::FP32, CPUPlace(), TensorDataLayout::kNCHW, Accelerator::kCUDNN);
+  OpKernelType op_kernel_type_2(DataType::FP32,
+                                CUDAPlace(0),
+                                TensorDataLayout::kNCHW,
                                 Accelerator::kCUDNN);
 
   OpKernelType::Hash hasher;

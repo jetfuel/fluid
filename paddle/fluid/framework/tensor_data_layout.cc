@@ -24,12 +24,12 @@ namespace paddle {
 namespace fluid {
 namespace framework {
 
-
 TensorDataLayout::TensorDataLayout(const std::string& type) {
   std::string key(type);
   std::transform(key.begin(), key.end(), key.begin(), ::toupper);
 
-  std::vector<std::string> layouts = {"NHWC", "NCHW", "ANYLAYOUT", "MKLDNNLAYOUT"};
+  std::vector<std::string> layouts = {
+      "NHWC", "NCHW", "ANYLAYOUT", "MKLDNNLAYOUT"};
   for (int i = 0; i < layouts.size(); ++i) {
     if (key == layouts[i]) {
       type_ = static_cast<TensorDataLayout::Type>(i);
@@ -40,7 +40,8 @@ TensorDataLayout::TensorDataLayout(const std::string& type) {
 }
 
 std::string TensorDataLayout::ToString() const {
-  std::vector<std::string> layouts = {"NHWC", "NCHW", "ANYLAYOUT", "MKLDNNLAYOUT"};
+  std::vector<std::string> layouts = {
+      "NHWC", "NCHW", "ANYLAYOUT", "MKLDNNLAYOUT"};
   return layouts[type_];
 }
 

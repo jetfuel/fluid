@@ -57,7 +57,8 @@ CUDA_ATOMIC_WRAPPER(Add, double) {
 
   do {
     assumed = old;
-    old = atomicCAS(address_as_ull, assumed,
+    old = atomicCAS(address_as_ull,
+                    assumed,
                     __double_as_longlong(val + __longlong_as_double(assumed)));
 
     // Note: uses integer comparison to avoid hang in case of NaN

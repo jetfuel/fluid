@@ -25,7 +25,8 @@ TEST(StringPiece, Construct) {
     EXPECT_EQ(0U, s.len());
   }
   {
-    EXPECT_THROW(paddle::fluid::string::Piece s(NULL, 10000U), std::invalid_argument);
+    EXPECT_THROW(paddle::fluid::string::Piece s(NULL, 10000U),
+                 std::invalid_argument);
   }
   {
     paddle::fluid::string::Piece s(NULL);

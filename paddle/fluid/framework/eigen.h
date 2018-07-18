@@ -36,8 +36,11 @@ struct EigenDim {
   }
 };
 
-// Interpret paddle::fluid::platform::Tensor as EigenTensor and EigenConstTensor.
-template <typename T, size_t D, int MajorType = Eigen::RowMajor,
+// Interpret paddle::fluid::platform::Tensor as EigenTensor and
+// EigenConstTensor.
+template <typename T,
+          size_t D,
+          int MajorType = Eigen::RowMajor,
           typename IndexType = Eigen::DenseIndex>
 struct EigenTensor {
   // TODO(qijun) Now, default type in unaligned, and we will make a benchmark on
@@ -62,7 +65,8 @@ struct EigenTensor {
   }
 };
 
-template <typename T, int MajorType = Eigen::RowMajor,
+template <typename T,
+          int MajorType = Eigen::RowMajor,
           typename IndexType = Eigen::DenseIndex>
 struct EigenMatrix : public EigenTensor<T, 2, MajorType, IndexType> {
   static typename EigenMatrix::Type Reshape(Tensor& tensor, int num_col_dims) {
@@ -83,7 +87,8 @@ struct EigenMatrix : public EigenTensor<T, 2, MajorType, IndexType> {
   }
 };
 
-template <typename T, int MajorType = Eigen::RowMajor,
+template <typename T,
+          int MajorType = Eigen::RowMajor,
           typename IndexType = Eigen::DenseIndex>
 struct EigenVector : public EigenTensor<T, 1, MajorType, IndexType> {
   // Flatten reshapes a Tensor into an EigenVector.
@@ -96,7 +101,8 @@ struct EigenVector : public EigenTensor<T, 1, MajorType, IndexType> {
   }
 };
 
-template <typename T, int MajorType = Eigen::RowMajor,
+template <typename T,
+          int MajorType = Eigen::RowMajor,
           typename IndexType = Eigen::DenseIndex>
 struct EigenScalar {
   // Scalar tensor (implemented as a rank-0 tensor) of scalar type T.

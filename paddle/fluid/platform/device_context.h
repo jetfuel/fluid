@@ -21,7 +21,6 @@ limitations under the License. */
 #define EIGEN_USE_GPU
 #endif
 
-
 #include "paddle/fluid/platform/enforce.h"
 #include "paddle/fluid/platform/place.h"
 #include "unsupported/Eigen/CXX11/Tensor"
@@ -143,8 +142,7 @@ class DeviceContextPool {
   explicit DeviceContextPool(const std::vector<platform::Place>& places);
 
   static DeviceContextPool& Instance() {
-    if (pool_ == nullptr)
-      pool_ = Init();
+    if (pool_ == nullptr) pool_ = Init();
     return *pool_;
   }
 
@@ -167,7 +165,8 @@ class DeviceContextPool {
 
   static DeviceContextPool* pool_;
   std::unordered_map<const platform::Place,
-                     std::unique_ptr<platform::DeviceContext>, PlaceHash>
+                     std::unique_ptr<platform::DeviceContext>,
+                     PlaceHash>
       device_contexts_;
   DISABLE_COPY_AND_ASSIGN(DeviceContextPool);
 };

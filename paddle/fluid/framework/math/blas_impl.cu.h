@@ -82,9 +82,15 @@ struct CUBlas<double> {
 template <>
 template <typename T>
 void Blas<platform::CUDADeviceContext>::GEMM(CBLAS_TRANSPOSE transA,
-                                             CBLAS_TRANSPOSE transB, int M,
-                                             int N, int K, T alpha, const T *A,
-                                             const T *B, T beta, T *C) const {
+                                             CBLAS_TRANSPOSE transB,
+                                             int M,
+                                             int N,
+                                             int K,
+                                             T alpha,
+                                             const T *A,
+                                             const T *B,
+                                             T beta,
+                                             T *C) const {
   // Note that cublas follows fortran order, so the order is different from
   // the cblas convention.
   int lda = (transA == CblasNoTrans) ? K : M;
@@ -94,48 +100,107 @@ void Blas<platform::CUDADeviceContext>::GEMM(CBLAS_TRANSPOSE transA,
   cublasOperation_t cuTransB =
       (transB == CblasNoTrans) ? CUBLAS_OP_N : CUBLAS_OP_T;
 
-  CUBlas<T>::GEMM(context_.cublas_handle(), cuTransB, cuTransA, N, M, K, &alpha,
-                  B, ldb, A, lda, &beta, C, N);
+  CUBlas<T>::GEMM(context_.cublas_handle(),
+                  cuTransB,
+                  cuTransA,
+                  N,
+                  M,
+                  K,
+                  &alpha,
+                  B,
+                  ldb,
+                  A,
+                  lda,
+                  &beta,
+                  C,
+                  N);
 }
 
 template <>
 template <typename T>
-void Blas<platform::CUDADeviceContext>::GEMM(bool transA, bool transB, int M,
-                                             int N, int K, T alpha, const T *A,
-                                             int lda, const T *B, int ldb,
-                                             T beta, T *C, int ldc) const {
+void Blas<platform::CUDADeviceContext>::GEMM(bool transA,
+                                             bool transB,
+                                             int M,
+                                             int N,
+                                             int K,
+                                             T alpha,
+                                             const T *A,
+                                             int lda,
+                                             const T *B,
+                                             int ldb,
+                                             T beta,
+                                             T *C,
+                                             int ldc) const {
   // Note that cublas follows fortran order, so the order is different from
   // the cblas convention.
   cublasOperation_t cuTransA = transA ? CUBLAS_OP_T : CUBLAS_OP_N;
   cublasOperation_t cuTransB = transB ? CUBLAS_OP_T : CUBLAS_OP_N;
-  CUBlas<T>::GEMM(context_.cublas_handle(), cuTransB, cuTransA, N, M, K, &alpha,
-                  B, ldb, A, lda, &beta, C, ldc);
+  CUBlas<T>::GEMM(context_.cublas_handle(),
+                  cuTransB,
+                  cuTransA,
+                  N,
+                  M,
+                  K,
+                  &alpha,
+                  B,
+                  ldb,
+                  A,
+                  lda,
+                  &beta,
+                  C,
+                  ldc);
 }
 
 template <>
 template <typename T>
-void Blas<platform::CUDADeviceContext>::AXPY(int n, T alpha, const T *x,
+void Blas<platform::CUDADeviceContext>::AXPY(int n,
+                                             T alpha,
+                                             const T *x,
                                              T *y) const {
   CUBlas<T>::AXPY(context_.cublas_handle(), n, &alpha, x, 1, y, 1);
 }
 
 template <>
 template <typename T>
-void Blas<platform::CUDADeviceContext>::GEMV(bool trans_a, int M, int N,
-                                             T alpha, const T *A, const T *B,
-                                             T beta, T *C) const {
+void Blas<platform::CUDADeviceContext>::GEMV(bool trans_a,
+                                             int M,
+                                             int N,
+                                             T alpha,
+                                             const T *A,
+                                             const T *B,
+                                             T beta,
+                                             T *C) const {
   cublasOperation_t cuTransA = !trans_a ? CUBLAS_OP_T : CUBLAS_OP_N;
 
-  CUBlas<T>::GEMV(context_.cublas_handle(), cuTransA, N, M, &alpha, A, N, B, 1,
-                  &beta, C, 1);
+  CUBlas<T>::GEMV(context_.cublas_handle(),
+                  cuTransA,
+                  N,
+                  M,
+                  &alpha,
+                  A,
+                  N,
+                  B,
+                  1,
+                  &beta,
+                  C,
+                  1);
 }
 
 template <>
 template <typename T>
-void Blas<platform::CUDADeviceContext>::BatchedGEMM(
-    CBLAS_TRANSPOSE transA, CBLAS_TRANSPOSE transB, int M, int N, int K,
-    T alpha, const T *A, const T *B, T beta, T *C, int batchCount,
-    int64_t strideA, int64_t strideB) const {
+void Blas<platform::CUDADeviceContext>::BatchedGEMM(CBLAS_TRANSPOSE transA,
+                                                    CBLAS_TRANSPOSE transB,
+                                                    int M,
+                                                    int N,
+                                                    int K,
+                                                    T alpha,
+                                                    const T *A,
+                                                    const T *B,
+                                                    T beta,
+                                                    T *C,
+                                                    int batchCount,
+                                                    int64_t strideA,
+                                                    int64_t strideB) const {
   // Note that cublas follows fortran order, so the order is different from
   // the cblas convention.
   int lda = (transA == CblasNoTrans) ? K : M;
@@ -147,9 +212,24 @@ void Blas<platform::CUDADeviceContext>::BatchedGEMM(
       (transB == CblasNoTrans) ? CUBLAS_OP_N : CUBLAS_OP_T;
   const int64_t strideC = M * N;
 
-  CUBlas<T>::GEMM_BATCH(context_.cublas_handle(), cuTransB, cuTransA, N, M, K,
-                        &alpha, B, ldb, strideB, A, lda, strideA, &beta, C, ldc,
-                        strideC, batchCount);
+  CUBlas<T>::GEMM_BATCH(context_.cublas_handle(),
+                        cuTransB,
+                        cuTransA,
+                        N,
+                        M,
+                        K,
+                        &alpha,
+                        B,
+                        ldb,
+                        strideB,
+                        A,
+                        lda,
+                        strideA,
+                        &beta,
+                        C,
+                        ldc,
+                        strideC,
+                        batchCount);
 }
 
 }  // namespace math

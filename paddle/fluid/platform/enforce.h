@@ -200,23 +200,23 @@ inline void throw_on_error(T e) {
   throw_on_error(e, "");
 }
 
-#define PADDLE_THROW(...)                                              \
-  do {                                                                 \
+#define PADDLE_THROW(...)                                                     \
+  do {                                                                        \
     throw ::paddle::fluid::platform::EnforceNotMet(                           \
-        std::make_exception_ptr(                                       \
+        std::make_exception_ptr(                                              \
             std::runtime_error(paddle::fluid::string::Sprintf(__VA_ARGS__))), \
-        __FILE__,                                                      \
-        __LINE__);                                                     \
+        __FILE__,                                                             \
+        __LINE__);                                                            \
   } while (false)
 
-#define PADDLE_ENFORCE(...)                              \
-  do {                                                   \
-    try {                                                \
-      ::paddle::fluid::platform::throw_on_error(__VA_ARGS__);   \
-    } catch (...) {                                      \
-      throw ::paddle::fluid::platform::EnforceNotMet(           \
-          std::current_exception(), __FILE__, __LINE__); \
-    }                                                    \
+#define PADDLE_ENFORCE(...)                                   \
+  do {                                                        \
+    try {                                                     \
+      ::paddle::fluid::platform::throw_on_error(__VA_ARGS__); \
+    } catch (...) {                                           \
+      throw ::paddle::fluid::platform::EnforceNotMet(         \
+          std::current_exception(), __FILE__, __LINE__);      \
+    }                                                         \
   } while (false)
 
 /*
@@ -244,12 +244,12 @@ inline void throw_on_error(T e) {
   __PADDLE_BINARY_COMPARE(__VAL0, __VAL1, <, >=, __VA_ARGS__)
 #define PADDLE_ENFORCE_LE(__VAL0, __VAL1, ...) \
   __PADDLE_BINARY_COMPARE(__VAL0, __VAL1, <=, >, __VA_ARGS__)
-#define PADDLE_ENFORCE_NOT_NULL(__VAL, ...)                  \
-  do {                                                       \
-    if (UNLIKELY(nullptr == (__VAL))) {                      \
-      PADDLE_THROW(#__VAL " should not be null\n%s",         \
+#define PADDLE_ENFORCE_NOT_NULL(__VAL, ...)                         \
+  do {                                                              \
+    if (UNLIKELY(nullptr == (__VAL))) {                             \
+      PADDLE_THROW(#__VAL " should not be null\n%s",                \
                    paddle::fluid::string::Sprintf("" __VA_ARGS__)); \
-    }                                                        \
+    }                                                               \
   } while (0)
 
 #define __PADDLE_BINARY_COMPARE(__VAL0, __VAL1, __CMP, __INV_CMP, ...) \
@@ -259,9 +259,9 @@ inline void throw_on_error(T e) {
                    " %s\n%s",                                          \
                    #__VAL0,                                            \
                    #__VAL1,                                            \
-                   paddle::fluid::string::to_string(__VAL0),                  \
-                   paddle::fluid::string::to_string(__VAL1),                  \
-                   paddle::fluid::string::Sprintf("" __VA_ARGS__));           \
+                   paddle::fluid::string::to_string(__VAL0),           \
+                   paddle::fluid::string::to_string(__VAL1),           \
+                   paddle::fluid::string::Sprintf("" __VA_ARGS__));    \
     }                                                                  \
   } while (0)
 

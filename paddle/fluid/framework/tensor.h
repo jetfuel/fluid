@@ -20,8 +20,8 @@ limitations under the License. */
 #include <typeindex>
 #include <vector>
 
-#include "paddle/fluid/framework/tensor_data_layout.h"
 #include "paddle/fluid/framework/ddim.h"
+#include "paddle/fluid/framework/tensor_data_layout.h"
 #include "paddle/fluid/memory/memory.h"
 #include "paddle/fluid/platform/device_context.h"
 #include "paddle/fluid/platform/enforce.h"
@@ -46,7 +46,8 @@ class Tensor {
   Tensor() : layout_(TensorDataLayout::kNCHW), offset_(0) {}
 
   /*! Constructor with place should only be used in pybind. */
-  explicit Tensor(const platform::Place& place) : layout_(TensorDataLayout::kNCHW), offset_(0) {
+  explicit Tensor(const platform::Place& place)
+      : layout_(TensorDataLayout::kNCHW), offset_(0) {
     holder_->set_place(place);
   }
 
@@ -148,7 +149,8 @@ class Tensor {
           place_(place),
           size_(size),
           type_(type) {
-      PADDLE_ENFORCE_NOT_NULL(ptr_, "Insufficient %s memory to allocation.",
+      PADDLE_ENFORCE_NOT_NULL(ptr_,
+                              "Insufficient %s memory to allocation.",
                               (is_cpu_place(place_) ? "CPU" : "GPU"));
     }
 

@@ -24,21 +24,27 @@ namespace paddle {
 namespace fluid {
 namespace framework {
 
-void TensorCopy(const Tensor& src, const platform::Place& dst_place,
-                const platform::DeviceContext& ctx, Tensor* dst);
-void TensorCopy(const Tensor& src, const platform::Place& dst_place,
+void TensorCopy(const Tensor& src,
+                const platform::Place& dst_place,
+                const platform::DeviceContext& ctx,
                 Tensor* dst);
-void TensorCopySync(const Tensor& src, const platform::Place& dst_place,
+void TensorCopy(const Tensor& src,
+                const platform::Place& dst_place,
+                Tensor* dst);
+void TensorCopySync(const Tensor& src,
+                    const platform::Place& dst_place,
                     Tensor* dst);
 
 template <typename T>
 void TensorFromVector(const std::vector<T>& src,
-                      const platform::DeviceContext& ctx, Tensor* dst);
+                      const platform::DeviceContext& ctx,
+                      Tensor* dst);
 template <typename T>
 void TensorFromVector(const std::vector<T>& src, Tensor* dst);
 
 template <typename T>
-void TensorToVector(const Tensor& src, const platform::DeviceContext& ctx,
+void TensorToVector(const Tensor& src,
+                    const platform::DeviceContext& ctx,
                     std::vector<T>* dst);
 template <typename T>
 void TesnorToVector(const Tensor& src, std::vector<T>* dst);
@@ -46,9 +52,11 @@ void TesnorToVector(const Tensor& src, std::vector<T>* dst);
 bool TensorContainsNAN(const framework::Tensor& tensor);
 bool TensorContainsInf(const framework::Tensor& tensor);
 
-void TensorToStream(std::ostream& os, const Tensor& tensor,
+void TensorToStream(std::ostream& os,
+                    const Tensor& tensor,
                     const platform::DeviceContext& dev_ctx);
-void TensorFromStream(std::istream& is, Tensor* tensor,
+void TensorFromStream(std::istream& is,
+                      Tensor* tensor,
                       const platform::DeviceContext& dev_ctx);
 
 //
@@ -57,7 +65,8 @@ void TensorFromStream(std::istream& is, Tensor* tensor,
 
 template <typename T>
 void TensorFromVector(const std::vector<T>& src,
-                      const platform::DeviceContext& ctx, Tensor* dst) {
+                      const platform::DeviceContext& ctx,
+                      Tensor* dst) {
   auto dst_place = ctx.GetPlace();
   auto src_ptr = static_cast<const void*>(src.data());
   platform::CPUPlace src_place;
@@ -66,13 +75,19 @@ void TensorFromVector(const std::vector<T>& src,
   auto size = src.size() * sizeof(T);
 
   if (platform::is_cpu_place(dst_place)) {
-    memory::Copy(boost::get<platform::CPUPlace>(dst_place), dst_ptr, src_place,
-                 src_ptr, size);
+    memory::Copy(boost::get<platform::CPUPlace>(dst_place),
+                 dst_ptr,
+                 src_place,
+                 src_ptr,
+                 size);
   }
 #ifdef PADDLE_WITH_CUDA
   else if (platform::is_gpu_place(dst_place)) {  // NOLINT
     memory::Copy(
-        boost::get<platform::CUDAPlace>(dst_place), dst_ptr, src_place, src_ptr,
+        boost::get<platform::CUDAPlace>(dst_place),
+        dst_ptr,
+        src_place,
+        src_ptr,
         size,
         reinterpret_cast<const platform::CUDADeviceContext&>(ctx).stream());
   }
@@ -92,7 +107,8 @@ void TensorFromVector(const std::vector<T>& src, Tensor* dst) {
 }
 
 template <typename T>
-void TensorToVector(const Tensor& src, const platform::DeviceContext& ctx,
+void TensorToVector(const Tensor& src,
+                    const platform::DeviceContext& ctx,
                     std::vector<T>* dst) {
   auto src_ptr = static_cast<const void*>(src.data<T>());
   auto size = src.numel() * sizeof(T);
@@ -102,14 +118,20 @@ void TensorToVector(const Tensor& src, const platform::DeviceContext& ctx,
   auto dst_ptr = static_cast<void*>(dst->data());
 
   if (platform::is_cpu_place(src.place())) {
-    memory::Copy(dst_place, dst_ptr,
-                 boost::get<platform::CPUPlace>(src.place()), src_ptr, size);
+    memory::Copy(dst_place,
+                 dst_ptr,
+                 boost::get<platform::CPUPlace>(src.place()),
+                 src_ptr,
+                 size);
   }
 #ifdef PADDLE_WITH_CUDA
   else if (platform::is_gpu_place(src.place())) {  // NOLINT
     memory::Copy(
-        dst_place, dst_ptr, boost::get<platform::CUDAPlace>(src.place()),
-        src_ptr, size,
+        dst_place,
+        dst_ptr,
+        boost::get<platform::CUDAPlace>(src.place()),
+        src_ptr,
+        size,
         reinterpret_cast<const platform::CUDADeviceContext&>(ctx).stream());
   }
 #endif
@@ -126,8 +148,11 @@ void TensorToVector(const Tensor& src, std::vector<T>* dst) {
 
   PADDLE_ENFORCE(platform::is_cpu_place(src.place()));
 
-  memory::Copy(dst_place, dst_ptr, boost::get<platform::CPUPlace>(src.place()),
-               src_ptr, size);
+  memory::Copy(dst_place,
+               dst_ptr,
+               boost::get<platform::CPUPlace>(src.place()),
+               src_ptr,
+               size);
 }
 
 }  // namespace framework

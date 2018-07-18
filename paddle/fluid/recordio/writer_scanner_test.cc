@@ -23,8 +23,8 @@ TEST(WriterScanner, Normal) {
   std::stringstream* stream = new std::stringstream();
 
   {
-    paddle::fluid::recordio::Writer writer(stream,
-                                    paddle::fluid::recordio::Compressor::kSnappy);
+    paddle::fluid::recordio::Writer writer(
+        stream, paddle::fluid::recordio::Compressor::kSnappy);
     writer.Write("ABC");
     writer.Write("BCD");
     writer.Write("CDE");
@@ -48,7 +48,9 @@ TEST(WriterScanner, TinyChunk) {
   std::stringstream* stream = new std::stringstream();
   {
     paddle::fluid::recordio::Writer writer(
-        stream, paddle::fluid::recordio::Compressor::kNoCompress, 2 /*max chunk num*/);
+        stream,
+        paddle::fluid::recordio::Compressor::kNoCompress,
+        2 /*max chunk num*/);
     writer.Write("ABC");
     writer.Write("BCD");
     writer.Write("CDE");

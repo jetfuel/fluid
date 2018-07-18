@@ -32,8 +32,10 @@ void SetConstant<DeviceContext, T>::operator()(const DeviceContext& context,
 
 template <typename DeviceContext, typename T, int Rank>
 void Transpose<DeviceContext, T, Rank>::operator()(
-    const DeviceContext& context, const framework::Tensor& in,
-    framework::Tensor* out, const std::vector<int>& axis) {
+    const DeviceContext& context,
+    const framework::Tensor& in,
+    framework::Tensor* out,
+    const std::vector<int>& axis) {
   Eigen::array<int, Rank> permute;
   for (int i = 0; i < Rank; i++) {
     permute[i] = axis[i];
@@ -68,7 +70,8 @@ template <typename T>
 class ColwiseSum<platform::CPUDeviceContext, T> {
  public:
   void operator()(const platform::CPUDeviceContext& context,
-                  const framework::Tensor& input, framework::Tensor* out) {
+                  const framework::Tensor& input,
+                  framework::Tensor* out) {
     auto& in_dims = input.dims();
     auto height = in_dims[0];
     auto size = in_dims[1];
@@ -110,7 +113,8 @@ template <typename T>
 class RowwiseMean<platform::CPUDeviceContext, T> {
  public:
   void operator()(const platform::CPUDeviceContext& context,
-                  const framework::Tensor& input, framework::Tensor* out) {
+                  const framework::Tensor& input,
+                  framework::Tensor* out) {
     auto& in_dims = input.dims();
     PADDLE_ENFORCE_EQ(in_dims.size(), 2U);
     auto height = in_dims[0];
@@ -151,7 +155,8 @@ template <typename T>
 class RowwiseSum<platform::CPUDeviceContext, T> {
  public:
   void operator()(const platform::CPUDeviceContext& context,
-                  const framework::Tensor& input, framework::Tensor* out) {
+                  const framework::Tensor& input,
+                  framework::Tensor* out) {
     auto& in_dims = input.dims();
     PADDLE_ENFORCE_EQ(in_dims.size(), 2U);
     auto height = in_dims[0];

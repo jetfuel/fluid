@@ -66,8 +66,8 @@ TEST(Dim, Equality) {
   EXPECT_EQ(res, 6);
 
   // ex_prefix_mul
-  paddle::fluid::framework::Dim<3> c =
-      paddle::fluid::framework::ex_prefix_mul(paddle::fluid::framework::Dim<3>(3, 4, 5));
+  paddle::fluid::framework::Dim<3> c = paddle::fluid::framework::ex_prefix_mul(
+      paddle::fluid::framework::Dim<3>(3, 4, 5));
   EXPECT_EQ(paddle::fluid::framework::get<0>(c), 1);
   EXPECT_EQ(paddle::fluid::framework::get<1>(c), 3);
   EXPECT_EQ(paddle::fluid::framework::get<2>(c), 12);

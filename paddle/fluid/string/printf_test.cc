@@ -25,6 +25,6 @@ TEST(StringPrintf, StringPrintf) {
   int hour = 14;
   int min = 44;
   EXPECT_EQ(std::string("Wednesday, July 27, 14:44"),
-            paddle::fluid::string::Sprintf("%s, %s %d, %.2d:%.2d", weekday, month, day,
-                                    hour, min));
+            paddle::fluid::string::Sprintf(
+                "%s, %s %d, %.2d:%.2d", weekday, month, day, hour, min));
 }

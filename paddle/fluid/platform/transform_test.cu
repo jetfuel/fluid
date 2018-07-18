@@ -39,13 +39,13 @@ class Multiply {
 }  // namespace
 
 using paddle::fluid::memory::Alloc;
-using paddle::fluid::memory::Free;
 using paddle::fluid::memory::Copy;
+using paddle::fluid::memory::Free;
 
-using paddle::fluid::platform::CPUPlace;
-using paddle::fluid::platform::CUDAPlace;
 using paddle::fluid::platform::CPUDeviceContext;
+using paddle::fluid::platform::CPUPlace;
 using paddle::fluid::platform::CUDADeviceContext;
+using paddle::fluid::platform::CUDAPlace;
 
 using paddle::fluid::platform::Transform;
 

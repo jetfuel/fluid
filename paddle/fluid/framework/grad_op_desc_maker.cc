@@ -25,18 +25,18 @@ namespace fluid {
 namespace framework {
 
 GradOpDescMaker::GradOpDescMaker(
-    const OpDesc& fwd_op, const std::unordered_set<std::string>& no_grad_set,
+    const OpDesc& fwd_op,
+    const std::unordered_set<std::string>& no_grad_set,
     std::unordered_map<std::string, std::string>* grad_to_var)
-    : fwd_op_(fwd_op),
-      no_grad_set_(no_grad_set),
-      grad_to_var_(grad_to_var) {}
+    : fwd_op_(fwd_op), no_grad_set_(no_grad_set), grad_to_var_(grad_to_var) {}
 
-std::vector<std::string> GradOpDescMaker::InputGrad(const std::string& name,
-                                                    bool drop_empty_grad) const {
+std::vector<std::string> GradOpDescMaker::InputGrad(
+    const std::string& name, bool drop_empty_grad) const {
   std::vector<std::string> ret_val;
   auto var_names = this->Input(name);
   ret_val.reserve(var_names.size());
-  std::transform(var_names.begin(), var_names.end(),
+  std::transform(var_names.begin(),
+                 var_names.end(),
                  std::back_inserter(ret_val),
                  [this](const std::string& fwd_var_name) -> std::string {
                    auto g_name = GradVarName(fwd_var_name);
@@ -50,7 +50,8 @@ std::vector<std::string> GradOpDescMaker::InputGrad(const std::string& name,
   if (!drop_empty_grad) {
     return ret_val;
   }
-  PADDLE_ENFORCE_LE(var_names.size(), 1UL,
+  PADDLE_ENFORCE_LE(var_names.size(),
+                    1UL,
                     "BUG from operator developer:"
                     " for input argument with a list of variables, "
                     " drop_empty_grad is not allowed because it makes"
@@ -61,17 +62,21 @@ std::vector<std::string> GradOpDescMaker::InputGrad(const std::string& name,
 
   std::vector<std::string> dropped_ret_val;
   dropped_ret_val.reserve(ret_val.size());
-  std::copy_if(ret_val.begin(), ret_val.end(),
+  std::copy_if(ret_val.begin(),
+               ret_val.end(),
                std::back_inserter(dropped_ret_val),
                [](const std::string& str) { return str != kEmptyVarName; });
   return dropped_ret_val;
 }
 
-std::vector<std::string> GradOpDescMaker::OutputGrad(const std::string& name) const {
+std::vector<std::string> GradOpDescMaker::OutputGrad(
+    const std::string& name) const {
   std::vector<std::string> ret_val;
   auto onames = this->Output(name);
   ret_val.reserve(onames.size());
-  std::transform(onames.begin(), onames.end(), std::back_inserter(ret_val),
+  std::transform(onames.begin(),
+                 onames.end(),
+                 std::back_inserter(ret_val),
                  [this](const std::string& fwd_var_name) -> std::string {
                    auto g_name = GradVarName(fwd_var_name);
                    (*this->grad_to_var_)[g_name] = fwd_var_name;

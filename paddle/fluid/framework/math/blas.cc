@@ -20,7 +20,8 @@ namespace fluid {
 namespace framework {
 namespace math {
 MatDescriptor CreateMatrixDescriptor(const framework::DDim &tensor_dim,
-                                     int num_flatten_cols, bool trans) {
+                                     int num_flatten_cols,
+                                     bool trans) {
   PADDLE_ENFORCE_GT(tensor_dim.size(), 1);
   MatDescriptor retv;
   if (num_flatten_cols > 1) {

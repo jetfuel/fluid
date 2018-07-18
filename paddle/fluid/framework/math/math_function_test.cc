@@ -16,10 +16,11 @@
 #include "paddle/fluid/framework/math/blas.h"
 
 template <typename T>
-inline paddle::fluid::framework::math::BlasT<paddle::fluid::platform::CPUDeviceContext, T>
-GetBlas(const paddle::fluid::platform::CPUDeviceContext& context) {
-  return paddle::fluid::framework::math::GetBlas<paddle::fluid::platform::CPUDeviceContext,
-                                          T>(context);
+inline paddle::fluid::framework::math::
+    BlasT<paddle::fluid::platform::CPUDeviceContext, T>
+    GetBlas(const paddle::fluid::platform::CPUDeviceContext& context) {
+  return paddle::fluid::framework::math::
+      GetBlas<paddle::fluid::platform::CPUDeviceContext, T>(context);
 }
 
 TEST(math_function, gemm_notrans_cblas) {
@@ -42,8 +43,19 @@ TEST(math_function, gemm_notrans_cblas) {
   memcpy(input3_ptr, arr3, 8 * sizeof(float));
 
   paddle::fluid::platform::CPUDeviceContext context(*cpu_place);
-  GetBlas<float>(context).GEMM(false, false, m, n, k, 1, input1_ptr, 3,
-                               input2_ptr + 1, 4, 1, input3_ptr + 1, 4);
+  GetBlas<float>(context).GEMM(false,
+                               false,
+                               m,
+                               n,
+                               k,
+                               1,
+                               input1_ptr,
+                               3,
+                               input2_ptr + 1,
+                               4,
+                               1,
+                               input3_ptr + 1,
+                               4);
 
   EXPECT_EQ(input3_ptr[0], 0);
   EXPECT_EQ(input3_ptr[1], 24);
@@ -75,8 +87,19 @@ TEST(math_function, gemm_trans_clbas) {
   memcpy(input3_ptr, arr3, 8 * sizeof(float));
 
   paddle::fluid::platform::CPUDeviceContext context(*cpu_place);
-  GetBlas<float>(context).GEMM(false, true, m, n, k, 1, input1_ptr, 3,
-                               input2_ptr + 3, 3, 1, input3_ptr + 1, 4);
+  GetBlas<float>(context).GEMM(false,
+                               true,
+                               m,
+                               n,
+                               k,
+                               1,
+                               input1_ptr,
+                               3,
+                               input2_ptr + 3,
+                               3,
+                               1,
+                               input3_ptr + 1,
+                               4);
   delete cpu_place;
   cpu_place = NULL;
 
@@ -95,9 +118,9 @@ TEST(math_function, zero) {
   auto* cpu_place = new paddle::fluid::platform::CPUPlace();
   float* t = tensor.mutable_data<float>({2, 2}, *cpu_place);
   paddle::fluid::platform::CPUDeviceContext context(*cpu_place);
-  paddle::fluid::framework::math::SetConstant<paddle::fluid::platform::CPUDeviceContext,
-                                       float>
-      functor;
+  paddle::fluid::framework::math::
+      SetConstant<paddle::fluid::platform::CPUDeviceContext, float>
+          functor;
   functor(context, &tensor, 0);
   EXPECT_EQ(t[0], 0);
   EXPECT_EQ(t[1], 0);
@@ -132,8 +155,14 @@ void GemvTest(int m, int n, bool trans) {
   }
 
   paddle::fluid::platform::CPUDeviceContext context(*cpu_place);
-  GetBlas<T>(context).GEMV(trans, static_cast<int>(m), static_cast<int>(n), 1.,
-                           data_a, data_b, 0., data_c);
+  GetBlas<T>(context).GEMV(trans,
+                           static_cast<int>(m),
+                           static_cast<int>(n),
+                           1.,
+                           data_a,
+                           data_b,
+                           0.,
+                           data_c);
 
   if (!trans) {
     for (int i = 0; i < m; ++i) {

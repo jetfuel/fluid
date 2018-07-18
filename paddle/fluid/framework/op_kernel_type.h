@@ -15,9 +15,9 @@ limitations under the License. */
 #pragma once
 
 #include <string>
-#include "paddle/fluid/framework/tensor_data_layout.h"
-#include "paddle/fluid/framework/data_type.h"
 #include "paddle/fluid/framework/accelerator.h"
+#include "paddle/fluid/framework/data_type.h"
+#include "paddle/fluid/framework/tensor_data_layout.h"
 #include "paddle/fluid/platform/place.h"
 
 namespace paddle {
@@ -37,7 +37,8 @@ struct OpKernelType {
   platform::Place place_;
   Accelerator accelerator_;
 
-  OpKernelType(proto::VarType::Type data_type, platform::Place place,
+  OpKernelType(proto::VarType::Type data_type,
+               platform::Place place,
                TensorDataLayout data_layout = TensorDataLayout::kAnyLayout,
                Accelerator accelerator = Accelerator::kPlain);
 

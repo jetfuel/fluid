@@ -14,7 +14,7 @@ limitations under the License. */
 #include "paddle/fluid/framework/accelerator.h"
 
 #include <algorithm>  // for transform
-#include <cctype>  // for toupper
+#include <cctype>     // for toupper
 #include <string>
 #include <vector>
 

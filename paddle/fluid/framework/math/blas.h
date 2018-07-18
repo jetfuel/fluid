@@ -68,7 +68,8 @@ struct MatDescriptor {
  * @param trans: True if the matrix is transposed.
  */
 extern MatDescriptor CreateMatrixDescriptor(const framework::DDim& tensor_dim,
-                                            int num_flatten_cols, bool trans);
+                                            int num_flatten_cols,
+                                            bool trans);
 
 template <typename DeviceContext>
 class Blas {
@@ -76,28 +77,59 @@ class Blas {
   explicit Blas(const DeviceContext& context) : context_(context) {}
 
   template <typename T>
-  void GEMM(CBLAS_TRANSPOSE transA, CBLAS_TRANSPOSE transB, int M, int N, int K,
-            T alpha, const T* A, const T* B, T beta, T* C) const;
+  void GEMM(CBLAS_TRANSPOSE transA,
+            CBLAS_TRANSPOSE transB,
+            int M,
+            int N,
+            int K,
+            T alpha,
+            const T* A,
+            const T* B,
+            T beta,
+            T* C) const;
 
   template <typename T>
-  void GEMM(bool transA, bool transB, int M, int N, int K, T alpha, const T* A,
-            int lda, const T* B, int ldb, T beta, T* C, int ldc) const;
+  void GEMM(bool transA,
+            bool transB,
+            int M,
+            int N,
+            int K,
+            T alpha,
+            const T* A,
+            int lda,
+            const T* B,
+            int ldb,
+            T beta,
+            T* C,
+            int ldc) const;
 
   template <typename T>
-  void MatMul(const framework::Tensor& mat_a, bool trans_a,
-              const framework::Tensor& mat_b, bool trans_b, T alpha,
-              framework::Tensor* mat_out, T beta) const;
+  void MatMul(const framework::Tensor& mat_a,
+              bool trans_a,
+              const framework::Tensor& mat_b,
+              bool trans_b,
+              T alpha,
+              framework::Tensor* mat_out,
+              T beta) const;
 
   template <typename T>
-  void MatMul(const framework::Tensor& mat_a, bool trans_a,
-              const framework::Tensor& mat_b, bool trans_b,
+  void MatMul(const framework::Tensor& mat_a,
+              bool trans_a,
+              const framework::Tensor& mat_b,
+              bool trans_b,
               framework::Tensor* mat_out) const {
-    MatMul(mat_a, trans_a, mat_b, trans_b, static_cast<T>(1.0), mat_out,
+    MatMul(mat_a,
+           trans_a,
+           mat_b,
+           trans_b,
+           static_cast<T>(1.0),
+           mat_out,
            static_cast<T>(0.0));
   }
 
   template <typename T>
-  void MatMul(const framework::Tensor& mat_a, const framework::Tensor& mat_b,
+  void MatMul(const framework::Tensor& mat_a,
+              const framework::Tensor& mat_b,
               framework::Tensor* mat_out) const {
     this->template MatMul<T>(mat_a, false, mat_b, false, mat_out);
   }
@@ -112,18 +144,38 @@ class Blas {
   void VCOPY(int n, const T* x, T* y) const;
 
   template <typename T>
-  void GEMV(bool trans_a, int M, int N, T alpha, const T* A, const T* B, T beta,
+  void GEMV(bool trans_a,
+            int M,
+            int N,
+            T alpha,
+            const T* A,
+            const T* B,
+            T beta,
             T* C) const;
 
   template <typename T>
-  void BatchedGEMM(CBLAS_TRANSPOSE transA, CBLAS_TRANSPOSE transB, int M, int N,
-                   int K, T alpha, const T* A, const T* B, T beta, T* C,
-                   int batchCount, int64_t strideA, int64_t strideB) const;
+  void BatchedGEMM(CBLAS_TRANSPOSE transA,
+                   CBLAS_TRANSPOSE transB,
+                   int M,
+                   int N,
+                   int K,
+                   T alpha,
+                   const T* A,
+                   const T* B,
+                   T beta,
+                   T* C,
+                   int batchCount,
+                   int64_t strideA,
+                   int64_t strideB) const;
 
   template <typename T>
-  void MatMul(const framework::Tensor& mat_a, const MatDescriptor& dim_a,
-              const framework::Tensor& mat_b, const MatDescriptor& dim_b,
-              T alpha, framework::Tensor* mat_out, T beta) const;
+  void MatMul(const framework::Tensor& mat_a,
+              const MatDescriptor& dim_a,
+              const framework::Tensor& mat_b,
+              const MatDescriptor& dim_b,
+              T alpha,
+              framework::Tensor* mat_out,
+              T beta) const;
 
  private:
   const DeviceContext& context_;

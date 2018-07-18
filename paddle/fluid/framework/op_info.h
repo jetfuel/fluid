@@ -36,12 +36,15 @@ class InferShapeBase {
   virtual void operator()(InferShapeContext*) const = 0;
 };
 
-using OpCreator = std::function<OperatorBase*(
-    const std::string& /*type*/, const VariableNameMap& /*inputs*/,
-    const VariableNameMap& /*outputs*/, const AttributeMap& /*attrs*/)>;
+using OpCreator =
+    std::function<OperatorBase*(const std::string& /*type*/,
+                                const VariableNameMap& /*inputs*/,
+                                const VariableNameMap& /*outputs*/,
+                                const AttributeMap& /*attrs*/)>;
 
 using GradOpMakerFN = std::function<std::vector<std::unique_ptr<OpDesc>>(
-    const OpDesc&, const std::unordered_set<std::string>& /*no_grad_set*/,
+    const OpDesc&,
+    const std::unordered_set<std::string>& /*no_grad_set*/,
     std::unordered_map<std::string, std::string>* /*grad_to_var*/)>;
 
 using InferShapeFN = std::function<void(InferShapeContext*)>;
@@ -52,7 +55,7 @@ struct OpInfo {
   proto::OpProto* proto_{nullptr};
   OpAttrChecker* checker_{nullptr};
   // TODO(tonyyang-svail): make infer_var_type independent of BlockDesc
-//  InferVarTypeFN infer_var_type_;
+  //  InferVarTypeFN infer_var_type_;
   InferShapeFN infer_shape_;
 
   bool HasOpProtoAndChecker() const {
@@ -96,8 +99,8 @@ class OpInfoMap {
 
   const OpInfo& Get(const std::string& type) const {
     auto op_info_ptr = GetNullable(type);
-    PADDLE_ENFORCE_NOT_NULL(op_info_ptr, "Operator %s has not been registered",
-                            type);
+    PADDLE_ENFORCE_NOT_NULL(
+        op_info_ptr, "Operator %s has not been registered", type);
     return *op_info_ptr;
   }
 

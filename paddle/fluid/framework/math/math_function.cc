@@ -23,7 +23,6 @@ namespace fluid {
 namespace framework {
 namespace math {
 
-
 template struct SetConstant<platform::CPUDeviceContext, float>;
 template struct SetConstant<platform::CPUDeviceContext, double>;
 template struct SetConstant<platform::CPUDeviceContext, int>;
@@ -31,13 +30,13 @@ template struct SetConstant<platform::CPUDeviceContext, int64_t>;
 template struct SetConstant<platform::CPUDeviceContext, bool>;
 template struct SetConstant<platform::CPUDeviceContext, uint8_t>;
 
-#define DEFINE_CPU_TRANS(RANK)                                             \
-  template struct Transpose<platform::CPUDeviceContext, float, RANK>;      \
-  template struct Transpose<platform::CPUDeviceContext, double, RANK>;     \
-  template struct Transpose<platform::CPUDeviceContext, int, RANK>;        \
-  template struct Transpose<platform::CPUDeviceContext, int64_t, RANK>;    \
-  template struct Transpose<platform::CPUDeviceContext, bool, RANK>;       \
-  template struct Transpose<platform::CPUDeviceContext, int16_t, RANK>;    \
+#define DEFINE_CPU_TRANS(RANK)                                          \
+  template struct Transpose<platform::CPUDeviceContext, float, RANK>;   \
+  template struct Transpose<platform::CPUDeviceContext, double, RANK>;  \
+  template struct Transpose<platform::CPUDeviceContext, int, RANK>;     \
+  template struct Transpose<platform::CPUDeviceContext, int64_t, RANK>; \
+  template struct Transpose<platform::CPUDeviceContext, bool, RANK>;    \
+  template struct Transpose<platform::CPUDeviceContext, int16_t, RANK>; \
   template struct Transpose<platform::CPUDeviceContext, uint8_t, RANK>;
 
 DEFINE_CPU_TRANS(1);
@@ -62,7 +61,8 @@ struct TensorSetConstantCPU {
 
 template <>
 void set_constant_with_place<platform::CPUPlace>(
-    const platform::DeviceContext& context, framework::Tensor* tensor,
+    const platform::DeviceContext& context,
+    framework::Tensor* tensor,
     float value) {
   framework::VisitDataType(framework::ToDataType(tensor->type()),
                            TensorSetConstantCPU(tensor, value));
@@ -70,7 +70,8 @@ void set_constant_with_place<platform::CPUPlace>(
 
 template <>
 void set_constant_with_place<platform::CUDAPinnedPlace>(
-    const platform::DeviceContext& context, framework::Tensor* tensor,
+    const platform::DeviceContext& context,
+    framework::Tensor* tensor,
     float value) {
   framework::VisitDataType(framework::ToDataType(tensor->type()),
                            TensorSetConstantCPU(tensor, value));
@@ -78,7 +79,8 @@ void set_constant_with_place<platform::CUDAPinnedPlace>(
 
 struct TensorSetConstantWithPlace : public boost::static_visitor<void> {
   TensorSetConstantWithPlace(const platform::DeviceContext& context,
-                             framework::Tensor* tensor, float value)
+                             framework::Tensor* tensor,
+                             float value)
       : context_(context), tensor_(tensor), value_(value) {}
 
   template <typename Place>
@@ -92,7 +94,8 @@ struct TensorSetConstantWithPlace : public boost::static_visitor<void> {
 };
 
 void set_constant(const platform::DeviceContext& context,
-                  framework::Tensor* tensor, float value) {
+                  framework::Tensor* tensor,
+                  float value) {
   TensorSetConstantWithPlace func(context, tensor, value);
 #ifdef PADDLE_WITH_CUDA
   tensor->place().apply_visitor(func);
@@ -105,7 +108,8 @@ template <typename T>
 struct RowwiseAdd<platform::CPUDeviceContext, T> {
   void operator()(const platform::CPUDeviceContext& context,
                   const framework::Tensor& input,
-                  const framework::Tensor& vector, framework::Tensor* output) {
+                  const framework::Tensor& vector,
+                  framework::Tensor* output) {
     auto in_dims = input.dims();
     auto size = input.numel() / in_dims[0];
     PADDLE_ENFORCE_EQ(vector.numel(), size);
@@ -136,6 +140,6 @@ template struct RowwiseMean<platform::CPUDeviceContext, float>;
 template struct RowwiseMean<platform::CPUDeviceContext, double>;
 
 }  // namespace math
-}  // namespace framwork
+}  // namespace framework
 }  // namespace fluid
 }  // namespace paddle

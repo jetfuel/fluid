@@ -24,13 +24,10 @@ namespace framework {
 // https://github.com/PaddlePaddle/Paddle/blob/develop/doc/design/operator_kernel_type.md#library
 class Accelerator {
  public:
-  enum Type {
-    kPlain = 0,
-    kMKLDNN = 1,
-    kCUDNN = 2
-  };
+  enum Type { kPlain = 0, kMKLDNN = 1, kCUDNN = 2 };
 
-  Accelerator(Accelerator::Type type) : type_(type) {}  // NOLINT: allow explicity construction.
+  Accelerator(Accelerator::Type type)
+      : type_(type) {}  // NOLINT: allow explicity construction.
   explicit Accelerator(const char* type);
   std::string ToString() const;
 

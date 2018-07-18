@@ -56,8 +56,10 @@ class InferShapeContext {
   virtual const std::vector<std::string> &Outputs(
       const std::string &name) const = 0;
 
-  virtual void ShareLoD(const std::string &in, const std::string &out,
-                        size_t i = 0, size_t j = 0) const = 0;
+  virtual void ShareLoD(const std::string &in,
+                        const std::string &out,
+                        size_t i = 0,
+                        size_t j = 0) const = 0;
 
   virtual bool IsRuntime() const = 0;
 

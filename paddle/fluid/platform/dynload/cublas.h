@@ -38,18 +38,19 @@ extern void *cublas_dso_handle;
  * note: default dynamic linked libs
  */
 #ifdef PADDLE_USE_DSO
-#define DECLARE_DYNAMIC_LOAD_CUBLAS_WRAP(__name)                             \
-  struct DynLoad__##__name {                                                 \
-    using FUNC_TYPE = decltype(&::__name);                                   \
-    template <typename... Args>                                              \
-    inline cublasStatus_t operator()(Args... args) {                         \
-      std::call_once(cublas_dso_flag, []() {                                 \
-        cublas_dso_handle = paddle::fluid::platform::dynload::GetCublasDsoHandle(); \
-      });                                                                    \
-      static void *p_##__name = dlsym(cublas_dso_handle, #__name);           \
-      return reinterpret_cast<FUNC_TYPE>(p_##__name)(args...);               \
-    }                                                                        \
-  };                                                                         \
+#define DECLARE_DYNAMIC_LOAD_CUBLAS_WRAP(__name)                    \
+  struct DynLoad__##__name {                                        \
+    using FUNC_TYPE = decltype(&::__name);                          \
+    template <typename... Args>                                     \
+    inline cublasStatus_t operator()(Args... args) {                \
+      std::call_once(cublas_dso_flag, []() {                        \
+        cublas_dso_handle =                                         \
+            paddle::fluid::platform::dynload::GetCublasDsoHandle(); \
+      });                                                           \
+      static void *p_##__name = dlsym(cublas_dso_handle, #__name);  \
+      return reinterpret_cast<FUNC_TYPE>(p_##__name)(args...);      \
+    }                                                               \
+  };                                                                \
   extern DynLoad__##__name __name
 #else
 #define DECLARE_DYNAMIC_LOAD_CUBLAS_WRAP(__name)     \

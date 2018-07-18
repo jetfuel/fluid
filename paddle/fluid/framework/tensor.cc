@@ -22,7 +22,8 @@ void Tensor::check_memory_size() const {
   PADDLE_ENFORCE_NOT_NULL(
       holder_, "Tensor holds no memory. Call Tensor::mutable_data first.");
   PADDLE_ENFORCE_LE(
-      numel() * SizeOfType(type()), memory_size(),
+      numel() * SizeOfType(type()),
+      memory_size(),
       "Tensor's dims_ is out of bound. Call Tensor::mutable_data "
       "first to re-allocate memory.\n"
       "or maybe the required data-type mismatches the data already stored.");
@@ -36,7 +37,8 @@ void* Tensor::mutable_data(platform::Place place, std::type_index type) {
   if (holder_ != nullptr) {
     holder_->set_type(type);
   }
-  PADDLE_ENFORCE_GE(numel(), 0,
+  PADDLE_ENFORCE_GE(numel(),
+                    0,
                     "When calling this method, the Tensor's numel must be "
                     "equal or larger than zero. "
                     "Please check Tensor::Resize has been called first.");
@@ -83,11 +85,12 @@ Tensor& Tensor::ShareDataWith(const Tensor& src) {
 
 Tensor Tensor::Slice(int begin_idx, int end_idx) const {
   check_memory_size();
-  PADDLE_ENFORCE_GE(begin_idx, 0,
-                    "The start row index must be greater than 0.");
+  PADDLE_ENFORCE_GE(
+      begin_idx, 0, "The start row index must be greater than 0.");
   PADDLE_ENFORCE_LE(end_idx, dims_[0], "The end row index is out of bound.");
   PADDLE_ENFORCE_LT(
-      begin_idx, end_idx,
+      begin_idx,
+      end_idx,
       "The start row index must be lesser than the end row index.");
 
   if (dims_[0] == 1) {

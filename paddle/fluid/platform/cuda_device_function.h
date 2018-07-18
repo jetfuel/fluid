@@ -28,8 +28,8 @@ namespace platform {
 #endif
 
 template <typename T>
-__forceinline__ __device__ T CudaShuffleDownSync(unsigned mask, T val,
-                                                 int delta, int width = 32) {
+__forceinline__ __device__ T
+CudaShuffleDownSync(unsigned mask, T val, int delta, int width = 32) {
 #if CUDA_VERSION < 9000
   return __shfl_down(val, delta, width);
 #else
@@ -38,8 +38,8 @@ __forceinline__ __device__ T CudaShuffleDownSync(unsigned mask, T val,
 }
 
 template <typename T>
-__forceinline__ __device__ T CudaShuffleSync(unsigned mask, T val, int src_line,
-                                             int width = 32) {
+__forceinline__ __device__ T
+CudaShuffleSync(unsigned mask, T val, int src_line, int width = 32) {
 #if CUDA_VERSION < 9000
   return __shfl(val, src_line, width);
 #else

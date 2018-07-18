@@ -22,18 +22,18 @@ limitations under the License. */
 #include <vector>
 
 #include "glog/logging.h"  // For VLOG
-#include "paddle/fluid/framework/op_desc.h"
+#include "paddle/fluid/framework/accelerator.h"
 #include "paddle/fluid/framework/attribute.h"
 #include "paddle/fluid/framework/framework.pb.h"
 #include "paddle/fluid/framework/lod_tensor.h"
+#include "paddle/fluid/framework/op_desc.h"
 #include "paddle/fluid/framework/op_kernel_type.h"
 #include "paddle/fluid/framework/scope.h"
 #include "paddle/fluid/framework/selected_rows.h"
-#include "paddle/fluid/framework/tensor.h"
 #include "paddle/fluid/framework/shape_inference.h"
+#include "paddle/fluid/framework/tensor.h"
 #include "paddle/fluid/platform/device_context.h"
 #include "paddle/fluid/platform/variant.h"
-#include "paddle/fluid/framework/accelerator.h"
 
 namespace paddle {
 namespace fluid {
@@ -41,7 +41,8 @@ namespace framework {
 
 // define some kernel priority
 /* Define multiple kernel type fallback order*/
-extern std::vector<std::tuple<platform::Place, Accelerator::Type>> kKernelPriority;
+extern std::vector<std::tuple<platform::Place, Accelerator::Type>>
+    kKernelPriority;
 
 proto::VarType::Type GetDataTypeOfVar(const Variable* var);
 
@@ -56,8 +57,10 @@ class ExecutionContext;
  */
 class OperatorBase {
  public:
-  OperatorBase(const std::string& type, const VariableNameMap& inputs,
-               const VariableNameMap& outputs, const AttributeMap& attrs);
+  OperatorBase(const std::string& type,
+               const VariableNameMap& inputs,
+               const VariableNameMap& outputs,
+               const AttributeMap& attrs);
 
   virtual ~OperatorBase() {}
 
@@ -78,8 +81,8 @@ class OperatorBase {
 
   template <typename T>
   inline const T& Attr(const std::string& name) const {
-    PADDLE_ENFORCE(attrs_.count(name) != 0, "%s should be in AttributeMap",
-                   name);
+    PADDLE_ENFORCE(
+        attrs_.count(name) != 0, "%s should be in AttributeMap", name);
     return boost::get<T>(attrs_.at(name));
   }
   const AttributeMap& Attrs() const { return attrs_; }
@@ -131,17 +134,19 @@ class OperatorBase {
 // Macro for define a clone method.
 // If you are writing an kernel operator, `Clone` will be defined when you
 // register it. i.e. `Clone` method is not needed to define by yourself.
-#define DEFINE_OP_CLONE_METHOD(cls)                                            \
-  std::unique_ptr<::paddle::fluid::framework::OperatorBase> Clone() const final {     \
-    return std::unique_ptr<::paddle::fluid::framework::OperatorBase>(new cls(*this)); \
+#define DEFINE_OP_CLONE_METHOD(cls)                                   \
+  std::unique_ptr<::paddle::fluid::framework::OperatorBase> Clone()   \
+      const final {                                                   \
+    return std::unique_ptr<::paddle::fluid::framework::OperatorBase>( \
+        new cls(*this));                                              \
   }
 
 // Macro for define a default constructor for Operator.
 // You can also use
 //   using PARENT_CLASS::PARENT_CLASS;
 // to use parent's constructor.
-#define DEFINE_OP_CONSTRUCTOR(cls, parent_cls)             \
-  cls(const std::string& type,                             \
+#define DEFINE_OP_CONSTRUCTOR(cls, parent_cls)                    \
+  cls(const std::string& type,                                    \
       const ::paddle::fluid::framework::VariableNameMap& inputs,  \
       const ::paddle::fluid::framework::VariableNameMap& outputs, \
       const paddle::fluid::framework::AttributeMap& attrs)        \
@@ -161,7 +166,8 @@ class NOP : public OperatorBase {
 
 class ExecutionContext {
  public:
-  ExecutionContext(const OperatorBase& op, const Scope& scope,
+  ExecutionContext(const OperatorBase& op,
+                   const Scope& scope,
                    const platform::DeviceContext& device_context)
       : op_(op), scope_(scope), device_context_(device_context) {}
 
@@ -201,7 +207,9 @@ class ExecutionContext {
     auto names = op_.Inputs(name);
     std::vector<const Variable*> res;
     res.reserve(names.size());
-    std::transform(names.begin(), names.end(), std::back_inserter(res),
+    std::transform(names.begin(),
+                   names.end(),
+                   std::back_inserter(res),
                    [this](const std::string& name) {
                      return name == kEmptyVarName ? nullptr
                                                   : scope_.FindVar(name);
@@ -213,7 +221,9 @@ class ExecutionContext {
     auto names = op_.Outputs(name);
     std::vector<Variable*> res;
     res.reserve(names.size());
-    std::transform(names.begin(), names.end(), std::back_inserter(res),
+    std::transform(names.begin(),
+                   names.end(),
+                   std::back_inserter(res),
                    [this](const std::string& name) {
                      return name == kEmptyVarName ? nullptr
                                                   : scope_.FindVar(name);
@@ -238,7 +248,9 @@ class ExecutionContext {
     auto names = op_.Inputs(name);
     std::vector<const T*> res;
     res.reserve(names.size());
-    std::transform(names.begin(), names.end(), std::back_inserter(res),
+    std::transform(names.begin(),
+                   names.end(),
+                   std::back_inserter(res),
                    [&](const std::string& sub_name) {
                      auto var = scope_.FindVar(sub_name);
                      return var == nullptr ? nullptr : &var->Get<T>();
@@ -251,7 +263,9 @@ class ExecutionContext {
     auto names = op_.Outputs(name);
     std::vector<T*> res;
     res.reserve(names.size());
-    std::transform(names.begin(), names.end(), std::back_inserter(res),
+    std::transform(names.begin(),
+                   names.end(),
+                   std::back_inserter(res),
                    [&](const std::string& sub_name) {
                      auto var = scope_.FindVar(sub_name);
                      return var == nullptr ? nullptr : var->GetMutable<T>();
@@ -330,12 +344,14 @@ class OpKernel : public OpKernelBase {
 
 class OperatorWithKernel : public OperatorBase {
  public:
-  using OpKernelMap =
-      std::unordered_map<OpKernelType, std::unique_ptr<OpKernelBase>,
-                         OpKernelType::Hash>;
+  using OpKernelMap = std::unordered_map<OpKernelType,
+                                         std::unique_ptr<OpKernelBase>,
+                                         OpKernelType::Hash>;
 
-  OperatorWithKernel(const std::string& type, const VariableNameMap& inputs,
-                     const VariableNameMap& outputs, const AttributeMap& attrs)
+  OperatorWithKernel(const std::string& type,
+                     const VariableNameMap& inputs,
+                     const VariableNameMap& outputs,
+                     const AttributeMap& attrs)
       : OperatorBase(type, inputs, outputs, attrs) {}
 
   static std::unordered_map<std::string /* op_type */, OpKernelMap>&
@@ -346,7 +362,8 @@ class OperatorWithKernel : public OperatorBase {
 
   bool SupportGPU() const override {
     auto& op_kernels = OperatorWithKernel::AllOpKernels().at(type_);
-    return std::any_of(op_kernels.begin(), op_kernels.end(),
+    return std::any_of(op_kernels.begin(),
+                       op_kernels.end(),
                        [](OpKernelMap::const_reference kern_pair) {
                          return platform::is_gpu_place(kern_pair.first.place_);
                        });
@@ -361,7 +378,8 @@ class OperatorWithKernel : public OperatorBase {
  protected:
   virtual OpKernelType GetExpectedKernelType(const ExecutionContext& ctx) const;
   virtual OpKernelType GetKernelTypeForVar(
-      const std::string& var_name, const Tensor& tensor,
+      const std::string& var_name,
+      const Tensor& tensor,
       const OpKernelType& expected_kernel_type) const;
 
  private:
@@ -385,8 +403,8 @@ class RuntimeInferShapeContext : public InferShapeContext {
     if (length == 0) {
       return false;
     }
-    PADDLE_ENFORCE_EQ(length, 1UL,
-                      "Input %s should not have more than one inputs", name);
+    PADDLE_ENFORCE_EQ(
+        length, 1UL, "Input %s should not have more than one inputs", name);
     auto ipt = ins[0];
     auto* var = ipt == kEmptyVarName ? nullptr : scope_.FindVar(ipt);
     return var != nullptr;
@@ -401,8 +419,8 @@ class RuntimeInferShapeContext : public InferShapeContext {
     if (length == 0) {
       return false;
     }
-    PADDLE_ENFORCE_EQ(length, 1UL,
-                      "Output %s should not have more than one inputs", name);
+    PADDLE_ENFORCE_EQ(
+        length, 1UL, "Output %s should not have more than one inputs", name);
     auto ipt = outs[0];
     auto* var = ipt == kEmptyVarName ? nullptr : scope_.FindVar(ipt);
     return var != nullptr;
@@ -452,7 +470,9 @@ class RuntimeInferShapeContext : public InferShapeContext {
     return op_.Outputs(name);
   }
 
-  void ShareLoD(const std::string& in, const std::string& out, size_t i = 0,
+  void ShareLoD(const std::string& in,
+                const std::string& out,
+                size_t i = 0,
                 size_t j = 0) const override {
     PADDLE_ENFORCE_LT(i, Inputs(in).size());
     PADDLE_ENFORCE_LT(j, Outputs(out).size());
@@ -460,18 +480,22 @@ class RuntimeInferShapeContext : public InferShapeContext {
     Variable* out_var = scope_.FindVar(Outputs(out)[j]);
     if (!in_var->IsType<LoDTensor>()) return;
     PADDLE_ENFORCE(out_var->IsType<LoDTensor>(),
-                   "The %d-th output of Output(%s) must be LoDTensor.", j, out);
+                   "The %d-th output of Output(%s) must be LoDTensor.",
+                   j,
+                   out);
     auto in_tensor = in_var->Get<LoDTensor>();
     auto* out_tensor = out_var->GetMutable<LoDTensor>();
     out_tensor->set_lod(in_tensor.lod());
 
-// TODO(dzhwinter) : reuse ShareLoD in most operators.
-// Need to call ShareLayout explicitly in sequence related ops.
-// Shall we have a better method to shared info between in/out Tensor?
+    // TODO(dzhwinter) : reuse ShareLoD in most operators.
+    // Need to call ShareLayout explicitly in sequence related ops.
+    // Shall we have a better method to shared info between in/out Tensor?
     out_tensor->set_layout(in_tensor.layout());
   }
 
-  void ShareLayout(const std::string& in, const std::string& out, size_t i = 0,
+  void ShareLayout(const std::string& in,
+                   const std::string& out,
+                   size_t i = 0,
                    size_t j = 0) const {
     PADDLE_ENFORCE_LT(i, Inputs(in).size());
     PADDLE_ENFORCE_LT(j, Outputs(out).size());
@@ -479,7 +503,9 @@ class RuntimeInferShapeContext : public InferShapeContext {
     Variable* out_var = scope_.FindVar(Outputs(out)[j]);
     if (!in_var->IsType<LoDTensor>()) return;
     PADDLE_ENFORCE(out_var->IsType<LoDTensor>(),
-                   "The %d-th output of Output(%s) must be LoDTensor.", j, out);
+                   "The %d-th output of Output(%s) must be LoDTensor.",
+                   j,
+                   out);
     auto in_tensor = in_var->Get<LoDTensor>();
     auto* out_tensor = out_var->GetMutable<LoDTensor>();
     out_tensor->set_layout(in_tensor.layout());
@@ -499,7 +525,8 @@ class RuntimeInferShapeContext : public InferShapeContext {
       PADDLE_THROW(
           "Only LoDTensor/SelectedRows support 'GetDim', but Variable %s's "
           "type_id is %s.",
-          name, var->Type().name());
+          name,
+          var->Type().name());
     }
   }
 
@@ -515,7 +542,8 @@ class RuntimeInferShapeContext : public InferShapeContext {
       var->GetMutable<SelectedRows>()->set_height(dim[0]);
     } else {
       PADDLE_THROW("Variable %s type_id %s, expect LoDTensor/SelectedRows.",
-                   name, var->Type().name());
+                   name,
+                   var->Type().name());
     }
   }
 
@@ -526,7 +554,7 @@ class RuntimeInferShapeContext : public InferShapeContext {
 
   proto::VarType::Type GetVarType(const std::string& name) const override;
 
-  using InferShapeVarPtr = boost::variant<Variable *>;
+  using InferShapeVarPtr = boost::variant<Variable*>;
   InferShapeVarPtr GetVarPtr(const std::string& name) override;
 
  private:

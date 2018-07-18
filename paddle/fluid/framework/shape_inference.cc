@@ -18,7 +18,7 @@ limitations under the License. */
 #include <string>
 #include <vector>
 
-#include "paddle/fluid/framework/op_desc.h" // framework::kEmptyVarName
+#include "paddle/fluid/framework/op_desc.h"  // framework::kEmptyVarName
 
 namespace paddle {
 namespace fluid {
@@ -26,9 +26,11 @@ namespace framework {
 
 DDim InferShapeContext::GetInputDim(const std::string &name) const {
   const std::vector<std::string> &arg_names = Inputs(name);
-  PADDLE_ENFORCE_EQ(arg_names.size(), 1UL,
+  PADDLE_ENFORCE_EQ(arg_names.size(),
+                    1UL,
                     "Input(%s) should hold one element, but now it holds %d",
-                    name, arg_names.size());
+                    name,
+                    arg_names.size());
   return this->GetDim(arg_names[0]);
 }
 
@@ -42,8 +44,10 @@ std::vector<DDim> InferShapeContext::GetReaderDims(
     const std::string &name) const {
   const std::vector<std::string> &arg_names = Inputs(name);
   PADDLE_ENFORCE_EQ(
-      arg_names.size(), 1UL,
-      "Reader input '%s' should hold one element, but now it holds %d", name,
+      arg_names.size(),
+      1UL,
+      "Reader input '%s' should hold one element, but now it holds %d",
+      name,
       arg_names.size());
   return this->GetRepeatedDims(arg_names[0]);
 }
@@ -56,9 +60,11 @@ DDim InferShapeContext::GetInputsElementDim(const std::string &name,
 
 void InferShapeContext::SetOutputDim(const std::string &name, const DDim &dim) {
   auto &arg_names = Outputs(name);
-  PADDLE_ENFORCE_EQ(arg_names.size(), 1UL,
+  PADDLE_ENFORCE_EQ(arg_names.size(),
+                    1UL,
                     "Output(%s) should hold one element, but now it holds %d",
-                    name, arg_names.size());
+                    name,
+                    arg_names.size());
   SetDim(arg_names[0], dim);
 }
 
@@ -72,8 +78,10 @@ void InferShapeContext::SetReaderDims(const std::string &name,
                                       const std::vector<DDim> &dims) {
   const std::vector<std::string> &arg_names = Outputs(name);
   PADDLE_ENFORCE_EQ(
-      arg_names.size(), 1UL,
-      "Reader output '%s' should hold one element, but now it holds %d", name,
+      arg_names.size(),
+      1UL,
+      "Reader output '%s' should hold one element, but now it holds %d",
+      name,
       arg_names.size());
   return this->SetRepeatedDims(arg_names[0], dims);
 }
@@ -84,7 +92,9 @@ std::vector<InferShapeVarPtr> InferShapeContext::GetInputVarPtrs(
   std::vector<InferShapeVarPtr> res;
   res.reserve(arg_names.size());
   std::transform(
-      arg_names.begin(), arg_names.end(), std::back_inserter(res),
+      arg_names.begin(),
+      arg_names.end(),
+      std::back_inserter(res),
       [this](const std::string &name) { return this->GetVarPtr(name); });
   return res;
 }
@@ -95,7 +105,9 @@ std::vector<InferShapeVarPtr> InferShapeContext::GetOutputVarPtrs(
   std::vector<InferShapeVarPtr> res;
   res.reserve(arg_names.size());
   std::transform(
-      arg_names.begin(), arg_names.end(), std::back_inserter(res),
+      arg_names.begin(),
+      arg_names.end(),
+      std::back_inserter(res),
       [this](const std::string &name) { return this->GetVarPtr(name); });
   return res;
 }
@@ -105,7 +117,9 @@ std::vector<DDim> InferShapeContext::GetDims(
   std::vector<DDim> ret;
   ret.reserve(names.size());
   std::transform(
-      names.begin(), names.end(), std::back_inserter(ret),
+      names.begin(),
+      names.end(),
+      std::back_inserter(ret),
       [this](const std::string &name) { return this->GetDim(name); });
   return ret;
 }
@@ -136,8 +150,11 @@ std::vector<proto::VarType::Type> InferShapeContext::GetVarTypes(
     const std::vector<std::string> &names) const {
   std::vector<proto::VarType::Type> retv;
   retv.resize(names.size());
-  std::transform(names.begin(), names.end(), retv.begin(),
-                 std::bind(std::mem_fn(&InferShapeContext::GetVarType), this,
+  std::transform(names.begin(),
+                 names.end(),
+                 retv.begin(),
+                 std::bind(std::mem_fn(&InferShapeContext::GetVarType),
+                           this,
                            std::placeholders::_1));
   return retv;
 }

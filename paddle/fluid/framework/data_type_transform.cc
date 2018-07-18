@@ -33,7 +33,8 @@ struct CastDataTypeFunctor {
 
 template <typename InType>
 struct CastDataType {
-  CastDataType(const framework::Tensor& in, framework::Tensor* out,
+  CastDataType(const framework::Tensor& in,
+               framework::Tensor* out,
                const platform::DeviceContext* ctx)
       : in_(in), out_(out), ctx_(ctx) {}
   const framework::Tensor in_;
@@ -49,13 +50,19 @@ struct CastDataType {
     if (platform::is_cpu_place(in_.place())) {
       platform::Transform<platform::CPUDeviceContext> trans;
       auto* context = static_cast<const platform::CPUDeviceContext*>(ctx_);
-      trans(*context, in_begin, in_end, out_begin,
+      trans(*context,
+            in_begin,
+            in_end,
+            out_begin,
             CastDataTypeFunctor<InType, OutType>());
 #ifdef __NVCC__
     } else if (platform::is_gpu_place(in_.place())) {
       platform::Transform<platform::CUDADeviceContext> trans;
       auto* context = static_cast<const platform::CUDADeviceContext*>(ctx_);
-      trans(*context, in_begin, in_end, out_begin,
+      trans(*context,
+            in_begin,
+            in_end,
+            out_begin,
             CastDataTypeFunctor<InType, OutType>());
       context->Wait();
 #endif
@@ -66,7 +73,8 @@ struct CastDataType {
 };
 
 void TransDataType(const OpKernelType& kernel_type_for_var,
-                   const OpKernelType& expected_kernel_type, const Tensor& in,
+                   const OpKernelType& expected_kernel_type,
+                   const Tensor& in,
                    Tensor* out) {
   platform::DeviceContextPool& pool = platform::DeviceContextPool::Instance();
 
