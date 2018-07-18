@@ -15,13 +15,15 @@ limitations under the License. */
 #include <set>
 #include <vector>
 
-#include "paddle/fluid/operators/math/math_function.h"
+#include "paddle/fluid/framework/math/math_function.h"
 #include "paddle/fluid/operators/math/selected_rows_functor.h"
 #include "paddle/fluid/platform/cuda_primitives.h"
 
 namespace paddle {
+namespace fluid {
 namespace operators {
 namespace math {
+
 template <typename T>
 struct SelectedRowsAdd<platform::CUDADeviceContext, T> {
   void operator()(const platform::CUDADeviceContext& context,
@@ -92,7 +94,7 @@ __global__ void SelectedRowsAddTensorKernel(const T* selected_rows,
     // Since index in rows of SelectedRows can be duplicate, we can not use
     // tensor_out[index] += selected_rows[index]; Instead, we have to use
     // AtomicAdd to avoid concurrent write error.
-    paddle::platform::CudaAtomicAdd(tensor_out + index, selected_rows[index]);
+    paddle::fluid::platform::CudaAtomicAdd(tensor_out + index, selected_rows[index]);
   }
 }
 }  // namespace
@@ -119,7 +121,7 @@ struct SelectedRowsAddTensor<platform::CUDADeviceContext, T> {
     auto* in2_data = input2.data<T>();
     auto* out_data = output->data<T>();
 
-    SetConstant<platform::CUDADeviceContext, T> functor;
+    framework::math::SetConstant<platform::CUDADeviceContext, T> functor;
     functor(context, output, 0.0);
 
     const int block_size = 256;
@@ -193,7 +195,7 @@ __global__ void SelectedRowsAddToTensorKernel(const T* selected_rows,
   for (int index = tid; index < row_numel; index += block_size) {
     // Since index in rows of SelectedRows can be duplicate, we have to use
     // Atomic Operation to avoid concurrent write error.
-    paddle::platform::CudaAtomicAdd(tensor_out + index, selected_rows[index]);
+    paddle::fluid::platform::CudaAtomicAdd(tensor_out + index, selected_rows[index]);
   }
 }
 }  // namespace
@@ -253,7 +255,7 @@ __global__ void MergeAddKernel(const T* input, const int64_t* input_rows,
   input += ty * row_numel;
   out += out_idx * row_numel;
   for (int index = tid; index < row_numel; index += block_size) {
-    paddle::platform::CudaAtomicAdd(out + index, input[index]);
+    paddle::fluid::platform::CudaAtomicAdd(out + index, input[index]);
   }
 }
 
@@ -275,7 +277,7 @@ struct MergeAdd<platform::CUDADeviceContext, T> {
             {static_cast<int64_t>(merge_rows.size()), input_width}),
         context.GetPlace());
 
-    math::SetConstant<platform::CUDADeviceContext, T> constant_functor;
+    framework::math::SetConstant<platform::CUDADeviceContext, T> constant_functor;
     constant_functor(context, out.mutable_value(), 0.0);
 
     auto* out_data = out.mutable_value()->data<T>();
@@ -382,5 +384,6 @@ struct UpdateToTensor<platform::CUDADeviceContext, T> {
 };
 }  // namespace scatter
 }  // namespace math
-}  // namespace operators
+}  // namespace operator
+}  // namespace fluid
 }  // namespace paddle
